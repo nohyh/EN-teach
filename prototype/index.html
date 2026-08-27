@@ -417,6 +417,30 @@ body {
 .recording-visual i:nth-child(4) { height: 52px; }
 .recording-visual.active i { background: var(--coral); animation: voice-wave .75s ease-in-out infinite alternate; }
 .recording-visual.active i:nth-child(2n) { animation-delay: -.3s; }
+.recording-visual.scoring i { background: var(--violet); opacity: .6; animation: none; }
+
+/* 跟读评分结果 */
+.pron-score { display: grid; gap: 12px; margin: 14px 0 6px; padding: 14px; border-radius: var(--r-lg); text-align: left; background: var(--paper-soft); box-shadow: inset 0 0 0 1px var(--hairline-soft); }
+.pron-score.passed { background: #e7faf6; box-shadow: inset 0 0 0 1px #b9e8df; }
+.pron-score.failed { background: #fff4f6; box-shadow: inset 0 0 0 1px #f7c8d2; }
+.pron-score-head { display: flex; align-items: center; justify-content: space-between; }
+.pron-overall { display: flex; align-items: baseline; gap: 4px; color: var(--ink); }
+.pron-overall strong { font-size: 38px; font-weight: 1000; }
+.pron-overall small { color: var(--muted); font-size: 12px; font-weight: 700; }
+.pron-status { color: var(--violet-deep); font-size: 13px; font-weight: 900; }
+.pron-score.passed .pron-status { color: #147f70; }
+.pron-score.failed .pron-status { color: #d45f72; }
+.pron-dims { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pron-dims > div { display: grid; gap: 2px; padding: 8px 6px; border-radius: var(--r-sm); background: rgba(255, 255, 255, .55); text-align: center; }
+.pron-dims span { color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .08em; }
+.pron-dims strong { color: var(--violet-deep); font-size: 17px; font-weight: 1000; }
+.pron-words { display: grid; gap: 6px; }
+.pron-word { display: grid; gap: 4px; padding: 8px 10px; border-radius: var(--r-sm); background: rgba(255, 255, 255, .55); }
+.pron-word-text { font-size: 12px; font-weight: 1000; }
+.pron-phonemes { display: flex; flex-wrap: wrap; gap: 3px; }
+.phoneme { position: relative; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 6px; color: white; font-size: 10px; font-weight: 800; }
+.phoneme small { position: absolute; right: -4px; top: -4px; display: grid; place-items: center; min-width: 16px; height: 14px; padding: 0 3px; border-radius: 8px; color: white; background: rgba(0, 0, 0, .45); font-size: 7px; font-weight: 1000; }
+.pron-error { display: block; margin: 14px 0 6px; padding: 10px 12px; border-radius: var(--r-md); color: #ad2342; background: #ffe4e8; font-size: 10px; font-weight: 700; text-align: left; }
 
 .dialog-scene { display: grid; gap: 4px; border-radius: var(--r-md); padding: 12px; color: #2e6b58; background: var(--teal-tint); }
 .dialog-scene span { font-size: 7px; font-weight: 700; letter-spacing: .14em; }
@@ -944,6 +968,162 @@ window.addEventListener("error", (event) => { document.title = "ERR:" + event.me
 "use strict";
 window.addEventListener("error", (event) => { document.title = "ERR:" + event.message; });
 
+/* ===================== 后端 API (C:\demo8) ===================== */
+
+const API_BASE = "http://127.0.0.1:8000";
+const USER_ID = 2;  // demo8 seed 的 child 账号 (db 里 id=2)
+
+// pronunciation.content -> sentence_id (与 demo8 DB 对应)
+const CONTENT_TO_SENTENCE_ID = {
+  "apple":          "unit-fruit-sent-1",
+  "banana":         "unit-fruit-sent-2",
+  "orange":         "unit-fruit-sent-3",
+  "I like apples.":  "unit-fruit-sent-4",
+  "I like bananas.": "unit-fruit-sent-5",
+  "I like oranges.": "unit-fruit-sent-6",
+};
+
+let currentAudio = null;  // 当前 TTS 播放的 <audio>
+let mediaRecorder = null;
+let audioChunks = [];
+
+async function speakWithBackend(text) {
+  // 调 POST /api/v1/tts/synthesize?text=... 拿 MP3, 用 <audio> 播放
+  try {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    const resp = await fetch(`${API_BASE}/api/v1/tts/synthesize?text=${encodeURIComponent(text)}&fmt=mp3`, { method: "POST" });
+    if (!resp.ok) throw new Error(`TTS HTTP ${resp.status}`);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.onended = audio.onerror = () => { currentAudio = null; URL.revokeObjectURL(url); };
+    currentAudio = audio;
+    await audio.play();
+  } catch (e) {
+    console.error("TTS 失败, 退化到 Web Speech:", e);
+    speakText(text);
+  }
+}
+
+async function startRecording() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  // 后端只接 wav/pcm/ogg/opus, 所以 mime 必须落在这些里. 优先级:
+  //   1. audio/ogg;codecs=opus  (Chrome 116+, Firefox)
+  //   2. audio/ogg              (旧 Firefox)
+  //   3. audio/webm             (Chrome 老版本, 走不通, 后面 submit 会报错让用户知道)
+  const candidates = [
+    "audio/ogg;codecs=opus",
+    "audio/ogg",
+    "audio/webm",
+  ];
+  const mime = candidates.find((t) => MediaRecorder.isTypeSupported(t)) || "";
+  mediaRecorder = mime
+    ? new MediaRecorder(stream, { mimeType: mime })
+    : new MediaRecorder(stream);
+  console.log("[record] requested mime:", mime, "actual:", mediaRecorder.mimeType);
+  audioChunks = [];
+  mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.start();
+}
+
+function stopRecording() {
+  return new Promise((resolve) => {
+    if (!mediaRecorder) return resolve(null);
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+      mediaRecorder.stream.getTracks().forEach((t) => t.stop());
+      mediaRecorder = null;
+      audioChunks = [];
+      // 后端只接 wav/pcm/ogg/opus. 注意: 必须精确匹配 mime 开头, 不能 includes('opus')
+      // 因为 "audio/webm;codecs=opus" 也包含 "opus" 子串
+      const type = (blob.type || "").toLowerCase();
+      const isOgg = type === "audio/ogg" || type.startsWith("audio/ogg;");
+      const isWav = type === "audio/wav" || type === "audio/x-wav" || type === "audio/wave";
+      const isOpus = type === "audio/opus";
+      const isPcm = type === "audio/pcm";
+      if (isOgg || isWav || isOpus || isPcm) {
+        return resolve(blob);
+      }
+      // webm 或其它 -> 浏览器内转 WAV
+      try {
+        console.log("[record] 浏览器只录了", type, "转 WAV 16k mono...");
+        const wav = await blobToWav16kMono(blob);
+        console.log("[record] 转换完成, 大小", wav.size, "bytes");
+        resolve(wav);
+      } catch (e) {
+        console.error("[record] WAV 转换失败:", e);
+        resolve(blob);  // 退化, 让后端报清楚的错
+      }
+    };
+    mediaRecorder.stop();
+  });
+}
+
+/** 把任意录音 blob (webm/ogg/...) 解码 → 16kHz mono 16-bit PCM WAV */
+async function blobToWav16kMono(blob) {
+  const arrayBuffer = await blob.arrayBuffer();
+  const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+  decodeCtx.close();
+
+  // 重采样 + 混音到 16k mono (SSECP 引擎要求)
+  const targetRate = 16000;
+  const targetLength = Math.ceil(audioBuffer.length * targetRate / audioBuffer.sampleRate);
+  const offlineCtx = new OfflineAudioContext(1, targetLength, targetRate);
+  const source = offlineCtx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(offlineCtx.destination);
+  source.start();
+  const mono = await offlineCtx.startRendering();
+
+  // 写 WAV 头 + 16-bit PCM 数据
+  const samples = mono.getChannelData(0);
+  const dataLength = samples.length * 2;
+  const header = new ArrayBuffer(44);
+  const v = new DataView(header);
+  v.setUint32(0, 0x52494646, false);   // "RIFF"
+  v.setUint32(4, 36 + dataLength, true);
+  v.setUint32(8, 0x57415645, false);   // "WAVE"
+  v.setUint32(12, 0x666d7420, false);  // "fmt "
+  v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true);            // PCM
+  v.setUint16(22, 1, true);            // 1 channel
+  v.setUint32(24, targetRate, true);
+  v.setUint32(28, targetRate * 2, true);
+  v.setUint16(32, 2, true);
+  v.setUint16(34, 16, true);
+  v.setUint32(36, 0x64617461, false);  // "data"
+  v.setUint32(40, dataLength, true);
+
+  const pcm = new Int16Array(samples.length);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    pcm[i] = s < 0 ? Math.round(s * 0x8000) : Math.round(s * 0x7fff);
+  }
+  return new Blob([header, pcm.buffer], { type: "audio/wav" });
+}
+
+async function submitAttempt(sentenceId, audioBlob) {
+  const form = new FormData();
+  form.append("user_id", USER_ID);
+  form.append("sentence_id", sentenceId);
+  // 后端接受: .wav .pcm .ogg .opus. 精确匹配 mime 开头 (别 includes('opus') 把 webm/opus 误判)
+  const type = (audioBlob.type || "").toLowerCase();
+  let ext;
+  if (type === "audio/ogg" || type.startsWith("audio/ogg;")) ext = ".ogg";
+  else if (type === "audio/opus") ext = ".opus";
+  else if (type === "audio/wav" || type === "audio/x-wav" || type === "audio/wave") ext = ".wav";
+  else if (type === "audio/pcm") ext = ".pcm";
+  else ext = ".webm";
+  form.append("audio", audioBlob, `recording${ext}`);
+  const resp = await fetch(`${API_BASE}/api/v1/attempts`, { method: "POST", body: form });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${err.slice(0, 200)}`);
+  }
+  return resp.json();
+}
+
 /* ===================== 数据（与原版一致） ===================== */
 
 const TODAY_TASKS = [
@@ -1023,7 +1203,7 @@ function freshLearn() {
 let ACT_UID = 0;
 function blankAct() {
   ACT_UID += 1;
-  return { uid: ACT_UID, answer: "", result: null, attempts: 0, pstate: "idle", dmsgs: [], dinput: "", dsent: false, hintDismissed: false };
+  return { uid: ACT_UID, answer: "", result: null, attempts: 0, pstate: "idle", dmsgs: [], dinput: "", dsent: false, hintDismissed: false, score: null, recordError: null };
 }
 
 /* ===================== 工具 ===================== */
@@ -1070,24 +1250,11 @@ function refreshAudioUI() {
   });
 }
 function speakWith(btn) {
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  audioActive = btn;
-  refreshAudioUI();
-  const utterance = new SpeechSynthesisUtterance(btn.dataset.speak);
-  utterance.lang = "en-US";
-  utterance.rate = 0.82;
-  utterance.onend = utterance.onerror = () => { audioActive = null; refreshAudioUI(); };
-  window.speechSynthesis.speak(utterance);
+  // 改用后端 NLS TTS (音色更自然, 跨浏览器一致)
+  speakWithBackend(btn.dataset.speak);
 }
 function speakText(text) {
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  audioActive = null;
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.82;
-  window.speechSynthesis.speak(utterance);
+  speakWithBackend(text);
 }
 
 let nudge = { key: null, timer: null, visible: false };
@@ -1316,11 +1483,64 @@ function wrongHint(activity, isAudio) {
 function pronunciationView(activity) {
   const a = S.learn.act;
   const supportOpen = armNudge(`u${a.uid}`, () => a.pstate === "idle") && a.pstate === "idle" && !a.hintDismissed;
+
+  // 中间面板: 提示 / 错误 / 评分结果
   let mid = "";
-  if (supportOpen) mid = SupportPanel("Lumi 来陪你热热身", "先听 Lumi 读一遍，嘴巴准备好再开始。", "我先听一遍");
-  else if (a.pstate === "done") mid = FeedbackPanel("correct", "声音飞过小木桥啦！", "Lumi 听见你勇敢地开口了。");
-  const labels = { idle: "🎙 开始跟读", recording: "■ 完成录音", done: "继续去水果店 →" };
-  return `<div class="pronunciation-learning-card"><div class="activity-content"><strong class="activity-main-word">${activity.content}</strong><span class="activity-meaning">${activity.meaning}</span>${AudioButton(activity.content, "听标准发音")}<div class="${a.pstate === "recording" ? "recording-visual active" : "recording-visual"}" aria-hidden="true">${[1, 2, 3, 4, 5, 6, 7].map(() => `<i></i>`).join("")}</div>${mid}</div>${ActivityDock(labels[a.pstate], `data-act="pron-main"`)}</div>`;
+  if (supportOpen) {
+    mid = SupportPanel("Lumi 来陪你热热身", "先听 Lumi 读一遍，嘴巴准备好再开始。", "我先听一遍");
+  } else if (a.recordError) {
+    mid = `<div class="pron-error">⚠️ ${esc(a.recordError)}</div>`;
+  } else if (a.score) {
+    mid = renderPronScore(a.score);
+  } else if (a.pstate === "done") {
+    mid = FeedbackPanel("correct", "声音飞过小木桥啦！", "Lumi 听见你勇敢地开口了。");
+  }
+
+  // 录音波形: scoring 状态时也展示
+  const showWave = a.pstate === "recording" || a.pstate === "scoring";
+  const waveState = a.pstate === "scoring" ? "scoring" : "recording";
+
+  // 按钮文案 + 禁用态
+  const labels = {
+    idle:      "🎙 开始跟读",
+    recording: "■ 完成录音",
+    scoring:   "⏳ 评分中…",
+    retry:     "↻ 再来一次",
+    done:      "继续去水果店 →",
+  };
+  const isDisabled = a.pstate === "scoring" ? " disabled" : "";
+
+  return `<div class="pronunciation-learning-card"><div class="activity-content"><strong class="activity-main-word">${activity.content}</strong><span class="activity-meaning">${activity.meaning}</span>${AudioButton(activity.content, "听标准发音")}<div class="${showWave ? 'recording-visual active' : 'recording-visual'} ${waveState}" aria-hidden="true">${[1, 2, 3, 4, 5, 6, 7].map(() => `<i></i>`).join("")}</div>${mid}</div>${ActivityDock(labels[a.pstate] || labels.idle, `data-act="pron-main"${isDisabled}`)}</div>`;
+}
+
+function renderPronScore(score) {
+  // score = { overall, accuracy, fluency, integrity, passed, words: [{text, score, phonemes: [{char, score}]}] }
+  const overall = Math.round(score.overall);
+  const acc = Math.round(score.accuracy);
+  const flu = Math.round(score.fluency);
+  const passed = score.passed;
+  const words = (score.words || []).map((w) => {
+    const wScore = Math.round(w.score);
+    const phs = (w.phonemes || []).map((p) => {
+      const ps = Math.round(p.score);
+      const color = ps >= 80 ? "#43c9b7" : ps >= 50 ? "#ffd861" : "#ff8296";
+      return `<span class="phoneme" style="background:${color}">${esc(p.char)}<small>${ps}</small></span>`;
+    }).join("");
+    return `<div class="pron-word"><span class="pron-word-text" style="color:${wScore >= 80 ? "#43c9b7" : wScore >= 50 ? "#94701c" : "#d45f72"}">${esc(w.text)} ${wScore}</span><div class="pron-phonemes">${phs}</div></div>`;
+  }).join("");
+
+  return `<div class="pron-score ${passed ? "passed" : "failed"}">
+    <div class="pron-score-head">
+      <div class="pron-overall"><strong>${overall}</strong><small>/100</small></div>
+      <div class="pron-status">${passed ? "🎉 通过" : "💪 还差一点"}</div>
+    </div>
+    <div class="pron-dims">
+      <div><span>发音</span><strong>${acc}</strong></div>
+      <div><span>流利</span><strong>${flu}</strong></div>
+      <div><span>完整</span><strong>${Math.round(score.integrity)}</strong></div>
+    </div>
+    <div class="pron-words">${words}</div>
+  </div>`;
 }
 function dialogView(activity) {
   const a = S.learn.act;
@@ -1488,15 +1708,44 @@ const ACTIONS = {
   },
   "act-next-word": () => { playLumiSound("correct"); finishStep(); render(); },
 
-  "pron-main": () => {
+  "pron-main": async () => {
     const a = S.learn.act;
-    if (a.pstate === "idle") { a.pstate = "recording"; }
-    else if (a.pstate === "recording") {
-      a.pstate = "done";
-      playLumiSound("correct");
-      S.learn.results[S.learn.step] = true;
-    } else { finishStep(); }
-    render();
+    const activity = SAMPLE_LESSON.activities[S.learn.step];
+    if (a.pstate === "idle") {
+      // 第一次按: 开始录音
+      a.pstate = "recording";
+      a.score = null;
+      a.recordError = null;
+      render();
+      try { await startRecording(); }
+      catch (e) { a.pstate = "idle"; a.recordError = "麦克风权限被拒: " + e.message; render(); }
+    } else if (a.pstate === "recording") {
+      // 第二次按: 停录音 + 提交后端
+      a.pstate = "scoring";
+      render();
+      try {
+        const blob = await stopRecording();
+        const sentenceId = CONTENT_TO_SENTENCE_ID[activity.content];
+        if (!sentenceId) throw new Error(`未配置 "${activity.content}" 对应的 sentence_id, 在 CONTENT_TO_SENTENCE_ID 里加`);
+        a.score = await submitAttempt(sentenceId, blob);
+        a.pstate = a.score.passed ? "done" : "retry";
+        playLumiSound(a.score.passed ? "correct" : "retry");
+        if (a.score.passed) S.learn.results[S.learn.step] = true;
+      } catch (e) {
+        a.pstate = "recording";  // 退回录音态, 让用户重试
+        a.recordError = "提交失败: " + e.message;
+      }
+      render();
+    } else if (a.pstate === "retry") {
+      // 重录一次
+      a.pstate = "idle";
+      a.score = null;
+      render();
+    } else {
+      // done
+      finishStep();
+      render();
+    }
   },
 
   "dialog-reply": (el) => { S.learn.act.dinput = el.dataset.reply; render(); },

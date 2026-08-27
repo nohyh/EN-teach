@@ -16,6 +16,7 @@ venv/
 
 # ---- 运行时产物 ----
 server/data/
+server/audio/
 *.db
 *.sqlite3
 *.log
