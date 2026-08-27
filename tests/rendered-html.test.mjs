@@ -71,6 +71,11 @@ test("keeps the requested student-page simplifications", async () => {
   assert.match(page, /function CourseLibrary/);
   assert.match(page, /className="home-course-scroller"/);
   assert.match(page, /className="adventure-map-stage"/);
+  assert.doesNotMatch(page, /AdventureRouteCanvas|adventure-route-canvas|adventure-unit-label/);
+  assert.match(page, /const adventureRoutePoints = \[/);
+  assert.match(page, /7 单元冒险地图/);
+  assert.match(page, /number: 7, title: "星光派对"/);
+  assert.doesNotMatch(page, /阳光游乐场/);
   assert.match(page, /星光派对/);
   assert.doesNotMatch(page, /CHOOSE A START|5 LEARNING TYPES|本周勋章|className="ai-banner"|今天学什么/);
   assert.match(page, /className="ai-page-layout"/);
@@ -80,5 +85,6 @@ test("keeps the requested student-page simplifications", async () => {
   assert.match(globals, /wonder-town-map-v1\.png/);
   assert.match(globals, /\.book-library-grid/);
   assert.match(globals, /\.adventure-stop/);
+  assert.doesNotMatch(globals, /\.adventure-unit-label|\.adventure-route-canvas/);
   assert.match(globals, /\.ai-page-layout \.chat-composer \{ position: sticky/);
 });

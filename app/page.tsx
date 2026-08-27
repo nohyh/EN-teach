@@ -34,9 +34,18 @@ const adventureUnits = [
   { number: 4, title: "水果商店", english: "Fruit Market", meta: "水果、颜色与数量", progress: "3/8", icon: "🍎", status: "current" as const },
   { number: 5, title: "动物公园", english: "Animal Park", meta: "动物与动作", progress: "0/7", icon: "🐼", status: "locked" as const },
   { number: 6, title: "美味餐厅", english: "Tasty Cafe", meta: "食物与简单点餐", progress: "0/8", icon: "🥞", status: "locked" as const },
-  { number: 7, title: "阳光游乐场", english: "Sunny Playground", meta: "运动与能力表达", progress: "0/7", icon: "🛝", status: "locked" as const },
-  { number: 8, title: "星光派对", english: "Starlight Party", meta: "综合复习与成果展示", progress: "0/10", icon: "🌟", status: "locked" as const },
+  { number: 7, title: "星光派对", english: "Starlight Party", meta: "综合复习与成果展示", progress: "0/10", icon: "🌟", status: "locked" as const },
 ];
+
+const adventureRoutePoints = [
+  { x: 35, y: 15.5 },
+  { x: 65, y: 29.2 },
+  { x: 36, y: 37.5 },
+  { x: 67.5, y: 49.1 },
+  { x: 34, y: 61 },
+  { x: 69.5, y: 72.8 },
+  { x: 58, y: 92.3 },
+] as const;
 
 function BookCover({ book, compact = false }: { book: CourseBook; compact?: boolean }) {
   return <div className={`book-cover-art cover-${book.cover}${compact ? " compact" : ""}`} role="img" aria-label={`${book.title}绘本封面`}><span className="book-lumi-mark">LUMI</span></div>;
@@ -229,21 +238,18 @@ function LearnPage({ onNavigate }: { onNavigate: (tab: StudentTab) => void }) {
 
   return (
     <StudentPage active="learn" onNavigate={onNavigate} label="英语学习页面">
-      <PageHeader eyebrow="MY STORY JOURNEY" title="学习冒险" subtitle="沿着小镇路线，完成 8 个英语单元" trailing={<Pill tone="yellow">⭐ 126</Pill>} />
+      <PageHeader eyebrow="MY STORY JOURNEY" title="学习冒险" subtitle="沿着小镇路线，完成 7 个英语单元" trailing={<Pill tone="yellow">⭐ 126</Pill>} />
       <Card className="current-book-card">
         <BookCover book={courseBooks[0]} compact />
         <div className="current-book-copy"><span>当前主教材 · 小学一年级</span><h2>奇妙小镇冒险</h2><p>已完成 3 个单元，正在探索水果商店</p><div><ProgressBar value={42} tone="violet" /><b>42%</b></div></div>
         <button type="button" className="book-directory-button" onClick={() => document.getElementById("adventure-map")?.scrollIntoView({ behavior: "smooth", block: "start" })}>课程目录 ↓</button>
       </Card>
-      <SectionTitle eyebrow="WONDERFUL TOWN" title="8 单元冒险地图" />
-      <div className="adventure-map-stage" id="adventure-map" aria-label="奇妙小镇8单元冒险地图">
-        <div className="map-story-caption"><span>从清晨出发</span><strong>小镇入口</strong></div>
+      <SectionTitle eyebrow="WONDERFUL TOWN" title="7 单元冒险地图" />
+      <div className="adventure-map-stage" id="adventure-map" aria-label="奇妙小镇7单元冒险地图">
         {adventureUnits.map((unit, index) => {
-          const side = index % 2 === 0 ? "left" : "right";
-          const node = <button type="button" className="adventure-node" disabled={unit.status === "locked"} onClick={() => unit.status !== "locked" && setView("catalog")} aria-label={`Unit ${unit.number} ${unit.title}，${unit.status === "done" ? "已完成" : unit.status === "current" ? "正在学习" : "尚未解锁"}`}><span>{unit.status === "done" ? "★" : unit.status === "locked" ? "🔒" : unit.icon}</span></button>;
-          return <div className={`adventure-stop side-${side} status-${unit.status}`} style={{ top: `${7 + index * 11.6}%` }} key={unit.number}>{node}<div className="adventure-unit-info"><span>UNIT {unit.number} · {unit.english}</span><strong>{unit.title}</strong><small>{unit.meta} · {unit.progress}</small>{unit.status === "done" && <em>✓ 已完成</em>}{unit.status === "locked" && <em>完成前一单元后开启</em>}{unit.status === "current" && <><div className="current-lumi"><LumiMascot size="small" mood="curious" /></div><p>约 12 分钟 · 还剩 5 个小挑战</p><Button onClick={() => setView("catalog")}>继续冒险 <b>→</b></Button></>}</div></div>;
+          const point = adventureRoutePoints[index];
+          return <div className={`adventure-stop status-${unit.status}`} style={{ left: `${point.x}%`, top: `${point.y}%` }} key={unit.number}><button type="button" className="adventure-node" disabled={unit.status === "locked"} onClick={() => unit.status !== "locked" && setView("catalog")} aria-label={`Unit ${unit.number} ${unit.title}，${unit.status === "done" ? "已完成" : unit.status === "current" ? "正在学习" : "尚未解锁"}`}><span>{unit.number}</span></button></div>;
         })}
-        <div className="map-finish-caption"><span>完成全部单元</span><strong>点亮星光派对 ✦</strong></div>
       </div>
     </StudentPage>
   );
