@@ -1,0 +1,119 @@
+{
+  "id": "lesson_04_family",
+  "title": "第4节：My Family 我的家人",
+  "intro": "来认识 family 里最常见的家人称呼！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "mom",
+      "meaning": "妈妈",
+      "example": "My mom is here.",
+      "exampleMeaning": "我的妈妈在这里。",
+      "message": "先认识一个新词：mom！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "mom",
+      "answer": "妈妈",
+      "message": "mom 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "妈妈",
+      "answer": "mom",
+      "message": "“妈妈”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "dad",
+      "meaning": "爸爸",
+      "example": "My dad is tall.",
+      "exampleMeaning": "我的爸爸很高。",
+      "message": "先认识一个新词：dad！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "dad",
+      "answer": "爸爸",
+      "message": "dad 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "爸爸",
+      "answer": "dad",
+      "message": "“爸爸”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "sister",
+      "meaning": "姐妹",
+      "example": "This is my sister.",
+      "exampleMeaning": "这是我的姐妹。",
+      "message": "先认识一个新词：sister！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "sister",
+      "answer": "姐妹",
+      "message": "sister 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "姐妹",
+      "answer": "sister",
+      "message": "“姐妹”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "mom",
+      "meaning": "妈妈",
+      "message": "听一遍，再跟着读：mom。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "This is my mom.",
+      "meaning": "这是我的妈妈。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "This is my ____.",
+      "answer": "mom",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "这是我的妈妈。",
+      "answer": "This is my mom.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "This is my mom.",
+      "answer": "This is my mom.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "This is my mom.",
+      "meaning": "这是我的妈妈。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "介绍家人",
+      "goal": "使用 This is my ... 简单介绍家人",
+      "opening": "Who is this?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

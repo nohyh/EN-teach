@@ -1,0 +1,119 @@
+{
+  "id": "lesson_01_greetings",
+  "title": "第1节：Hello！第一次打招呼",
+  "intro": "今天先学会最简单的见面和告别表达！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "hello",
+      "meaning": "你好",
+      "example": "Hello, Amy.",
+      "exampleMeaning": "你好，Amy。",
+      "message": "先认识一个新词：hello！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "hello",
+      "answer": "你好",
+      "message": "hello 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "你好",
+      "answer": "hello",
+      "message": "“你好”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "goodbye",
+      "meaning": "再见",
+      "example": "Goodbye, Tom.",
+      "exampleMeaning": "再见，Tom。",
+      "message": "先认识一个新词：goodbye！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "goodbye",
+      "answer": "再见",
+      "message": "goodbye 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "再见",
+      "answer": "goodbye",
+      "message": "“再见”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "friend",
+      "meaning": "朋友",
+      "example": "You are my friend.",
+      "exampleMeaning": "你是我的朋友。",
+      "message": "先认识一个新词：friend！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "friend",
+      "answer": "朋友",
+      "message": "friend 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "朋友",
+      "answer": "friend",
+      "message": "“朋友”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "hello",
+      "meaning": "你好",
+      "message": "听一遍，再跟着读：hello。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "Hello, my friend.",
+      "meaning": "你好，我的朋友。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "Hello, my ____.",
+      "answer": "friend",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "你好，我的朋友。",
+      "answer": "Hello, my friend.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "Hello, my friend.",
+      "answer": "Hello, my friend.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "Hello, my friend.",
+      "meaning": "你好，我的朋友。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "第一次见面",
+      "goal": "使用 hello 和 goodbye 完成简单的见面与告别",
+      "opening": "Hello! What's your name?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

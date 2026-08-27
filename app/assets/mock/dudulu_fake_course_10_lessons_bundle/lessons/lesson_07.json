@@ -1,0 +1,119 @@
+{
+  "id": "lesson_07_school",
+  "title": "第7节：School Bag 我的书包",
+  "intro": "打开书包，认识上学时常见的东西！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "book",
+      "meaning": "书",
+      "example": "This is my book.",
+      "exampleMeaning": "这是我的书。",
+      "message": "先认识一个新词：book！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "book",
+      "answer": "书",
+      "message": "book 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "书",
+      "answer": "book",
+      "message": "“书”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "pen",
+      "meaning": "钢笔",
+      "example": "I have a pen.",
+      "exampleMeaning": "我有一支钢笔。",
+      "message": "先认识一个新词：pen！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "pen",
+      "answer": "钢笔",
+      "message": "pen 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "钢笔",
+      "answer": "pen",
+      "message": "“钢笔”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "bag",
+      "meaning": "书包",
+      "example": "My bag is blue.",
+      "exampleMeaning": "我的书包是蓝色的。",
+      "message": "先认识一个新词：bag！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "bag",
+      "answer": "书包",
+      "message": "bag 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "书包",
+      "answer": "bag",
+      "message": "“书包”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "book",
+      "meaning": "书",
+      "message": "听一遍，再跟着读：book。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "This is my book.",
+      "meaning": "这是我的书。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "This is my ____.",
+      "answer": "book",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "这是我的书。",
+      "answer": "This is my book.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "This is my book.",
+      "answer": "This is my book.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "This is my book.",
+      "meaning": "这是我的书。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "整理书包",
+      "goal": "使用 This is my ... 介绍自己的学习用品",
+      "opening": "What's in your school bag?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

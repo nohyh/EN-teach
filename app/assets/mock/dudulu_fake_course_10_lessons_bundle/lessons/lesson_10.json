@@ -1,0 +1,119 @@
+{
+  "id": "lesson_10_daily_routine",
+  "title": "第10节：My Morning 我的早晨",
+  "intro": "最后一节，我们用英语说说每天早上会做什么！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "morning",
+      "meaning": "早晨",
+      "example": "Good morning!",
+      "exampleMeaning": "早上好！",
+      "message": "先认识一个新词：morning！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "morning",
+      "answer": "早晨",
+      "message": "morning 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "早晨",
+      "answer": "morning",
+      "message": "“早晨”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "breakfast",
+      "meaning": "早餐",
+      "example": "I eat breakfast.",
+      "exampleMeaning": "我吃早餐。",
+      "message": "先认识一个新词：breakfast！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "breakfast",
+      "answer": "早餐",
+      "message": "breakfast 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "早餐",
+      "answer": "breakfast",
+      "message": "“早餐”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "school",
+      "meaning": "学校",
+      "example": "I go to school.",
+      "exampleMeaning": "我去上学。",
+      "message": "先认识一个新词：school！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "school",
+      "answer": "学校",
+      "message": "school 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "学校",
+      "answer": "school",
+      "message": "“学校”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "morning",
+      "meaning": "早晨",
+      "message": "听一遍，再跟着读：morning。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "I go to school in the morning.",
+      "meaning": "我早上去上学。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "I go to ____ in the morning.",
+      "answer": "school",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "我早上去上学。",
+      "answer": "I go to school in the morning.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "I go to school in the morning.",
+      "answer": "I go to school in the morning.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "I go to school in the morning.",
+      "meaning": "我早上去上学。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "早晨日常",
+      "goal": "使用 morning、breakfast、school 简单描述早晨日常",
+      "opening": "What do you do in the morning?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

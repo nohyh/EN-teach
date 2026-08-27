@@ -1,0 +1,119 @@
+{
+  "id": "lesson_06_animals",
+  "title": "第6节：Animal Friends 动物朋友",
+  "intro": "猫、狗、小鸟来了，看看你能认出谁！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "cat",
+      "meaning": "猫",
+      "example": "The cat is small.",
+      "exampleMeaning": "这只猫很小。",
+      "message": "先认识一个新词：cat！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "cat",
+      "answer": "猫",
+      "message": "cat 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "猫",
+      "answer": "cat",
+      "message": "“猫”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "dog",
+      "meaning": "狗",
+      "example": "The dog can run.",
+      "exampleMeaning": "这只狗会跑。",
+      "message": "先认识一个新词：dog！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "dog",
+      "answer": "狗",
+      "message": "dog 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "狗",
+      "answer": "dog",
+      "message": "“狗”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "bird",
+      "meaning": "鸟",
+      "example": "The bird can fly.",
+      "exampleMeaning": "这只鸟会飞。",
+      "message": "先认识一个新词：bird！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "bird",
+      "answer": "鸟",
+      "message": "bird 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "鸟",
+      "answer": "bird",
+      "message": "“鸟”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "cat",
+      "meaning": "猫",
+      "message": "听一遍，再跟着读：cat。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "I see a cat.",
+      "meaning": "我看见一只猫。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "I see a ____.",
+      "answer": "cat",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "我看见一只猫。",
+      "answer": "I see a cat.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "I see a cat.",
+      "answer": "I see a cat.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "I see a cat.",
+      "meaning": "我看见一只猫。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "动物园",
+      "goal": "使用 I see a ... 说出看到的动物",
+      "opening": "What animal do you see?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

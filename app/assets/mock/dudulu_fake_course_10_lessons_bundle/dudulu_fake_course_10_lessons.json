@@ -1,0 +1,1198 @@
+{
+  "courseId": "dudulu_beginner_course_01",
+  "title": "Dudulu 英语启蒙大课程：我的第一套英语课",
+  "description": "面向低龄英语初学者的 10 节假数据课程，用于测试 Dudulu Lesson Runtime。",
+  "lessonCount": 10,
+  "lessons": [
+    {
+      "id": "lesson_01_greetings",
+      "title": "第1节：Hello！第一次打招呼",
+      "intro": "今天先学会最简单的见面和告别表达！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "hello",
+          "meaning": "你好",
+          "example": "Hello, Amy.",
+          "exampleMeaning": "你好，Amy。",
+          "message": "先认识一个新词：hello！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "hello",
+          "answer": "你好",
+          "message": "hello 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "你好",
+          "answer": "hello",
+          "message": "“你好”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "goodbye",
+          "meaning": "再见",
+          "example": "Goodbye, Tom.",
+          "exampleMeaning": "再见，Tom。",
+          "message": "先认识一个新词：goodbye！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "goodbye",
+          "answer": "再见",
+          "message": "goodbye 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "再见",
+          "answer": "goodbye",
+          "message": "“再见”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "friend",
+          "meaning": "朋友",
+          "example": "You are my friend.",
+          "exampleMeaning": "你是我的朋友。",
+          "message": "先认识一个新词：friend！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "friend",
+          "answer": "朋友",
+          "message": "friend 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "朋友",
+          "answer": "friend",
+          "message": "“朋友”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "hello",
+          "meaning": "你好",
+          "message": "听一遍，再跟着读：hello。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "Hello, my friend.",
+          "meaning": "你好，我的朋友。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "Hello, my ____.",
+          "answer": "friend",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "你好，我的朋友。",
+          "answer": "Hello, my friend.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "Hello, my friend.",
+          "answer": "Hello, my friend.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "Hello, my friend.",
+          "meaning": "你好，我的朋友。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "第一次见面",
+          "goal": "使用 hello 和 goodbye 完成简单的见面与告别",
+          "opening": "Hello! What's your name?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_02_colors",
+      "title": "第2节：Color World 颜色世界",
+      "intro": "一起认识红色、蓝色和黄色！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "red",
+          "meaning": "红色",
+          "example": "The apple is red.",
+          "exampleMeaning": "这个苹果是红色的。",
+          "message": "先认识一个新词：red！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "red",
+          "answer": "红色",
+          "message": "red 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "红色",
+          "answer": "red",
+          "message": "“红色”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "blue",
+          "meaning": "蓝色",
+          "example": "The sky is blue.",
+          "exampleMeaning": "天空是蓝色的。",
+          "message": "先认识一个新词：blue！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "blue",
+          "answer": "蓝色",
+          "message": "blue 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "蓝色",
+          "answer": "blue",
+          "message": "“蓝色”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "yellow",
+          "meaning": "黄色",
+          "example": "The banana is yellow.",
+          "exampleMeaning": "香蕉是黄色的。",
+          "message": "先认识一个新词：yellow！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "yellow",
+          "answer": "黄色",
+          "message": "yellow 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "黄色",
+          "answer": "yellow",
+          "message": "“黄色”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "red",
+          "meaning": "红色",
+          "message": "听一遍，再跟着读：red。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "It is red.",
+          "meaning": "它是红色的。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "It is ____.",
+          "answer": "red",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "它是红色的。",
+          "answer": "It is red.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "It is red.",
+          "answer": "It is red.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "It is red.",
+          "meaning": "它是红色的。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "颜色猜猜看",
+          "goal": "使用 red、blue、yellow 描述物品颜色",
+          "opening": "Look at my toy. What color is it?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_03_numbers",
+      "title": "第3节：One, Two, Three 数字小队",
+      "intro": "今天认识 1、2、3，并用数字说数量！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "one",
+          "meaning": "一",
+          "example": "I have one ball.",
+          "exampleMeaning": "我有一个球。",
+          "message": "先认识一个新词：one！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "one",
+          "answer": "一",
+          "message": "one 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "一",
+          "answer": "one",
+          "message": "“一”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "two",
+          "meaning": "二",
+          "example": "I see two cats.",
+          "exampleMeaning": "我看见两只猫。",
+          "message": "先认识一个新词：two！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "two",
+          "answer": "二",
+          "message": "two 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "二",
+          "answer": "two",
+          "message": "“二”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "three",
+          "meaning": "三",
+          "example": "I have three apples.",
+          "exampleMeaning": "我有三个苹果。",
+          "message": "先认识一个新词：three！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "three",
+          "answer": "三",
+          "message": "three 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "三",
+          "answer": "three",
+          "message": "“三”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "one",
+          "meaning": "一",
+          "message": "听一遍，再跟着读：one。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "I have three apples.",
+          "meaning": "我有三个苹果。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "I have ____ apples.",
+          "answer": "three",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "我有三个苹果。",
+          "answer": "I have three apples.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "I have three apples.",
+          "answer": "I have three apples.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "I have three apples.",
+          "meaning": "我有三个苹果。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "数一数",
+          "goal": "使用 one、two、three 回答简单数量问题",
+          "opening": "How many apples do you have?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_04_family",
+      "title": "第4节：My Family 我的家人",
+      "intro": "来认识 family 里最常见的家人称呼！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "mom",
+          "meaning": "妈妈",
+          "example": "My mom is here.",
+          "exampleMeaning": "我的妈妈在这里。",
+          "message": "先认识一个新词：mom！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "mom",
+          "answer": "妈妈",
+          "message": "mom 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "妈妈",
+          "answer": "mom",
+          "message": "“妈妈”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "dad",
+          "meaning": "爸爸",
+          "example": "My dad is tall.",
+          "exampleMeaning": "我的爸爸很高。",
+          "message": "先认识一个新词：dad！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "dad",
+          "answer": "爸爸",
+          "message": "dad 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "爸爸",
+          "answer": "dad",
+          "message": "“爸爸”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "sister",
+          "meaning": "姐妹",
+          "example": "This is my sister.",
+          "exampleMeaning": "这是我的姐妹。",
+          "message": "先认识一个新词：sister！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "sister",
+          "answer": "姐妹",
+          "message": "sister 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "姐妹",
+          "answer": "sister",
+          "message": "“姐妹”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "mom",
+          "meaning": "妈妈",
+          "message": "听一遍，再跟着读：mom。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "This is my mom.",
+          "meaning": "这是我的妈妈。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "This is my ____.",
+          "answer": "mom",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "这是我的妈妈。",
+          "answer": "This is my mom.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "This is my mom.",
+          "answer": "This is my mom.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "This is my mom.",
+          "meaning": "这是我的妈妈。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "介绍家人",
+          "goal": "使用 This is my ... 简单介绍家人",
+          "opening": "Who is this?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_05_food",
+      "title": "第5节：Yummy Food 好吃的食物",
+      "intro": "今天认识几种常见食物，并学会说自己喜欢什么！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "apple",
+          "meaning": "苹果",
+          "example": "I eat an apple.",
+          "exampleMeaning": "我吃一个苹果。",
+          "message": "先认识一个新词：apple！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "apple",
+          "answer": "苹果",
+          "message": "apple 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "苹果",
+          "answer": "apple",
+          "message": "“苹果”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "banana",
+          "meaning": "香蕉",
+          "example": "The banana is yellow.",
+          "exampleMeaning": "香蕉是黄色的。",
+          "message": "先认识一个新词：banana！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "banana",
+          "answer": "香蕉",
+          "message": "banana 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "香蕉",
+          "answer": "banana",
+          "message": "“香蕉”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "milk",
+          "meaning": "牛奶",
+          "example": "I drink milk.",
+          "exampleMeaning": "我喝牛奶。",
+          "message": "先认识一个新词：milk！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "milk",
+          "answer": "牛奶",
+          "message": "milk 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "牛奶",
+          "answer": "milk",
+          "message": "“牛奶”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "apple",
+          "meaning": "苹果",
+          "message": "听一遍，再跟着读：apple。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "I like apples.",
+          "meaning": "我喜欢苹果。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "I like ____.",
+          "answer": "apples",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "我喜欢苹果。",
+          "answer": "I like apples.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "I like apples.",
+          "answer": "I like apples.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "I like apples.",
+          "meaning": "我喜欢苹果。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "早餐时间",
+          "goal": "使用 I like ... 表达自己喜欢的食物或饮品",
+          "opening": "What food do you like?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_06_animals",
+      "title": "第6节：Animal Friends 动物朋友",
+      "intro": "猫、狗、小鸟来了，看看你能认出谁！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "cat",
+          "meaning": "猫",
+          "example": "The cat is small.",
+          "exampleMeaning": "这只猫很小。",
+          "message": "先认识一个新词：cat！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "cat",
+          "answer": "猫",
+          "message": "cat 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "猫",
+          "answer": "cat",
+          "message": "“猫”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "dog",
+          "meaning": "狗",
+          "example": "The dog can run.",
+          "exampleMeaning": "这只狗会跑。",
+          "message": "先认识一个新词：dog！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "dog",
+          "answer": "狗",
+          "message": "dog 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "狗",
+          "answer": "dog",
+          "message": "“狗”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "bird",
+          "meaning": "鸟",
+          "example": "The bird can fly.",
+          "exampleMeaning": "这只鸟会飞。",
+          "message": "先认识一个新词：bird！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "bird",
+          "answer": "鸟",
+          "message": "bird 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "鸟",
+          "answer": "bird",
+          "message": "“鸟”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "cat",
+          "meaning": "猫",
+          "message": "听一遍，再跟着读：cat。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "I see a cat.",
+          "meaning": "我看见一只猫。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "I see a ____.",
+          "answer": "cat",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "我看见一只猫。",
+          "answer": "I see a cat.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "I see a cat.",
+          "answer": "I see a cat.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "I see a cat.",
+          "meaning": "我看见一只猫。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "动物园",
+          "goal": "使用 I see a ... 说出看到的动物",
+          "opening": "What animal do you see?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_07_school",
+      "title": "第7节：School Bag 我的书包",
+      "intro": "打开书包，认识上学时常见的东西！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "book",
+          "meaning": "书",
+          "example": "This is my book.",
+          "exampleMeaning": "这是我的书。",
+          "message": "先认识一个新词：book！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "book",
+          "answer": "书",
+          "message": "book 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "书",
+          "answer": "book",
+          "message": "“书”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "pen",
+          "meaning": "钢笔",
+          "example": "I have a pen.",
+          "exampleMeaning": "我有一支钢笔。",
+          "message": "先认识一个新词：pen！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "pen",
+          "answer": "钢笔",
+          "message": "pen 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "钢笔",
+          "answer": "pen",
+          "message": "“钢笔”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "bag",
+          "meaning": "书包",
+          "example": "My bag is blue.",
+          "exampleMeaning": "我的书包是蓝色的。",
+          "message": "先认识一个新词：bag！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "bag",
+          "answer": "书包",
+          "message": "bag 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "书包",
+          "answer": "bag",
+          "message": "“书包”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "book",
+          "meaning": "书",
+          "message": "听一遍，再跟着读：book。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "This is my book.",
+          "meaning": "这是我的书。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "This is my ____.",
+          "answer": "book",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "这是我的书。",
+          "answer": "This is my book.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "This is my book.",
+          "answer": "This is my book.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "This is my book.",
+          "meaning": "这是我的书。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "整理书包",
+          "goal": "使用 This is my ... 介绍自己的学习用品",
+          "opening": "What's in your school bag?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_08_body",
+      "title": "第8节：My Body 我的身体",
+      "intro": "眼睛、鼻子和手，一边说一边指一指！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "eye",
+          "meaning": "眼睛",
+          "example": "I have two eyes.",
+          "exampleMeaning": "我有两只眼睛。",
+          "message": "先认识一个新词：eye！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "eye",
+          "answer": "眼睛",
+          "message": "eye 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "眼睛",
+          "answer": "eye",
+          "message": "“眼睛”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "nose",
+          "meaning": "鼻子",
+          "example": "This is my nose.",
+          "exampleMeaning": "这是我的鼻子。",
+          "message": "先认识一个新词：nose！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "nose",
+          "answer": "鼻子",
+          "message": "nose 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "鼻子",
+          "answer": "nose",
+          "message": "“鼻子”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "hand",
+          "meaning": "手",
+          "example": "Raise your hand.",
+          "exampleMeaning": "举起你的手。",
+          "message": "先认识一个新词：hand！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "hand",
+          "answer": "手",
+          "message": "hand 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "手",
+          "answer": "hand",
+          "message": "“手”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "eye",
+          "meaning": "眼睛",
+          "message": "听一遍，再跟着读：eye。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "Touch your nose.",
+          "meaning": "摸摸你的鼻子。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "Touch your ____.",
+          "answer": "nose",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "摸摸你的鼻子。",
+          "answer": "Touch your nose.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "Touch your nose.",
+          "answer": "Touch your nose.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "Touch your nose.",
+          "meaning": "摸摸你的鼻子。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "身体动作游戏",
+          "goal": "听懂并使用 eye、nose、hand 完成简单身体指令",
+          "opening": "Can you touch your nose?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_09_weather",
+      "title": "第9节：How's the Weather? 天气怎么样",
+      "intro": "晴天、雨天和刮风天都怎么说？",
+      "activities": [
+        {
+          "type": "word",
+          "word": "sunny",
+          "meaning": "晴朗的",
+          "example": "It is sunny today.",
+          "exampleMeaning": "今天是晴天。",
+          "message": "先认识一个新词：sunny！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "sunny",
+          "answer": "晴朗的",
+          "message": "sunny 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "晴朗的",
+          "answer": "sunny",
+          "message": "“晴朗的”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "rainy",
+          "meaning": "下雨的",
+          "example": "It is rainy today.",
+          "exampleMeaning": "今天下雨。",
+          "message": "先认识一个新词：rainy！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "rainy",
+          "answer": "下雨的",
+          "message": "rainy 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "下雨的",
+          "answer": "rainy",
+          "message": "“下雨的”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "windy",
+          "meaning": "有风的",
+          "example": "It is windy outside.",
+          "exampleMeaning": "外面有风。",
+          "message": "先认识一个新词：windy！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "windy",
+          "answer": "有风的",
+          "message": "windy 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "有风的",
+          "answer": "windy",
+          "message": "“有风的”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "sunny",
+          "meaning": "晴朗的",
+          "message": "听一遍，再跟着读：sunny。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "It is sunny today.",
+          "meaning": "今天是晴天。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "It is ____ today.",
+          "answer": "sunny",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "今天是晴天。",
+          "answer": "It is sunny today.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "It is sunny today.",
+          "answer": "It is sunny today.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "It is sunny today.",
+          "meaning": "今天是晴天。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "天气播报",
+          "goal": "使用 It is ... today. 描述今天的天气",
+          "opening": "How's the weather today?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    },
+    {
+      "id": "lesson_10_daily_routine",
+      "title": "第10节：My Morning 我的早晨",
+      "intro": "最后一节，我们用英语说说每天早上会做什么！",
+      "activities": [
+        {
+          "type": "word",
+          "word": "morning",
+          "meaning": "早晨",
+          "example": "Good morning!",
+          "exampleMeaning": "早上好！",
+          "message": "先认识一个新词：morning！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "morning",
+          "answer": "早晨",
+          "message": "morning 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "早晨",
+          "answer": "morning",
+          "message": "“早晨”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "breakfast",
+          "meaning": "早餐",
+          "example": "I eat breakfast.",
+          "exampleMeaning": "我吃早餐。",
+          "message": "先认识一个新词：breakfast！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "breakfast",
+          "answer": "早餐",
+          "message": "breakfast 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "早餐",
+          "answer": "breakfast",
+          "message": "“早餐”用英语怎么说？"
+        },
+        {
+          "type": "word",
+          "word": "school",
+          "meaning": "学校",
+          "example": "I go to school.",
+          "exampleMeaning": "我去上学。",
+          "message": "先认识一个新词：school！"
+        },
+        {
+          "type": "recall",
+          "mode": "en_to_zh",
+          "prompt": "school",
+          "answer": "学校",
+          "message": "school 是什么意思？"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "学校",
+          "answer": "school",
+          "message": "“学校”用英语怎么说？"
+        },
+        {
+          "type": "pronunciation",
+          "content": "morning",
+          "meaning": "早晨",
+          "message": "听一遍，再跟着读：morning。"
+        },
+        {
+          "type": "sentence",
+          "sentence": "I go to school in the morning.",
+          "meaning": "我早上去上学。",
+          "message": "现在学一个能直接用出来的小句子。"
+        },
+        {
+          "type": "recall",
+          "mode": "fill_blank",
+          "prompt": "I go to ____ in the morning.",
+          "answer": "school",
+          "message": "把缺少的部分填进去吧！"
+        },
+        {
+          "type": "recall",
+          "mode": "zh_to_en",
+          "prompt": "我早上去上学。",
+          "answer": "I go to school in the morning.",
+          "message": "试着把整句话写成英文。"
+        },
+        {
+          "type": "recall",
+          "mode": "audio_to_text",
+          "prompt": "I go to school in the morning.",
+          "answer": "I go to school in the morning.",
+          "message": "认真听，把听到的句子写下来。"
+        },
+        {
+          "type": "pronunciation",
+          "content": "I go to school in the morning.",
+          "meaning": "我早上去上学。",
+          "message": "最后把整句话读一遍！"
+        },
+        {
+          "type": "dialog",
+          "scene": "早晨日常",
+          "goal": "使用 morning、breakfast、school 简单描述早晨日常",
+          "opening": "What do you do in the morning?",
+          "message": "把刚学会的内容放进真实对话里试一试！"
+        }
+      ]
+    }
+  ]
+}
