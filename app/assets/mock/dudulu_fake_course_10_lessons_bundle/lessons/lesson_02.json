@@ -1,0 +1,119 @@
+{
+  "id": "lesson_02_colors",
+  "title": "第2节：Color World 颜色世界",
+  "intro": "一起认识红色、蓝色和黄色！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "red",
+      "meaning": "红色",
+      "example": "The apple is red.",
+      "exampleMeaning": "这个苹果是红色的。",
+      "message": "先认识一个新词：red！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "red",
+      "answer": "红色",
+      "message": "red 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "红色",
+      "answer": "red",
+      "message": "“红色”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "blue",
+      "meaning": "蓝色",
+      "example": "The sky is blue.",
+      "exampleMeaning": "天空是蓝色的。",
+      "message": "先认识一个新词：blue！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "blue",
+      "answer": "蓝色",
+      "message": "blue 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "蓝色",
+      "answer": "blue",
+      "message": "“蓝色”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "yellow",
+      "meaning": "黄色",
+      "example": "The banana is yellow.",
+      "exampleMeaning": "香蕉是黄色的。",
+      "message": "先认识一个新词：yellow！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "yellow",
+      "answer": "黄色",
+      "message": "yellow 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "黄色",
+      "answer": "yellow",
+      "message": "“黄色”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "red",
+      "meaning": "红色",
+      "message": "听一遍，再跟着读：red。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "It is red.",
+      "meaning": "它是红色的。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "It is ____.",
+      "answer": "red",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "它是红色的。",
+      "answer": "It is red.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "It is red.",
+      "answer": "It is red.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "It is red.",
+      "meaning": "它是红色的。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "颜色猜猜看",
+      "goal": "使用 red、blue、yellow 描述物品颜色",
+      "opening": "Look at my toy. What color is it?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

@@ -40,6 +40,7 @@ server/data/
 .env
 .env.*
 !.env.example
+.skills/
 
 # Editors and system files
 .idea/

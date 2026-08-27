@@ -1,0 +1,119 @@
+{
+  "id": "lesson_05_food",
+  "title": "第5节：Yummy Food 好吃的食物",
+  "intro": "今天认识几种常见食物，并学会说自己喜欢什么！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "apple",
+      "meaning": "苹果",
+      "example": "I eat an apple.",
+      "exampleMeaning": "我吃一个苹果。",
+      "message": "先认识一个新词：apple！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "apple",
+      "answer": "苹果",
+      "message": "apple 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "苹果",
+      "answer": "apple",
+      "message": "“苹果”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "banana",
+      "meaning": "香蕉",
+      "example": "The banana is yellow.",
+      "exampleMeaning": "香蕉是黄色的。",
+      "message": "先认识一个新词：banana！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "banana",
+      "answer": "香蕉",
+      "message": "banana 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "香蕉",
+      "answer": "banana",
+      "message": "“香蕉”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "milk",
+      "meaning": "牛奶",
+      "example": "I drink milk.",
+      "exampleMeaning": "我喝牛奶。",
+      "message": "先认识一个新词：milk！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "milk",
+      "answer": "牛奶",
+      "message": "milk 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "牛奶",
+      "answer": "milk",
+      "message": "“牛奶”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "apple",
+      "meaning": "苹果",
+      "message": "听一遍，再跟着读：apple。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "I like apples.",
+      "meaning": "我喜欢苹果。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "I like ____.",
+      "answer": "apples",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "我喜欢苹果。",
+      "answer": "I like apples.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "I like apples.",
+      "answer": "I like apples.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "I like apples.",
+      "meaning": "我喜欢苹果。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "早餐时间",
+      "goal": "使用 I like ... 表达自己喜欢的食物或饮品",
+      "opening": "What food do you like?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

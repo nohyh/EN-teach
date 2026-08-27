@@ -1,0 +1,119 @@
+{
+  "id": "lesson_08_body",
+  "title": "第8节：My Body 我的身体",
+  "intro": "眼睛、鼻子和手，一边说一边指一指！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "eye",
+      "meaning": "眼睛",
+      "example": "I have two eyes.",
+      "exampleMeaning": "我有两只眼睛。",
+      "message": "先认识一个新词：eye！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "eye",
+      "answer": "眼睛",
+      "message": "eye 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "眼睛",
+      "answer": "eye",
+      "message": "“眼睛”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "nose",
+      "meaning": "鼻子",
+      "example": "This is my nose.",
+      "exampleMeaning": "这是我的鼻子。",
+      "message": "先认识一个新词：nose！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "nose",
+      "answer": "鼻子",
+      "message": "nose 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "鼻子",
+      "answer": "nose",
+      "message": "“鼻子”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "hand",
+      "meaning": "手",
+      "example": "Raise your hand.",
+      "exampleMeaning": "举起你的手。",
+      "message": "先认识一个新词：hand！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "hand",
+      "answer": "手",
+      "message": "hand 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "手",
+      "answer": "hand",
+      "message": "“手”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "eye",
+      "meaning": "眼睛",
+      "message": "听一遍，再跟着读：eye。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "Touch your nose.",
+      "meaning": "摸摸你的鼻子。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "Touch your ____.",
+      "answer": "nose",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "摸摸你的鼻子。",
+      "answer": "Touch your nose.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "Touch your nose.",
+      "answer": "Touch your nose.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "Touch your nose.",
+      "meaning": "摸摸你的鼻子。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "身体动作游戏",
+      "goal": "听懂并使用 eye、nose、hand 完成简单身体指令",
+      "opening": "Can you touch your nose?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}

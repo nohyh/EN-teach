@@ -1,0 +1,119 @@
+{
+  "id": "lesson_03_numbers",
+  "title": "第3节：One, Two, Three 数字小队",
+  "intro": "今天认识 1、2、3，并用数字说数量！",
+  "activities": [
+    {
+      "type": "word",
+      "word": "one",
+      "meaning": "一",
+      "example": "I have one ball.",
+      "exampleMeaning": "我有一个球。",
+      "message": "先认识一个新词：one！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "one",
+      "answer": "一",
+      "message": "one 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "一",
+      "answer": "one",
+      "message": "“一”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "two",
+      "meaning": "二",
+      "example": "I see two cats.",
+      "exampleMeaning": "我看见两只猫。",
+      "message": "先认识一个新词：two！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "two",
+      "answer": "二",
+      "message": "two 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "二",
+      "answer": "two",
+      "message": "“二”用英语怎么说？"
+    },
+    {
+      "type": "word",
+      "word": "three",
+      "meaning": "三",
+      "example": "I have three apples.",
+      "exampleMeaning": "我有三个苹果。",
+      "message": "先认识一个新词：three！"
+    },
+    {
+      "type": "recall",
+      "mode": "en_to_zh",
+      "prompt": "three",
+      "answer": "三",
+      "message": "three 是什么意思？"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "三",
+      "answer": "three",
+      "message": "“三”用英语怎么说？"
+    },
+    {
+      "type": "pronunciation",
+      "content": "one",
+      "meaning": "一",
+      "message": "听一遍，再跟着读：one。"
+    },
+    {
+      "type": "sentence",
+      "sentence": "I have three apples.",
+      "meaning": "我有三个苹果。",
+      "message": "现在学一个能直接用出来的小句子。"
+    },
+    {
+      "type": "recall",
+      "mode": "fill_blank",
+      "prompt": "I have ____ apples.",
+      "answer": "three",
+      "message": "把缺少的部分填进去吧！"
+    },
+    {
+      "type": "recall",
+      "mode": "zh_to_en",
+      "prompt": "我有三个苹果。",
+      "answer": "I have three apples.",
+      "message": "试着把整句话写成英文。"
+    },
+    {
+      "type": "recall",
+      "mode": "audio_to_text",
+      "prompt": "I have three apples.",
+      "answer": "I have three apples.",
+      "message": "认真听，把听到的句子写下来。"
+    },
+    {
+      "type": "pronunciation",
+      "content": "I have three apples.",
+      "meaning": "我有三个苹果。",
+      "message": "最后把整句话读一遍！"
+    },
+    {
+      "type": "dialog",
+      "scene": "数一数",
+      "goal": "使用 one、two、three 回答简单数量问题",
+      "opening": "How many apples do you have?",
+      "message": "把刚学会的内容放进真实对话里试一试！"
+    }
+  ]
+}
