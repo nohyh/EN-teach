@@ -80,6 +80,20 @@ Swagger: `http://127.0.0.1:8000/docs`
 - `GET /api/v1/tts/sentences?ids=apple,banana&pause_ms=600` → 200, 61478 bytes WAV (有停顿)
 - `POST /api/v1/attempts` (hello.wav) → 200, overall=39
 
+## 测试 / 验证语音能力
+
+```bash
+# 单元测试 (内容适配器 + 评测逻辑, 纯本地)
+cd server
+python -m pytest tests/ -q
+
+# 端到端语音验证: 鉴权 / TTS 念英语 / SSECP 听+打分 / attempts 提交
+cd ..   # EN-teach 根目录, 需已配好 .env 且灌过数据
+python scripts/seed_db.py
+python scripts/verify_speech.py
+# 4 步全 [OK] = 语音能力端到端通
+```
+
 ## 外部服务
 
 | 服务 | 用途 | 关键 env |

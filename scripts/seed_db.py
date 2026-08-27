@@ -40,6 +40,10 @@ def main():
         for u in units:
             existing = db.query(models.Unit).filter_by(id=u.id).first()
             if existing:
+                # 先清掉旧句子再删 Unit, 否则 ORM 会把 unit_id 置空, 撞 NOT NULL 约束
+                db.query(models.Sentence).filter_by(unit_id=u.id).delete(
+                    synchronize_session=False
+                )
                 db.delete(existing)
                 db.flush()
             db.add(models.Unit(
