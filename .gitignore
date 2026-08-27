@@ -24,6 +24,7 @@ server/data/
 .env
 .env.*
 !.env.example
+.skills/
 
 # ---- 编辑器 / 系统 ----
 .idea/

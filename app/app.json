@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "EN-teach",
+    "slug": "en-teach",
+    "version": "0.1.0",
+    "scheme": "enteach",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"]
+  }
+}
