@@ -28,6 +28,7 @@ EN-teach/
 │   ├── app/    #   业务代码：路由、模型、schema、服务编排
 │   └── tests/
 ├── scripts/    # 教材导入 / LLM 批量生成题库脚本
+├── prototype/  # ★ LUMI 学生端 HTML 视觉原型（零依赖单文件，浏览器直接打开）
 ├── docs/       # ★ 设计文档
 └── README.md
 ```
