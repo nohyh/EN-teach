@@ -1,6 +1,6 @@
 /**
  * 学习交互复刻层：对应队友分支 components/learning-components.tsx。
- * 五种组件视图、旅程条、Lumi 引导气泡、正误反馈、温柔支持面板、完成庆祝页。
+ * 五种组件视图、旅程条、Lumi 引导气泡、正误反馈和完成庆祝页。
  * 数据不再来自 sampleLesson，而由调用方传入 LESSONS 分节后的活动。
  */
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
@@ -57,17 +57,6 @@ const STORY_BEATS = [
 
 function normalize(value: string) {
   return value.toLowerCase().trim().replace(/[.,!?;:'"()[\]{}，。！？；：“”‘’]/g, " ").replace(/\s+/g, " ").trim();
-}
-
-/** 闲置 7 秒后出现的 Lumi 温柔提示 */
-function useGentleNudge(active = true, delay = 7000) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    if (!active) { setVisible(false); return; }
-    const timer = setTimeout(() => { setVisible(true); playLumiSound("help"); }, delay);
-    return () => clearTimeout(timer);
-  }, [active, delay]);
-  return [active && visible, setVisible] as const;
 }
 
 /* ---- 旅程条 ---- */
@@ -151,24 +140,6 @@ export function FeedbackPanel({ kind, title, text }: { kind: "correct" | "wrong"
   );
 }
 
-function GentleSupportPanel({ title, text, actionLabel, onAction, onClose }: { title: string; text: string; actionLabel: string; onAction: () => void; onClose: () => void }) {
-  return (
-    <LinearGradient colors={["#eae6ff", "#fff8e8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.support}>
-      <LumiMascot size="small" mood="resting" />
-      <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ fontSize: 12, fontWeight: "900", color: "#4b4676" }}>{title}</Text>
-        <Text style={{ fontSize: 9, fontWeight: "600", color: "#706a91", lineHeight: 13 }}>{text}</Text>
-        <Pressable onPress={onAction} style={{ alignSelf: "flex-start", minHeight: 31, borderRadius: 10, paddingHorizontal: 11, justifyContent: "center", backgroundColor: P.violet, marginTop: 3 }}>
-          <Text style={{ color: "#fff", fontSize: 9, fontWeight: "900" }}>{actionLabel}</Text>
-        </Pressable>
-      </View>
-      <Pressable onPress={onClose} accessibilityLabel="收起 Lumi 的陪伴提示" style={{ width: 26, height: 26, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,.85)", alignSelf: "flex-start" }}>
-        <Text style={{ color: "#8b85a7", fontSize: 15 }}>×</Text>
-      </Pressable>
-    </LinearGradient>
-  );
-}
-
 /* ---- 底部双按钮坞 ---- */
 function ActivityActionDock({ primaryLabel, onPrimary, primaryDisabled = false, onPrevious, canPrevious }: { primaryLabel: string; onPrimary?: () => void; primaryDisabled?: boolean; onPrevious: () => void; canPrevious: boolean }) {
   return (
@@ -198,7 +169,6 @@ export function AudioButton({ text, label = "听标准发音" }: { text: string;
 
 /* ---- 五种组件视图 ---- */
 function WordView({ activity, onNext, onPrevious, canPrevious }: { activity: WordA; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
-  const [supportOpen, setSupportOpen] = useGentleNudge();
   const next = () => { playLumiSound("correct"); onNext(); };
   return (
     <View style={{ flex: 1 }}>
@@ -212,10 +182,6 @@ function WordView({ activity, onNext, onPrevious, canPrevious }: { activity: Wor
           <Text style={{ fontSize: 14, fontWeight: "800", color: P.ink }}>{activity.example}</Text>
           <Text style={{ fontSize: 9, color: P.muted }}>{activity.exampleMeaning}</Text>
         </View>
-        {supportOpen && (
-          <GentleSupportPanel title="Lumi 来陪你啦" text="不用马上记住，我们和 Lumi 只听一遍也可以。" actionLabel="和 Lumi 听一遍"
-            onAction={() => { speak(activity.word); setSupportOpen(false); }} onClose={() => setSupportOpen(false)} />
-        )}
       </View>
       <ActivityActionDock primaryLabel="收进水果篮 →" onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} />
     </View>
@@ -223,7 +189,6 @@ function WordView({ activity, onNext, onPrevious, canPrevious }: { activity: Wor
 }
 
 function SentenceView({ activity, onNext, onPrevious, canPrevious }: { activity: SentenceA; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
-  const [supportOpen, setSupportOpen] = useGentleNudge();
   const next = () => { playLumiSound("correct"); onNext(); };
   return (
     <View style={{ flex: 1 }}>
@@ -237,10 +202,6 @@ function SentenceView({ activity, onNext, onPrevious, canPrevious }: { activity:
           <Text style={{ color: P.muted }}>＋</Text>
           <View style={styles.patternBox}><Text style={{ color: P.violet, fontSize: 9, fontWeight: "800" }}>喜欢的事物</Text></View>
         </View>
-        {supportOpen && (
-          <GentleSupportPanel title="Lumi 来陪你啦" text="今天只听懂一点点，也是在进步。" actionLabel="陪我听整句话"
-            onAction={() => { speak(activity.sentence); setSupportOpen(false); }} onClose={() => setSupportOpen(false)} />
-        )}
       </View>
       <ActivityActionDock primaryLabel="带上这句话 →" onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} />
     </View>
@@ -252,7 +213,6 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
   const [attempts, setAttempts] = useState(0);
   const isAudio = activity.mode === "audio_to_text";
-  const [supportOpen, setSupportOpen] = useGentleNudge(!answer.trim() && !result);
   const finished = result === "correct" || attempts >= 3;
 
   const submit = useCallback(() => {
@@ -261,10 +221,9 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
     const nextAttempts = attempts + 1;
     setAttempts(nextAttempts);
     setResult(correct ? "correct" : "wrong");
-    setSupportOpen(false);
     playLumiSound(correct ? "correct" : "retry");
     if (correct || nextAttempts >= 3) onCompleted(correct);
-  }, [answer, activity.answer, attempts, onCompleted, setSupportOpen]);
+  }, [answer, activity.answer, attempts, onCompleted]);
 
   const wrongHint = attempts === 1
     ? isAudio ? "再听一次，注意每一个词。" : `小提示：答案有 ${activity.answer.replace(/\s/g, "").length} 个字符。`
@@ -296,12 +255,7 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
             style={styles.textInput}
           />
         </View>
-        {supportOpen ? (
-          <GentleSupportPanel title="Lumi 发现你在想办法" text="我先帮一点点，剩下的我们慢慢来。"
-            actionLabel={isAudio ? "再帮我读一遍" : "帮我写第一个字"}
-            onAction={() => { if (isAudio) speak(activity.prompt); else setAnswer(activity.answer.slice(0, 1)); setSupportOpen(false); }}
-            onClose={() => setSupportOpen(false)} />
-        ) : result === "correct" ? (
+        {result === "correct" ? (
           <FeedbackPanel kind="correct" title="苹果装进篮子啦！" text="你找到了答案，Lumi 开心地跳起来啦！" />
         ) : result === "wrong" ? (
           <FeedbackPanel kind="wrong" title={attempts >= 3 ? "没关系，我们一起记住" : "差一点点，继续试试看"} text={wrongHint} />
@@ -320,8 +274,7 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
 
 function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: PronunciationA; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const [state, setState] = useState<"idle" | "recording" | "done">("idle");
-  const [supportOpen, setSupportOpen] = useGentleNudge(state === "idle");
-  const complete = () => { setState("done"); setSupportOpen(false); playLumiSound("correct"); onCompleted(true); };
+  const complete = () => { setState("done"); playLumiSound("correct"); onCompleted(true); };
   const primary = state === "idle" ? () => setState("recording") : state === "recording" ? complete : onNext;
   const bars = [15, 27, 39, 52, 39, 27, 15];
   return (
@@ -335,10 +288,7 @@ function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevi
             <View key={index} style={{ width: 5, height: state === "recording" ? barHeight : Math.round(barHeight * 0.55), borderRadius: 99, backgroundColor: state === "recording" ? P.coral : "#d8d5f5" }} />
           ))}
         </View>
-        {supportOpen ? (
-          <GentleSupportPanel title="Lumi 来陪你热热身" text="先听 Lumi 读一遍，嘴巴准备好再开始。" actionLabel="我先听一遍"
-            onAction={() => { setState("idle"); speak(activity.content); setSupportOpen(false); }} onClose={() => setSupportOpen(false)} />
-        ) : state === "done" && <FeedbackPanel kind="correct" title="声音飞过小木桥啦！" text="Lumi 听见你勇敢地开口了。" />}
+        {state === "done" && <FeedbackPanel kind="correct" title="声音飞过小木桥啦！" text="Lumi 听见你勇敢地开口了。" />}
       </View>
       <ActivityActionDock
         primaryLabel={state === "idle" ? "🎙 开始跟读" : state === "recording" ? "■ 完成录音" : "继续去水果店 →"}
@@ -354,7 +304,6 @@ function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, is
   const [messages, setMessages] = useState<Array<{ role: "ai" | "student"; text: string }>>([{ role: "ai", text: activity.opening }]);
   const [input, setInput] = useState("");
   const [sent, setSent] = useState(false);
-  const [supportOpen, setSupportOpen] = useGentleNudge(!input && !sent);
   const replies = ["I like apples.", "I like bananas."];
   const chatRef = useRef<ScrollView>(null);
 
@@ -365,7 +314,6 @@ function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, is
     if (!value || sent) return;
     setMessages((items) => [...items, { role: "student", text: value }, { role: "ai", text: "Great! That sounds delicious. Me too!" }]);
     setSent(true);
-    setSupportOpen(false);
     playLumiSound("correct");
     onCompleted(true);
   };
@@ -398,10 +346,6 @@ function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, is
           </>
         ) : (
           <FeedbackPanel kind="correct" title="店员听懂你啦！" text="你用刚学会的句子完成了水果店对话。" />
-        )}
-        {supportOpen && !sent && (
-          <GentleSupportPanel title="Lumi 来帮你选一句" text="点一下就能把整句话放进输入框。" actionLabel="帮我选一句"
-            onAction={() => { setInput(replies[0]); setSupportOpen(false); }} onClose={() => setSupportOpen(false)} />
         )}
       </View>
       <ActivityActionDock
@@ -521,7 +465,6 @@ const styles = StyleSheet.create({
   dictationPrompt: { minHeight: 120, borderRadius: 20, padding: 18, backgroundColor: "#f0edff", alignItems: "center", justifyContent: "center", gap: 11 },
   textInput: { height: 48, borderWidth: 1, borderColor: "#dfe1eb", borderRadius: 14, paddingHorizontal: 13, color: P.ink, backgroundColor: "#fff", fontSize: 12, fontWeight: "700" },
   feedback: { position: "relative", flexDirection: "row", alignItems: "center", gap: 11, minHeight: 104, marginTop: 10, borderRadius: 19, paddingLeft: 10, paddingRight: 14, paddingVertical: 12 },
-  support: { position: "relative", flexDirection: "row", alignItems: "center", gap: 10, minHeight: 92, marginTop: 10, borderWidth: 2, borderColor: "#cfc8ff", borderRadius: 18, paddingVertical: 10, paddingLeft: 11, paddingRight: 9 },
   dock: { flexDirection: "row", gap: 8, borderTopWidth: 1, borderTopColor: P.line, marginTop: 9, paddingTop: 10 },
   recordingRow: { height: 64, alignItems: "center", flexDirection: "row", gap: 5, marginVertical: 16 },
   dialogScene: { gap: 3, borderRadius: 16, padding: 12, backgroundColor: "#e4f9f4" },

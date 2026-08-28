@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type StudentTab = "home" | "learn" | "ai" | "homework" | "growth";
+export type StudentTab = "home" | "ai" | "homework" | "growth";
 export type Tone = "violet" | "mint" | "sky" | "yellow" | "pink" | "gray";
 export type LumiMood = "neutral" | "happy" | "encourage" | "curious" | "listening" | "resting" | "proud";
 export type LumiVariant = "head" | "full";
@@ -109,18 +109,32 @@ export function TaskRow({ icon, title, detail, meta, reward, tone = "violet", ba
   );
 }
 
-const navItems: Array<{ id: StudentTab; icon: string; label: string }> = [
-  { id: "home", icon: "⌂", label: "首页" },
-  { id: "learn", icon: "Ab", label: "学习" },
-  { id: "ai", icon: "AI", label: "AI伙伴" },
-  { id: "homework", icon: "✓", label: "作业" },
-  { id: "growth", icon: "我", label: "成长" },
+type NavIconName = "home" | "ai" | "homework" | "profile";
+
+const navItems: Array<{ id: StudentTab; icon: NavIconName; label: string }> = [
+  { id: "home", icon: "home", label: "冒险" },
+  { id: "ai", icon: "ai", label: "AI伙伴" },
+  { id: "homework", icon: "homework", label: "作业" },
+  { id: "growth", icon: "profile", label: "我的" },
 ];
+
+function NavIcon({ name }: { name: NavIconName }) {
+  if (name === "home") {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4" /><path d="M6 5h10l-2.2 3L16 11H6" /><path d="M8.5 20c1.3-3.5 4.2-4 7-5.5" /><circle cx="17.5" cy="13" r="1.5" /></svg>;
+  }
+  if (name === "ai") {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.2 4.2L17 9l-3.8 1.8L12 15l-1.2-4.2L7 9l3.8-1.8Z" fill="currentColor" stroke="none" /><path d="m19 14 .6 2.2L22 17l-2.4.8L19 20l-.6-2.2L16 17l2.4-.8Z" fill="currentColor" stroke="none" /><path d="M5 14.5 5.6 17 8 18l-2.4 1L5 21.5 4.4 19 2 18l2.4-1Z" fill="currentColor" stroke="none" /></svg>;
+  }
+  if (name === "homework") {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8" /><rect x="5" y="4" width="14" height="17" rx="2.5" /><path d="m8.3 13 2.2 2.2 5.2-5.2M8 8.5h5" /></svg>;
+  }
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.8-3.7 3-5.6 6.5-5.6s5.7 1.9 6.5 5.6" /><path d="M18.5 5.5h2M19.5 4.5v2" /></svg>;
+}
 
 export function BottomNav({ active, onChange }: { active: StudentTab; onChange: (tab: StudentTab) => void }) {
   return (
     <nav className="bottom-nav" aria-label="学生端主导航">
-      {navItems.map((item) => <button key={item.id} className={active === item.id ? "selected" : ""} type="button" aria-current={active === item.id ? "page" : undefined} onClick={() => onChange(item.id)}><span className={item.id === "ai" ? "nav-ai" : ""}>{item.icon}</span>{item.label}</button>)}
+      {navItems.map((item) => <button key={item.id} className={active === item.id ? "selected" : ""} type="button" aria-label={item.label} aria-current={active === item.id ? "page" : undefined} onClick={() => onChange(item.id)}><span className={`nav-icon ${item.id === "ai" ? "nav-ai" : ""}`}><NavIcon name={item.icon} /></span><span className="nav-label" aria-hidden="true">{item.label}</span></button>)}
     </nav>
   );
 }

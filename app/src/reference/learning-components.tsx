@@ -123,16 +123,6 @@ function playLumiSound(kind: LumiSound) {
   window.setTimeout(() => void context.close(), 600);
 }
 
-function useGentleNudge(active = true, delay = 7000) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    if (!active) return;
-    const timer = window.setTimeout(() => { setVisible(true); playLumiSound("help"); }, delay);
-    return () => window.clearTimeout(timer);
-  }, [active, delay]);
-  return [active && visible, setVisible] as const;
-}
-
 export function LessonJourney({ step, total }: { step: number; total: number }) {
   const chapter = step < 3 ? "在果园收集水果" : step < 6 ? "带着水果去商店" : "在水果店完成挑战";
   const visibleCount = Math.min(5, total);
@@ -165,12 +155,6 @@ function FeedbackPanel({ kind, title, text }: { kind: "correct" | "wrong"; title
   return <div className={`lesson-feedback ${kind}`} role="status">{kind === "correct" && <div className="feedback-burst" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i></div>}<span className="feedback-state-icon" aria-hidden="true">{kind === "correct" ? "✓" : "↻"}</span><div><strong>{title}</strong><span>{text}</span></div></div>;
 }
 
-function GentleSupportPanel({ title, text, actionLabel, onAction, onClose }: { title: string; text: string; actionLabel: string; onAction: () => void; onClose: () => void }) {
-  const mascot = useContext(MascotMoodContext);
-  useEffect(() => mascot?.setMood("resting"), [mascot]);
-  return <div className="lesson-support" role="status"><span className="support-state-icon" aria-hidden="true">💡</span><div><strong>{title}</strong><span>{text}</span><button type="button" onClick={onAction}>{actionLabel}</button></div><button className="support-close" type="button" onClick={onClose} aria-label="收起 Lumi 的陪伴提示">×</button></div>;
-}
-
 function ActivityActionDock({ primaryLabel, onPrimary, primaryDisabled = false, onPrevious, canPrevious, primaryType = "button", feedback }: { primaryLabel: string; onPrimary?: () => void; primaryDisabled?: boolean; onPrevious: () => void; canPrevious: boolean; primaryType?: "button" | "submit"; feedback?: React.ReactNode }) {
   return <div className={`lesson-action-dock${feedback ? " has-feedback" : ""}`}>{feedback}<div className="lesson-action-row"><Button variant="secondary" type="button" disabled={!canPrevious} onClick={onPrevious} aria-label="回到上一步">←</Button><Button type={primaryType} disabled={primaryDisabled} onClick={onPrimary}>{primaryLabel}</Button></div></div>;
 }
@@ -181,17 +165,13 @@ function AudioButton({ text, label = "听标准发音" }: { text: string; label?
 }
 
 function WordView({ activity, onNext, onPrevious, canPrevious }: { activity: WordActivity; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
-  const [supportOpen, setSupportOpen] = useGentleNudge();
   const next = () => { playLumiSound("correct"); onNext(); };
-  const listenWithLumi = () => { speak(activity.word, () => undefined); setSupportOpen(false); };
-  return <div className="word-learning-card"><div className="activity-content"><span className="activity-kicker">今天的新朋友</span><strong className="activity-main-word">{activity.word}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.word} /><div className="example-card"><span>放进一句话里</span><strong>{activity.example}</strong><small>{activity.exampleMeaning}</small></div>{supportOpen && <GentleSupportPanel title="Lumi 来陪你啦" text="不用马上记住，我们和 Lumi 只听一遍也可以。" actionLabel="和 Lumi 听一遍" onAction={listenWithLumi} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock primaryLabel="收进水果篮 →" onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+  return <div className="word-learning-card"><div className="activity-content"><span className="activity-kicker">今天的新朋友</span><strong className="activity-main-word">{activity.word}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.word} /><div className="example-card"><span>放进一句话里</span><strong>{activity.example}</strong><small>{activity.exampleMeaning}</small></div></div><ActivityActionDock primaryLabel="收进水果篮 →" onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 function SentenceView({ activity, onNext, onPrevious, canPrevious }: { activity: SentenceActivity; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
-  const [supportOpen, setSupportOpen] = useGentleNudge();
   const next = () => { playLumiSound("correct"); onNext(); };
-  const listenWithLumi = () => { speak(activity.sentence, () => undefined); setSupportOpen(false); };
-  return <div className="sentence-learning-card"><div className="activity-content"><span className="activity-kicker">今天的神奇句子</span><strong className="activity-main-sentence">{activity.sentence}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.sentence} label="听一听整句话" /><div className="sentence-pattern"><span>I like</span><i>＋</i><span>喜欢的事物</span></div>{supportOpen && <GentleSupportPanel title="Lumi 来陪你啦" text="今天只听懂一点点，也是在进步。" actionLabel="陪我听整句话" onAction={listenWithLumi} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock primaryLabel="带上这句话 →" onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+  return <div className="sentence-learning-card"><div className="activity-content"><span className="activity-kicker">今天的神奇句子</span><strong className="activity-main-sentence">{activity.sentence}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.sentence} label="听一听整句话" /><div className="sentence-pattern"><span>I like</span><i>＋</i><span>喜欢的事物</span></div></div><ActivityActionDock primaryLabel="带上这句话 →" onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: RecallActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
@@ -199,6 +179,7 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
   const [attempts, setAttempts] = useState(0);
   const isAudio = activity.mode === "audio_to_text";
+  const answerLanguage = activity.mode === "en_to_zh" ? "中" : "Aa";
   const finished = result === "correct" || attempts >= 3;
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -217,37 +198,47 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
       ? <FeedbackPanel kind="wrong" title={attempts >= 3 ? "一起记住它" : "再试一次"} text={wrongHint} />
       : undefined;
   const answerState = result ? `is-${result}` : answer.trim() ? "is-filled" : "";
-  return <form className="recall-learning-card" onSubmit={finished ? (event) => { event.preventDefault(); onNext(); } : submit}><div className="activity-content">{isAudio ? <div className="dictation-prompt"><AudioButton text={activity.prompt} label="点击听题" /><small>听清楚后，把答案写下来</small></div> : <div className="recall-prompt">{activity.prompt}</div>}<div className={`recall-form ${answerState}`}><div className="recall-form-heading"><span aria-hidden="true">✎</span><div><label htmlFor="recall-answer">写下你的答案</label><small>大胆试一试，写错也没关系</small></div>{answer.trim() && <b aria-hidden="true">{result === "correct" ? "答对啦" : "已填写"}</b>}</div><div className="recall-input-shell"><input id="recall-answer" value={answer} disabled={result === "correct"} onChange={(event) => { setAnswer(event.target.value); if (result === "wrong") setResult(null); }} placeholder="点这里开始输入…" autoComplete="off" /><span aria-hidden="true">{result === "correct" ? "✓" : "Aa"}</span></div></div></div><ActivityActionDock feedback={feedback} primaryLabel={finished ? "继续" : attempts ? "再检查一次" : "检查答案"} primaryDisabled={!finished && !answer.trim()} primaryType="submit" onPrevious={onPrevious} canPrevious={canPrevious} /></form>;
+  return (
+    <form className="recall-learning-card" onSubmit={finished ? (event) => { event.preventDefault(); onNext(); } : submit}>
+      <div className="activity-content">
+        <div className="recall-question-stage">
+          {isAudio ? <AudioButton text={activity.prompt} label="点击听题" /> : <strong className="recall-prompt">{activity.prompt}</strong>}
+        </div>
+        <div className={`recall-form ${answerState}`}>
+          <div className="recall-input-shell">
+            <input id="recall-answer" value={answer} disabled={result === "correct"} onChange={(event) => { setAnswer(event.target.value); if (result === "wrong") setResult(null); }} placeholder={answerLanguage === "中" ? "输入中文意思…" : "输入英文答案…"} autoComplete="off" />
+            <span aria-hidden="true">{result === "correct" ? "✓" : answerLanguage}</span>
+          </div>
+        </div>
+      </div>
+      <ActivityActionDock feedback={feedback} primaryLabel={finished ? "继续" : attempts ? "再检查一次" : "检查答案"} primaryDisabled={!finished && !answer.trim()} primaryType="submit" onPrevious={onPrevious} canPrevious={canPrevious} />
+    </form>
+  );
 }
 
 function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: PronunciationActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const [state, setState] = useState<"idle" | "recording" | "done">("idle");
-  const [supportOpen, setSupportOpen] = useGentleNudge(state === "idle");
-  const complete = () => { setState("done"); setSupportOpen(false); playLumiSound("correct"); onCompleted(true); };
+  const complete = () => { setState("done"); playLumiSound("correct"); onCompleted(true); };
   const primary = state === "idle" ? () => setState("recording") : state === "recording" ? complete : onNext;
-  const listenFirst = () => { setState("idle"); speak(activity.content, () => undefined); setSupportOpen(false); };
   const feedback = state === "done" ? <FeedbackPanel kind="correct" title="读得真棒！" text="Lumi 清楚地听见你了。" /> : undefined;
-  return <div className="pronunciation-learning-card"><div className="activity-content"><strong className="activity-main-word">{activity.content}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.content} /><div className={state === "recording" ? "recording-visual active" : "recording-visual"} aria-hidden="true">{[1,2,3,4,5,6,7].map((bar) => <i key={bar} />)}</div>{supportOpen && <GentleSupportPanel title="先听一遍也可以" text="听清楚以后，再跟着 Lumi 开口。" actionLabel="听示范" onAction={listenFirst} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock feedback={feedback} primaryLabel={state === "idle" ? "开始跟读" : state === "recording" ? "完成录音" : "继续"} onPrimary={primary} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+  return <div className="pronunciation-learning-card"><div className="activity-content"><strong className="activity-main-word">{activity.content}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.content} /><div className={state === "recording" ? "recording-visual active" : "recording-visual"} aria-hidden="true">{[1,2,3,4,5,6,7].map((bar) => <i key={bar} />)}</div></div><ActivityActionDock feedback={feedback} primaryLabel={state === "idle" ? "开始跟读" : state === "recording" ? "完成录音" : "继续"} onPrimary={primary} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, isLast }: { activity: DialogActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean; isLast: boolean }) {
   const [messages, setMessages] = useState([{ role: "ai", text: activity.opening }]);
   const [input, setInput] = useState("");
   const [sent, setSent] = useState(false);
-  const [supportOpen, setSupportOpen] = useGentleNudge(!input && !sent);
   const replies = ["I like apples.", "I like bananas."];
   const send = () => {
     const value = input.trim();
     if (!value) return;
     setMessages((items) => [...items, { role: "student", text: value }, { role: "ai", text: "Great! That sounds delicious. Me too!" }]);
     setSent(true);
-    setSupportOpen(false);
     playLumiSound("correct");
     onCompleted(true);
   };
-  const chooseWithLumi = () => { setInput(replies[0]); setSupportOpen(false); };
   const feedback = sent ? <FeedbackPanel kind="correct" title="对话完成！" text="店员听懂了你的英语。" /> : undefined;
-  return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>情景对话</span><strong>🍎 {activity.scene}</strong><small>告诉店员你喜欢什么水果</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}</div>{!sent && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="用英语回答" aria-label="场景对话回答" /></div></>}{supportOpen && <GentleSupportPanel title="需要 Lumi 帮忙吗？" text="可以先选一句，再试着读出来。" actionLabel="帮我选一句" onAction={chooseWithLumi} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock feedback={feedback} primaryLabel={sent ? isLast ? "打开星星宝箱" : "继续" : "发送回答"} primaryDisabled={!sent && !input.trim()} onPrimary={sent ? onNext : send} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+  return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>情景对话</span><strong>🍎 {activity.scene}</strong><small>告诉店员你喜欢什么水果</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}</div>{!sent && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="用英语回答" aria-label="场景对话回答" /></div></>}</div><ActivityActionDock feedback={feedback} primaryLabel={sent ? isLast ? "打开星星宝箱" : "继续" : "发送回答"} primaryDisabled={!sent && !input.trim()} onPrimary={sent ? onNext : send} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 export function LessonActivityView({ activity, step, total, onCompleted, onNext, onPrevious, canPrevious }: { activity: LessonActivity; step: number; total: number; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {

@@ -61,20 +61,18 @@
 
 .activity-shell { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: white; }
 .activity-shell::after { content: ""; position: absolute; z-index: 10; inset: 0; border-radius: 24px; opacity: 0; pointer-events: none; background: rgba(94,221,184,.34); }
-.activity-mentor-stage { position: relative; flex: 0 0 166px; display: grid; grid-template-columns: minmax(0,1fr) 136px; align-items: center; gap: 10px; overflow: hidden; margin: 0 18px; border-radius: 26px; padding: 18px 8px 12px 20px; background: #fff4d1; }
+.activity-mentor-stage { position: relative; flex: 0 0 190px; display: grid; grid-template-columns: minmax(0,1fr) 164px; align-items: center; gap: 8px; overflow: hidden; margin: 0 18px; border-radius: 26px; padding: 18px 4px 10px 20px; background: #fff4d1; }
 .activity-mentor-stage::after { content: ""; position: absolute; right: -34px; top: -46px; width: 124px; height: 124px; border-radius: 50%; background: rgba(255,255,255,.48); }
-.activity-mentor-stage .bear-mascot.large.variant-full { z-index: 1; align-self: end; width: 136px; height: 169px; }
-.activity-shell:has(.recall-learning-card) .activity-mentor-stage { flex-basis: 145px; grid-template-columns: minmax(0,1fr) 122px; }
-.activity-shell:has(.recall-learning-card) .activity-mentor-stage .bear-mascot.large.variant-full { width: 122px; height: 151px; }
+.activity-mentor-stage .bear-mascot.large.variant-full { z-index: 1; align-self: end; width: 164px; height: 204px; }
 .mentor-story { position: relative; z-index: 2; display: grid; gap: 8px; }
 .mentor-story > span { color: #9a6c10; font-size: 12px; font-weight: 1000; letter-spacing: .04em; }
 .mentor-story > strong { color: #44351c; font-size: 19px; line-height: 1.4; }
 
 .activity-body { flex: 1; min-height: 0; display: flex; padding: 20px 24px 0; background: white; }
 .activity-body:has(.recall-learning-card) { padding-inline: 16px; }
-.activity-body > div,.activity-body > form { width: 100%; min-height: 0; display: flex; flex-direction: column; }
+.activity-body > div,.activity-body > form { width: 100%; min-height: 0; flex: 1; display: flex; flex-direction: column; }
 .activity-content { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; padding: 2px 0 14px; }
-.recall-learning-card .activity-content { justify-content: flex-start; overflow: hidden; padding: 4px 0 0; }
+.recall-learning-card .activity-content { flex: 1; justify-content: center; overflow: visible; padding: 4px 0 0; }
 .dialog-learning-card .activity-content { justify-content: flex-start; padding-top: 24px; }
 .word-learning-card,.sentence-learning-card,.pronunciation-learning-card { text-align: center; }
 .activity-kicker { color: var(--violet); font-size: 13px; font-weight: 1000; letter-spacing: .08em; }
@@ -94,48 +92,26 @@
 .sentence-pattern span { border: 2px solid #dedaff; border-radius: 16px; padding: 14px 9px; color: var(--violet); background: #f4f2ff; font-size: 13px; font-weight: 900; }
 .sentence-pattern i { color: #aaa9b4; font-style: normal; }
 
-.recall-prompt { position: relative; isolation: isolate; min-height: 116px; display: grid; place-items: center; overflow: hidden; border: 3px solid #d9d5ff; border-radius: 23px; padding: 20px; color: #3f3d90; background: linear-gradient(145deg,#fbfaff,#f2f0ff); font-size: 34px; font-weight: 1000; line-height: 1.3; text-align: center; box-shadow: inset 0 -5px 0 #e6e3ff,0 8px 18px rgba(70,60,168,.07); }
-.recall-prompt::before { content: "✦"; position: absolute; z-index: -1; left: 18px; top: 14px; color: #bbb4ff; font-size: 20px; transform: rotate(-12deg); }
-.recall-prompt::after { content: ""; position: absolute; z-index: -1; right: -28px; bottom: -40px; width: 116px; height: 116px; border-radius: 50%; background: rgba(136,126,247,.1); box-shadow: -235px -80px 0 -31px rgba(255,200,0,.12); }
-.dictation-prompt { min-height: 144px; display: grid; place-content: center; justify-items: center; gap: 14px; border: 3px solid #cceafa; border-radius: 23px; background: #f1faff; box-shadow: inset 0 -4px 0 #e2f4fc; }
-.recall-learning-card .dictation-prompt { min-height: 116px; gap: 8px; }
-.dictation-prompt small { color: var(--muted); font-size: 12px; }
-.recall-form { position: relative; display: grid; gap: 10px; margin: 12px 0 0; border: 2px solid #e4e1ff; border-radius: 22px; padding: 12px; background: linear-gradient(145deg,#fbfaff,#f5f3ff); text-align: left; box-shadow: inset 0 -4px 0 #e9e6ff,0 7px 18px rgba(82,71,189,.07); }
-.recall-form-heading { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; align-items: center; gap: 10px; }
-.recall-form-heading > span { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 14px; color: white; background: linear-gradient(145deg,#887ff7,#6257e8); font-size: 20px; font-weight: 1000; box-shadow: inset 0 -4px 0 rgba(57,48,173,.3); }
-.recall-form-heading > div { min-width: 0; display: grid; gap: 3px; }
-.recall-form label { color: #3f3d4b; font-size: 15px; font-weight: 1000; }
-.recall-form-heading small { color: #848291; font-size: 11px; font-weight: 750; line-height: 1.4; }
-.recall-form-heading b { border-radius: 999px; padding: 6px 9px; color: var(--violet); background: white; font-size: 10px; white-space: nowrap; box-shadow: 0 3px 8px rgba(65,55,168,.08); }
-.recall-input-shell { position: relative; }
+.recall-question-stage { flex: 0 0 140px; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 12px; text-align: center; }
+.recall-question-stage .lesson-audio-button { margin: 0; }
+.recall-prompt { display: block; max-width: 100%; margin: 0; color: #3d3c45; font-size: clamp(40px,11vw,58px); font-weight: 1000; line-height: 1.12; overflow-wrap: anywhere; }
+.recall-form { flex: 0 0 auto; width: min(100%,320px); min-width: min(100%,320px); align-self: center; display: grid; margin: 10px auto 0; padding: 0; background: transparent; text-align: left; }
+.recall-input-shell { position: relative; flex: 0 0 64px; min-height: 64px; }
 .recall-form input,.dialog-input input { min-width: 0; height: 58px; border: 2px solid #dcdce4; border-radius: 17px; outline: 0; padding: 0 17px; color: var(--ink); background: white; font-size: 16px; font-weight: 850; box-shadow: inset 0 -3px 0 #f1f1f4; }
-.recall-form input { width: 100%; height: 72px; border: 3px solid #d9d5ff; border-radius: 19px; padding: 0 62px 0 19px; font-size: 19px; box-shadow: inset 0 -4px 0 #f0eeff; transition: border-color .18s ease,box-shadow .18s ease,background .18s ease; }
-.recall-form input::placeholder { color: #aaa8b6; font-size: 15px; font-weight: 750; }
-.recall-input-shell > span { position: absolute; right: 13px; top: 50%; width: 43px; height: 43px; display: grid; place-items: center; border-radius: 14px; color: var(--violet); background: var(--violet-soft); font-size: 13px; font-weight: 1000; transform: translateY(-50%); }
-.recall-form input:focus,.dialog-input input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px #e6e3ff; }
-.recall-form:focus-within { border-color: #c8c2ff; box-shadow: inset 0 -4px 0 #ddd9ff,0 10px 24px rgba(82,71,189,.11); }
-.recall-form.is-filled input { border-color: #8f86f5; background: #fff; box-shadow: inset 0 -4px 0 #ebe8ff,0 0 0 3px rgba(111,99,235,.08); }
+.recall-form input { width: 100%; min-width: 100%; height: 64px; min-height: 64px; border: 2px solid #e2e2e9; border-radius: 18px; padding: 0 56px 0 17px; background: #fafafa; font-size: 18px; box-shadow: inset 0 -3px 0 #eeeeF2; transition: border-color .18s ease,box-shadow .18s ease,background .18s ease; }
+.recall-form input::placeholder { color: #aaa8b4; font-size: 14px; font-weight: 750; }
+.recall-input-shell > span { position: absolute; right: 11px; top: 50%; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: var(--violet); background: var(--violet-soft); font-size: 12px; font-weight: 1000; transform: translateY(-50%); }
+.recall-form input:focus { border-color: var(--violet); background: white; box-shadow: inset 0 -3px 0 #e7e3ff,0 0 0 3px #dedaff; }
+.dialog-input input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px #e6e3ff; }
+.recall-form.is-filled input { border-color: #8f86f5; background: white; box-shadow: inset 0 -3px 0 #ebe8ff; }
 .recall-form.is-filled .recall-input-shell > span { color: white; background: var(--violet); }
-.recall-form.is-correct { border-color: #9ee1ca; background: linear-gradient(145deg,#f5fffb,#eafaf4); box-shadow: inset 0 -4px 0 #d4f3e7,0 9px 22px rgba(31,151,116,.09); }
-.recall-form.is-correct .recall-form-heading > span,.recall-form.is-correct .recall-input-shell > span { background: #34b995; box-shadow: inset 0 -4px 0 rgba(9,111,82,.25); }
-.recall-form.is-correct .recall-form-heading b { color: #187b62; }
-.recall-form.is-correct input { border-color: #74d5b8; background: white; }
-.recall-form.is-wrong { border-color: #ffc2ca; background: linear-gradient(145deg,#fffafa,#fff1f3); box-shadow: inset 0 -4px 0 #ffe0e4,0 9px 22px rgba(192,61,83,.07); }
-.recall-form.is-wrong .recall-form-heading > span { background: var(--coral); box-shadow: inset 0 -4px 0 rgba(169,51,73,.23); }
-.recall-form.is-wrong input { border-color: #ff9dac; }
-.recall-learning-card:has(.lesson-feedback) .recall-prompt,.recall-learning-card:has(.lesson-feedback) .dictation-prompt { display: none; }
-.recall-learning-card:has(.lesson-feedback) .recall-form { margin-top: 0; }
+.recall-form.is-correct .recall-input-shell > span { color: white; background: #34b995; }
+.recall-form.is-correct input { border-color: #74d5b8; background: white; box-shadow: inset 0 -3px 0 #d8f1e8; }
+.recall-form.is-wrong input { border-color: #ff9dac; background: white; box-shadow: inset 0 -3px 0 #ffe5e8; }
 
-.lesson-support { display: grid; grid-template-columns: 44px 1fr 32px; align-items: center; gap: 12px; margin-top: 16px; border: 2px solid #f1d77d; border-radius: 19px; padding: 14px; color: #665016; background: #fff8dc; text-align: left; }
-.support-state-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: white; font-size: 20px !important; }
-.lesson-support > div { display: grid; gap: 4px; }
-.lesson-support strong { font-size: 14px; }
-.lesson-support span { color: #7b6b3f; font-size: 12px; font-weight: 800; line-height: 1.5; }
-.lesson-support > div > button { width: fit-content; min-height: 36px; margin-top: 3px; border: 0; border-bottom: 3px solid #4e43bf; border-radius: 11px; padding: 0 13px; color: white; background: var(--violet); font-size: 12px; font-weight: 1000; }
-.support-close { align-self: start; width: 32px; height: 32px; border: 0; border-radius: 50%; color: #91845d; background: white; font-size: 17px; }
 
 .lesson-action-dock { flex: 0 0 auto; margin: auto -24px 0; border-top: 2px solid #ededf1; padding: 16px 24px 20px; background: white; }
-.recall-learning-card .lesson-action-dock { margin-inline: -16px; padding-inline: 16px; }
+.recall-learning-card .lesson-action-dock { margin: 16px -16px 0; padding-inline: 16px; }
 .lesson-action-row { display: grid; grid-template-columns: 56px 1fr; gap: 12px; }
 .lesson-action-row .ui-button { width: 100%; min-height: 56px; border: 0; border-radius: 17px; font-size: 15px; }
 .lesson-action-row .ui-button.primary { background: var(--violet); box-shadow: inset 0 -5px 0 #4d42bd; }
@@ -220,8 +196,8 @@
   @keyframes success-cta-pulse { 50% { transform: translateY(-2px) scale(1.018); } }
 }
 @media (max-width:370px) {
-  .activity-mentor-stage { grid-template-columns: minmax(0,1fr) 112px; margin-inline: 14px; padding-left: 15px; }
-  .activity-mentor-stage .bear-mascot.large.variant-full { width: 112px; height: 140px; }
+  .activity-mentor-stage { flex-basis: 170px; grid-template-columns: minmax(0,1fr) 140px; margin-inline: 14px; padding-left: 15px; }
+  .activity-mentor-stage .bear-mascot.large.variant-full { width: 140px; height: 174px; }
   .mentor-story > strong { font-size: 17px; }
   .activity-body { padding-inline: 18px; }
   .lesson-action-dock { margin-inline: -18px; padding-inline: 18px; }
