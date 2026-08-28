@@ -2,9 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { activityCatalog, Button, Card, FloatingDecorations, LessonActivityView, LessonComplete, LessonCourseCard, LumiMascot, PageHeader, PhoneShell, Pill, ProgressBar, sampleLesson, SectionTitle, StatusBar, StudentPage, TaskRow, type StudentTab, type Tone } from "../components";
-
-// 后端 FastAPI 地址 (见 C:\demo8\api)
-const API_BASE = "http://localhost:8000";
+import { API_BASE, startPcmRecording, transcribePcm } from "../components/speech";
 
 type EntryScreen = "login" | "role";
 type Screen = EntryScreen | StudentTab;
@@ -142,6 +140,7 @@ function AiPage({ onNavigate }: { onNavigate: (tab: StudentTab) => void }) {
   const [listening, setListening] = useState(false);
   const [isWaiting, setIsWaiting] = useState(false);
   const busyRef = useRef(false); // 防连点竞态 (state 更新是异步的)
+  const recordingRef = useRef<{ stop: () => Uint8Array } | null>(null); // 麦克风录音句柄 (AI 伙伴语音输入)
   const [messages, setMessages] = useState([
     { role: "lumi", text: "Hi，小鹿！今天想聊动物、学校，还是听一个英语故事？", translation: "嗨，小鹿！选择一个你喜欢的话题吧。" },
   ]);
@@ -203,6 +202,35 @@ function AiPage({ onNavigate }: { onNavigate: (tab: StudentTab) => void }) {
       console.error("TTS playback error:", err);
     }
   };
+
+  // ---------- 语音转文字 (录音 → 后端阿里云 ASR) ----------
+
+  // 🎙 按钮: 第一次按开始录, 再按一次停止并转文字发出去
+  const handleVoice = async () => {
+    if (listening) {
+      const rec = recordingRef.current;
+      setListening(false);
+      if (!rec) return;
+      const pcm = rec.stop();
+      recordingRef.current = null;
+      if (pcm.length < 6400) return; // 少于 0.4s 当没说话
+      try {
+        const text = await transcribePcm(pcm);
+        const trimmed = text.trim();
+        if (trimmed) { setInput(trimmed); await sendMessage(trimmed); }
+      } catch (err) {
+        console.error("STT error:", err);
+      }
+    } else {
+      try {
+        recordingRef.current = null;
+        recordingRef.current = { stop: await startPcmRecording() };
+        setListening(true);
+      } catch (err) {
+        console.error("mic error:", err);
+      }
+    }
+  };
   return (
     <StudentPage active="ai" onNavigate={onNavigate} label="AI英语伙伴页面">
       <div className="ai-page-layout"><PageHeader eyebrow="LUMI AI BUDDY" title="AI 英语伙伴" subtitle="安全陪伴模式已开启" trailing={<Pill tone="mint">● 在线</Pill>} />
@@ -210,7 +238,7 @@ function AiPage({ onNavigate }: { onNavigate: (tab: StudentTab) => void }) {
         <div className="chat-list" aria-live="polite">{messages.map((message, index) => <div className={`chat-row ${message.role}`} key={`${message.role}-${index}`}>{message.role === "lumi" && <span className="mini-ai">AI</span>}<div className="chat-bubble"><strong>{message.text}</strong>{message.translation && <small>{message.translation}</small>}{message.role === "lumi" && <button type="button" aria-label="播放回答" onClick={() => playTTS(message.text)}>▶ 听一听</button>}</div></div>)}{isWaiting && <div className="chat-row lumi"><span className="mini-ai">AI</span><div className="chat-bubble typing" aria-label="Lumi 正在输入"><strong>正在想…</strong></div></div>}</div>
         <div className="quick-prompts" aria-label="快捷提问">{["我想聊动物", "讲个小故事", "陪我练口语"].map((text) => <button key={text} type="button" onClick={() => sendMessage(text)}>{text}</button>)}</div>
         <p className="safety-caption">Lumi 只回答适合儿童的英语学习内容，重要问题请询问老师或家长。</p>
-        <form className="chat-composer" onSubmit={submit}><button className={listening ? "voice-button listening" : "voice-button"} type="button" aria-label="语音输入" onClick={() => setListening((value) => !value)}>{listening ? "◼" : "🎙"}</button><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={listening ? "正在听你说…" : "输入想问的问题"} aria-label="向Lumi提问" /><button className="send-button" type="submit" aria-label="发送消息" disabled={isWaiting}>↑</button></form>
+        <form className="chat-composer" onSubmit={submit}><button className={listening ? "voice-button listening" : "voice-button"} type="button" aria-label="语音输入" onClick={handleVoice}>{listening ? "◼" : "🎙"}</button><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={listening ? "正在听你说…" : "输入想问的问题"} aria-label="向Lumi提问" /><button className="send-button" type="submit" aria-label="发送消息" disabled={isWaiting}>↑</button></form>
       </div>
     </StudentPage>
   );

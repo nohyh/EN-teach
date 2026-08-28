@@ -1,4 +1,4 @@
-"""AI 英语伙伴业务: 调 DeepSeek 聊天, 输出简短英文 + 中文翻译
+"""AI 英语伙伴业务: 调 DeepSeek 聊天 / 判定口语对话
 
 即 docs/architecture.md 里的 ai_service (LLM, 兼容 OpenAI 接口)。
 """
@@ -29,6 +29,15 @@ SYSTEM_PROMPT = """你是 Lumi，一位给小学低年级孩子（6~9 岁）设�
 5. 如果孩子说错了，可以温柔地给出正确说法，不要取笑。
 现在开始对话，永远只输出上面定义的 JSON。"""
 
+DIALOG_SYSTEM_PROMPT = """你是 Lumi，水果店大冒险里一位友好的店员。孩子刚学完 "I like ..." 句型，现在要回答你的开场白。
+【任务】判断孩子的回答 (utterance) 是不是对开场白 (opening) 的合适英语回答。
+【宽松标准】
+- 只要说出符合水果店场景的英语（如 "I like apples."、"I like bananas."、"Apple."、"I like apples and oranges."）就算对。
+- 单复数、大小写、小语法瑕疵不算错；用中文回答不算对。
+- 完全答非所问、或没有用英语回答才算错。
+【输出】只输出一个 JSON 对象，不要输出其他内容：
+{"correct": true或false, "feedback": "一句简短的英文反馈", "translation": "feedback 的中文翻译", "hint": "如果错了给一句英文提示(例如 I like apples.), 对了就留空字符串"}"""
+
 
 class AiError(Exception):
     """AI 服务调用 / 解析相关错误"""
@@ -39,7 +48,7 @@ class MissingApiKeyError(AiError):
 
 
 class AiService:
-    """DeepSeek 聊天封装: 拼系统提示词 + 调用 + 解析成 (english, translation)"""
+    """DeepSeek 封装: 聊天 (english+translation) 与口语对话判定 (correct+feedback+hint)"""
 
     def __init__(self) -> None:
         s = get_settings()
@@ -49,14 +58,40 @@ class AiService:
 
     def chat(self, messages: list[dict]) -> tuple[str, str]:
         """把最近的对话发给模型, 返回 (english, translation)"""
+        self._require_key()
+        content = self._post(
+            [{"role": "system", "content": SYSTEM_PROMPT}, *messages[-MAX_HISTORY:]],
+            max_tokens=600,
+        )
+        return self._parse_reply(content)
+
+    def judge_dialog(self, scene: str, goal: str, opening: str, utterance: str) -> dict:
+        """判定口语对话的回答, 返回 {correct, feedback, translation, hint}"""
+        self._require_key()
+        prompt = (
+            f"场景: {scene}\n"
+            f"目标: {goal}\n"
+            f"店员开场白: {opening}\n"
+            f"孩子回答: {utterance}\n"
+            f"请判定。"
+        )
+        content = self._post(
+            [{"role": "system", "content": DIALOG_SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
+            max_tokens=300,
+        )
+        return self._parse_dialog_check(content)
+
+    def _require_key(self) -> None:
         if not self.api_key:
             raise MissingApiKeyError("DEEPSEEK_API_KEY 未设置")
 
+    def _post(self, messages: list[dict], max_tokens: int) -> str:
+        """调用 /chat/completions, 返回模型生成的文本内容"""
         payload = {
             "model": self.model,
-            "messages": [{"role": "system", "content": SYSTEM_PROMPT}, *messages[-MAX_HISTORY:]],
+            "messages": messages,
             "temperature": 0.6,
-            "max_tokens": 600,
+            "max_tokens": max_tokens,
             "response_format": {"type": "json_object"},
         }
         try:
@@ -76,15 +111,13 @@ class AiService:
             raise AiError(f"DeepSeek 返回错误: status={resp.status_code}, body={resp.text[:300]}")
 
         try:
-            content = resp.json()["choices"][0]["message"]["content"]
+            return resp.json()["choices"][0]["message"]["content"]
         except (ValueError, KeyError, IndexError, TypeError) as e:
             raise AiError(f"DeepSeek 响应解析失败: {e}") from e
 
-        return self._parse_reply(content)
-
     @staticmethod
     def _parse_reply(content: str) -> tuple[str, str]:
-        """解析模型输出的 JSON; 失败时整段当英文"""
+        """解析聊天输出的 JSON; 失败时整段当英文"""
         text = content.strip()
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
         try:
@@ -94,6 +127,23 @@ class AiService:
             return english, translation
         except (ValueError, TypeError, AttributeError):
             return text, ""
+
+    @staticmethod
+    def _parse_dialog_check(content: str) -> dict:
+        """解析判定输出的 JSON; 失败时判错"""
+        text = content.strip()
+        text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
+        try:
+            data = json.loads(text)
+            raw = data.get("correct")
+            return {
+                "correct": str(raw).strip().lower() in ("true", "1", "yes"),
+                "feedback": str(data.get("feedback") or "").strip(),
+                "translation": str(data.get("translation") or "").strip(),
+                "hint": str(data.get("hint") or "").strip(),
+            }
+        except (ValueError, TypeError, AttributeError):
+            return {"correct": False, "feedback": text, "translation": "", "hint": ""}
 
 
 _service: AiService | None = None

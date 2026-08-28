@@ -1,6 +1,7 @@
-"""AI 英语伙伴路由 - 代理 DeepSeek 聊天
+"""AI 英语伙伴路由 - 代理 DeepSeek 聊天 / 判定口语对话
 
-POST /api/v1/ai/chat  把最近对话发给 LLM, 返回 {english, translation}
+POST /api/v1/ai/chat           把最近对话发给 LLM, 返回 {english, translation}
+POST /api/v1/ai/dialog-check   判定口语对话的回答, 返回 {correct, feedback, translation, hint}
 """
 from typing import Literal, Optional
 
@@ -32,3 +33,23 @@ def chat(req: ChatRequest):
     except AiError:
         raise HTTPException(status_code=502, detail="哎呀，AI 服务开小差了，再试一次好吗？")
     return {"english": english, "translation": translation}
+
+
+class DialogCheckRequest(BaseModel):
+    scene: str = Field(min_length=1, max_length=100)
+    goal: str = Field(min_length=1, max_length=200)
+    opening: str = Field(min_length=1, max_length=300)
+    utterance: str = Field(min_length=1, max_length=300)
+
+
+@router.post("/dialog-check")
+def dialog_check(req: DialogCheckRequest):
+    try:
+        result = get_ai_service().judge_dialog(
+            req.scene, req.goal, req.opening, req.utterance
+        )
+    except MissingApiKeyError:
+        raise HTTPException(status_code=503, detail="AI 服务暂未配置，请联系老师")
+    except AiError:
+        raise HTTPException(status_code=502, detail="哎呀，AI 服务开小差了，再试一次好吗？")
+    return result

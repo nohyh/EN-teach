@@ -29,11 +29,12 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # 阿里云 NLS (TTS)
+    # 阿里云 NLS (TTS + 一句话识别 ASR)
     nls_appkey: str
     nls_token: str
     nls_voice: str = "cally"  # 美式英文女声
     nls_tts_url: str = "https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/tts"
+    nls_asr_url: str = "https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/asr"
 
     # 阿里云 SSECP (口语评测)
     ssecp_app_id: str

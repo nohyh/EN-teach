@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card, LumiMascot, Pill, type Tone } from "./student-ui";
+import { API_BASE, startPcmRecording, transcribePcm } from "./speech";
 
 export type RecallMode = "zh_to_en" | "en_to_zh" | "audio_to_text" | "fill_blank";
 
@@ -223,20 +224,76 @@ function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevi
 function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, isLast }: { activity: DialogActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean; isLast: boolean }) {
   const [messages, setMessages] = useState([{ role: "ai", text: activity.opening }]);
   const [input, setInput] = useState("");
-  const [sent, setSent] = useState(false);
-  const [supportOpen, setSupportOpen] = useGentleNudge(!input && !sent);
+  const [listening, setListening] = useState(false);
+  const [judging, setJudging] = useState(false); // 等 AI 判定中
+  const [feedback, setFeedback] = useState<{ kind: "correct" | "wrong"; text: string } | null>(null);
+  const [finished, setFinished] = useState(false); // 判定对了才能继续
+  const recordingRef = useRef<{ stop: () => Uint8Array } | null>(null);
   const replies = ["I like apples.", "I like bananas."];
-  const send = () => {
-    const value = input.trim();
-    if (!value) return;
-    setMessages((items) => [...items, { role: "student", text: value }, { role: "ai", text: "Great! That sounds delicious. Me too!" }]);
-    setSent(true);
+  const [supportOpen, setSupportOpen] = useGentleNudge(!finished && messages.length <= 1);
+
+  // 把孩子说的话交给 AI 判定: 对 → 庆祝继续, 错 → 提示重试
+  const sendUtterance = async (text: string) => {
+    const value = text.trim();
+    if (!value || judging || finished) return;
+    setMessages((items) => [...items, { role: "student", text: value }]);
+    setInput("");
+    setJudging(true);
     setSupportOpen(false);
-    playLumiSound("correct");
-    onCompleted(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/ai/dialog-check`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scene: activity.scene, goal: activity.goal, opening: activity.opening, utterance: value }),
+      });
+      if (!res.ok) throw new Error(`判定接口错误: ${res.status}`);
+      const data = await res.json();
+      if (data.correct) {
+        setFinished(true);
+        setFeedback({ kind: "correct", text: data.feedback ? `${data.feedback}（${data.translation || ""}）` : "Great!" });
+        playLumiSound("correct");
+        onCompleted(true);
+      } else {
+        setFeedback({ kind: "wrong", text: data.hint || (data.feedback ? `${data.feedback}（${data.translation || ""}）` : "试着说：I like ...") });
+        playLumiSound("retry");
+      }
+    } catch (err) {
+      console.error("dialog check error:", err);
+      setFeedback({ kind: "wrong", text: "哎呀，网络开小差了，再试一次好吗？" });
+    } finally {
+      setJudging(false);
+    }
   };
-  const chooseWithLumi = () => { setInput(replies[0]); setSupportOpen(false); };
-  return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>你已经走进</span><strong>🍎 {activity.scene}</strong><small>试着告诉店员：你喜欢什么水果？</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}</div>{!sent && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="试着用英语回答" aria-label="场景对话回答" /></div></>}{supportOpen ? <GentleSupportPanel title="Lumi 来帮你选一句" text="点一下就能把整句话放进输入框。" actionLabel="帮我选一句" onAction={chooseWithLumi} onClose={() => setSupportOpen(false)} /> : sent && <FeedbackPanel kind="correct" title="店员听懂你啦！" text="你用刚学会的句子完成了水果店对话。" />}</div><ActivityActionDock primaryLabel={sent ? isLast ? "打开星星宝箱 ★" : "继续冒险 →" : "发送回答 ↑"} primaryDisabled={!sent && !input.trim()} onPrimary={sent ? onNext : send} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+
+  // 🎙 按钮: 第一次按开始录, 再按一次停止 → 转文字 → 交给判定
+  const handleVoice = async () => {
+    if (listening) {
+      const rec = recordingRef.current;
+      setListening(false);
+      if (!rec) return;
+      const pcm = rec.stop();
+      recordingRef.current = null;
+      if (pcm.length < 6400) return; // 少于 0.4s 当没说话
+      try {
+        const text = await transcribePcm(pcm);
+        if (text.trim()) await sendUtterance(text);
+        else setFeedback({ kind: "wrong", text: "再大声说一次好吗？" });
+      } catch (err) {
+        console.error("STT error:", err);
+        setFeedback({ kind: "wrong", text: "没听清楚，再试一次好吗？" });
+      }
+    } else {
+      try {
+        recordingRef.current = null;
+        recordingRef.current = { stop: await startPcmRecording() };
+        setListening(true);
+      } catch (err) {
+        console.error("mic error:", err);
+      }
+    }
+  };
+
+  return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>你已经走进</span><strong>🍎 {activity.scene}</strong><small>{activity.goal}</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}{judging && <div className="lesson-chat-bubble ai dialog-judging">Lumi 正在判断…</div>}</div>{feedback && <FeedbackPanel kind={feedback.kind} title={feedback.kind === "correct" ? "店员听懂你啦！" : "差一点点，再试一次"} text={feedback.text} />}{!finished && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} disabled={judging} onChange={(event) => setInput(event.target.value)} placeholder="说英语，或点 🎙 录音" aria-label="场景对话回答" autoComplete="off" /><button className={listening ? "voice-button listening" : "voice-button"} type="button" aria-label="语音输入" onClick={handleVoice}>{listening ? "◼" : "🎙"}</button></div></>}{supportOpen && <GentleSupportPanel title="Lumi 来帮你选一句" text="点一下就能把整句话放进输入框，也可以按 🎙 自己说。" actionLabel="帮我选一句" onAction={() => { setInput(replies[0]); setSupportOpen(false); }} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock primaryLabel={finished ? (isLast ? "打开星星宝箱 ★" : "继续冒险 →") : judging ? "正在判断…" : feedback?.kind === "wrong" ? "再试一次 ↑" : "发送回答 ↑"} primaryDisabled={!finished && (judging || !input.trim())} onPrimary={finished ? onNext : () => sendUtterance(input)} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 export function LessonActivityView({ activity, step, total, onCompleted, onNext, onPrevious, canPrevious }: { activity: LessonActivity; step: number; total: number; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
