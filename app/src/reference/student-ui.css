@@ -62,4 +62,55 @@
 }
 @media (prefers-reduced-motion: reduce) { .lumi-pop, .lumi-ring, .lumi-signal, .lumi-rest { display: none; } }
 
+/* Bear mascot from C:/CODE/web_code/teach. Head is the default app mark;
+   the full character is reserved for focused learning activities. */
+.bear-mascot { display: block; flex: 0 0 auto; overflow: visible; transform-origin: 50% 88%; }
+.bear-mascot.small.variant-head { width: 54px; height: 54px; }
+.bear-mascot.medium.variant-head { width: 82px; height: 82px; }
+.bear-mascot.large.variant-head { width: 112px; height: 112px; }
+.bear-mascot.small.variant-full { width: 78px; height: 96px; }
+.bear-mascot.medium.variant-full { width: 128px; height: 158px; }
+.bear-mascot.large.variant-full { width: 190px; height: 234px; }
+.bear-mascot svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 10px 14px rgba(90,58,28,.18)); }
+.bear-mascot .bear-root,.bear-mascot .bear-body,.bear-mascot .bear-head,.bear-mascot .bear-nod { transform-box: fill-box; transform-origin: 50% 100%; }
+.bear-mascot .bear-cheek { opacity: .52; }
+.bear-mascot .bear-happy-eyes,.bear-mascot .bear-mouth-curious,.bear-mascot .bear-mouth-happy,.bear-mascot .bear-mouth-proud { display: none; }
+.bear-mascot.mood-happy .bear-open-eyes,.bear-mascot.mood-resting .bear-open-eyes { display: none; }
+.bear-mascot.mood-happy .bear-happy-eyes,.bear-mascot.mood-resting .bear-happy-eyes { display: block; }
+.bear-mascot.mood-happy .bear-mouth-normal,.bear-mascot.mood-proud .bear-mouth-normal,.bear-mascot.mood-curious .bear-mouth-normal,.bear-mascot.mood-resting .bear-mouth-normal { display: none; }
+.bear-mascot.mood-happy .bear-mouth-happy,.bear-mascot.mood-proud .bear-mouth-proud,.bear-mascot.mood-curious .bear-mouth-curious { display: block; }
+.bear-mascot.mood-happy .bear-cheek,.bear-mascot.mood-proud .bear-cheek { opacity: .9; }
+.bear-mascot.mood-encourage .bear-cheek { opacity: .72; }
+.bear-mascot.mood-curious .bear-pupil { transform: translate(5px,-5px); }
+.bear-mascot.mood-encourage .bear-head { transform: rotate(-3deg); }
+.bear-mascot.mood-resting .bear-happy-eyes { transform: translateY(4px); opacity: .86; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .bear-mascot.mood-neutral .bear-root { animation: bear-float 3.4s ease-in-out infinite; }
+  .bear-mascot.mood-happy .bear-root { animation: bear-happy-hop .85s cubic-bezier(.23,1,.32,1) both; }
+  .bear-mascot.mood-happy .bear-body { animation: bear-happy-squash .85s cubic-bezier(.23,1,.32,1) both; }
+  .bear-mascot.mood-encourage .bear-nod { animation: bear-encourage 1.15s ease-in-out both; }
+  .bear-mascot.mood-curious .bear-head { animation: bear-think 4.2s ease-in-out infinite; }
+  .bear-mascot.mood-curious .bear-thoughts { animation: bear-thoughts 2.4s ease-in-out infinite; }
+  .bear-mascot.mood-listening .bear-root { animation: bear-listen 1.15s ease-in-out infinite alternate; }
+  .bear-mascot.mood-listening .bear-note { animation: bear-note 1.15s ease-out infinite; }
+  .bear-mascot.mood-resting .bear-body { animation: bear-breathe 2.2s ease-in-out infinite; }
+  .bear-mascot.mood-resting .bear-rest { animation: bear-note 1.8s ease-out infinite; }
+  .bear-mascot.mood-proud .bear-root { animation: bear-celebrate .9s cubic-bezier(.23,1,.32,1) both; }
+  .bear-mascot.mood-proud .bear-party-hat { transform-box: fill-box; transform-origin: 50% 100%; animation: bear-hat .45s .08s cubic-bezier(.23,1,.32,1) both; }
+  .bear-mascot.mood-proud .bear-star { transform-box: fill-box; transform-origin: center; animation: bear-star 1.7s ease-in-out infinite; }
+  @keyframes bear-float { 50% { transform: translateY(-5px) rotate(1deg); } }
+  @keyframes bear-happy-hop { 0% { transform: translateY(4px) scale(.96); } 32% { transform: translateY(-14px) rotate(-4deg) scale(1.06); } 58% { transform: translateY(0) rotate(3deg) scale(.98); } 78% { transform: translateY(-5px) scale(1.02); } 100% { transform: none; } }
+  @keyframes bear-happy-squash { 0%,100% { transform: none; } 30% { transform: scale(1.04,.96); } 58% { transform: scale(.98,1.03); } }
+  @keyframes bear-encourage { 0%,100% { transform: none; } 26% { transform: translateY(4px) rotate(-5deg); } 52% { transform: translateY(-1px) rotate(4deg); } 76% { transform: translateY(2px) rotate(-2deg); } }
+  @keyframes bear-think { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(4deg) translateY(-2px); } }
+  @keyframes bear-thoughts { 0%,100% { transform: translateY(0); opacity: .62; } 50% { transform: translateY(-5px); opacity: 1; } }
+  @keyframes bear-listen { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg) translateY(-2px); } }
+  @keyframes bear-note { 0% { opacity: 0; transform: translateY(7px) scale(.72); } 35% { opacity: 1; } 100% { opacity: 0; transform: translate(7px,-14px) scale(1.12); } }
+  @keyframes bear-breathe { 50% { transform: translateY(2px) scale(1.025,.98); } }
+  @keyframes bear-celebrate { 0% { transform: scale(.78) rotate(-6deg); opacity: .3; } 35% { transform: translateY(-15px) scale(1.1) rotate(6deg); opacity: 1; } 68% { transform: rotate(-4deg); } 100% { transform: none; } }
+  @keyframes bear-hat { from { transform: scale(0) rotate(-15deg); } to { transform: scale(1); } }
+  @keyframes bear-star { 50% { transform: scale(1.25) rotate(16deg); opacity: .7; } }
+}
+@media (prefers-reduced-motion: reduce) { .bear-mascot .bear-note,.bear-mascot .bear-rest,.bear-mascot .bear-stars { display: none; } }
 

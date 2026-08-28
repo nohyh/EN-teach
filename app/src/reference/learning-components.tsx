@@ -1,5 +1,5 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Button, Card, LumiMascot, Pill, type Tone } from "./student-ui";
+import { createContext, FormEvent, useContext, useEffect, useMemo, useState } from "react";
+import { Button, Card, LumiMascot, Pill, type LumiMood, type Tone } from "./student-ui";
 
 export type RecallMode = "zh_to_en" | "en_to_zh" | "audio_to_text" | "fill_blank";
 
@@ -134,33 +134,45 @@ function useGentleNudge(active = true, delay = 7000) {
 }
 
 export function LessonJourney({ step, total }: { step: number; total: number }) {
-  const percent = Math.max(6, Math.min(100, ((step + 1) / total) * 100));
   const chapter = step < 3 ? "在果园收集水果" : step < 6 ? "带着水果去商店" : "在水果店完成挑战";
-  return <section className="lesson-journey" aria-label={`课程旅程已完成 ${step + 1} 个环节，共 ${total} 个环节`}><div className="journey-copy"><span>水果店大冒险</span><strong>{chapter}</strong><small>{storyBeats[Math.min(step, storyBeats.length - 1)].promise}</small></div><div className="journey-track" aria-hidden="true"><i style={{ width: `${percent}%` }} /><span className="journey-stop start">🌳</span><span className="journey-stop middle">🛤</span><span className="journey-stop end">🏪</span><b style={{ left: `calc(${percent}% - 13px)` }}>🦌</b></div></section>;
+  const visibleCount = Math.min(5, total);
+  const start = Math.max(0, Math.min(step - 2, total - visibleCount));
+  const visibleSteps = Array.from({ length: visibleCount }, (_, offset) => start + offset);
+  return <section className="lesson-journey" aria-label={`课程旅程已完成 ${step + 1} 个环节，共 ${total} 个环节`}><div className="journey-copy"><strong>{chapter}</strong><span>{step + 1} / {total}</span></div><div className="journey-node-map" aria-hidden="true"><ol className="journey-nodes">{visibleSteps.map((index, position) => <li className={`${index < step ? "completed" : index === step ? "current" : "upcoming"}${position < visibleSteps.length - 1 ? " connected" : ""}`} key={index}><span>{index < step ? "✓" : index + 1}</span></li>)}</ol></div></section>;
 }
+
+const MascotMoodContext = createContext<{ setMood: (mood: LumiMood) => void } | null>(null);
 
 function ActivityFrame({ activity, step, children }: { activity: LessonActivity; step: number; children: React.ReactNode }) {
   const message = activity.type === "dialog" ? "把刚学会的表达，用到小对话里吧！" : activity.message;
   const story = storyBeats[Math.min(step, storyBeats.length - 1)];
-  const guideMood = activity.type === "pronunciation" ? "listening" : activity.type === "recall" || activity.type === "dialog" ? "curious" : "neutral";
+  const guideMood: LumiMood = activity.type === "pronunciation" ? "listening" : activity.type === "recall" || activity.type === "dialog" ? "curious" : "neutral";
+  const [mascotMood, setMascotMood] = useState<LumiMood>(guideMood);
+  useEffect(() => setMascotMood(guideMood), [guideMood, step]);
   return (
-    <Card className={`activity-shell activity-${activity.type}`}>
-      <div className="activity-guide"><LumiMascot size="small" mood={guideMood} /><div><span>{story.place}</span><strong>{story.title}</strong><p>{message}</p></div></div>
-      <div className="activity-body">{children}</div>
-    </Card>
+    <MascotMoodContext.Provider value={{ setMood: setMascotMood }}>
+      <section className={`activity-shell activity-${activity.type}`}>
+        <div className="activity-mentor-stage"><div className="mentor-story"><span>{story.place} · {story.title}</span><strong>{message}</strong></div><LumiMascot size="large" variant="full" mood={mascotMood} /></div>
+        <div className="activity-body">{children}</div>
+      </section>
+    </MascotMoodContext.Provider>
   );
 }
 
 function FeedbackPanel({ kind, title, text }: { kind: "correct" | "wrong"; title: string; text: string }) {
-  return <div className={`lesson-feedback ${kind}`} role="status"><div className="feedback-burst" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i></div><LumiMascot size="medium" mood={kind === "correct" ? "happy" : "encourage"} /><div><small>{kind === "correct" ? "太棒啦！" : "Lumi 陪你再试试"}</small><strong>{title}</strong><span>{text}</span></div></div>;
+  const mascot = useContext(MascotMoodContext);
+  useEffect(() => mascot?.setMood(kind === "correct" ? "happy" : "encourage"), [kind, mascot]);
+  return <div className={`lesson-feedback ${kind}`} role="status">{kind === "correct" && <div className="feedback-burst" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i></div>}<span className="feedback-state-icon" aria-hidden="true">{kind === "correct" ? "✓" : "↻"}</span><div><strong>{title}</strong><span>{text}</span></div></div>;
 }
 
 function GentleSupportPanel({ title, text, actionLabel, onAction, onClose }: { title: string; text: string; actionLabel: string; onAction: () => void; onClose: () => void }) {
-  return <div className="lesson-support" role="status"><LumiMascot size="small" mood="resting" /><div><strong>{title}</strong><span>{text}</span><button type="button" onClick={onAction}>{actionLabel}</button></div><button className="support-close" type="button" onClick={onClose} aria-label="收起 Lumi 的陪伴提示">×</button></div>;
+  const mascot = useContext(MascotMoodContext);
+  useEffect(() => mascot?.setMood("resting"), [mascot]);
+  return <div className="lesson-support" role="status"><span className="support-state-icon" aria-hidden="true">💡</span><div><strong>{title}</strong><span>{text}</span><button type="button" onClick={onAction}>{actionLabel}</button></div><button className="support-close" type="button" onClick={onClose} aria-label="收起 Lumi 的陪伴提示">×</button></div>;
 }
 
-function ActivityActionDock({ primaryLabel, onPrimary, primaryDisabled = false, onPrevious, canPrevious, primaryType = "button" }: { primaryLabel: string; onPrimary?: () => void; primaryDisabled?: boolean; onPrevious: () => void; canPrevious: boolean; primaryType?: "button" | "submit" }) {
-  return <div className="lesson-action-dock"><Button variant="secondary" type="button" disabled={!canPrevious} onClick={onPrevious}>← 回到上一步</Button><Button type={primaryType} disabled={primaryDisabled} onClick={onPrimary}>{primaryLabel}</Button></div>;
+function ActivityActionDock({ primaryLabel, onPrimary, primaryDisabled = false, onPrevious, canPrevious, primaryType = "button", feedback }: { primaryLabel: string; onPrimary?: () => void; primaryDisabled?: boolean; onPrevious: () => void; canPrevious: boolean; primaryType?: "button" | "submit"; feedback?: React.ReactNode }) {
+  return <div className={`lesson-action-dock${feedback ? " has-feedback" : ""}`}>{feedback}<div className="lesson-action-row"><Button variant="secondary" type="button" disabled={!canPrevious} onClick={onPrevious} aria-label="回到上一步">←</Button><Button type={primaryType} disabled={primaryDisabled} onClick={onPrimary}>{primaryLabel}</Button></div></div>;
 }
 
 function AudioButton({ text, label = "听标准发音" }: { text: string; label?: string }) {
@@ -187,7 +199,6 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
   const [attempts, setAttempts] = useState(0);
   const isAudio = activity.mode === "audio_to_text";
-  const [supportOpen, setSupportOpen] = useGentleNudge(!answer.trim() && !result);
   const finished = result === "correct" || attempts >= 3;
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -196,17 +207,17 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
     const nextAttempts = attempts + 1;
     setAttempts(nextAttempts);
     setResult(correct ? "correct" : "wrong");
-    setSupportOpen(false);
     playLumiSound(correct ? "correct" : "retry");
     if (correct || nextAttempts >= 3) onCompleted(correct);
   };
   const wrongHint = attempts === 1 ? (isAudio ? "再听一次，注意每一个词。" : `小提示：答案有 ${activity.answer.replace(/\s/g, "").length} 个字符。`) : attempts === 2 ? `再给一个提示：答案从“${activity.answer.slice(0, 1)}”开始。` : `一起记住它：${activity.answer}`;
-  const giveAHand = () => {
-    if (isAudio) speak(activity.prompt, () => undefined);
-    else setAnswer(activity.answer.slice(0, 1));
-    setSupportOpen(false);
-  };
-  return <form className="recall-learning-card" onSubmit={finished ? (event) => { event.preventDefault(); onNext(); } : submit}><div className="activity-content">{isAudio ? <div className="dictation-prompt"><AudioButton text={activity.prompt} label="点击听题" /><small>题目藏在声音里，仔细听哦</small></div> : <div className="recall-prompt">{activity.prompt}</div>}<div className="recall-form"><label htmlFor="recall-answer">我的答案</label><input id="recall-answer" value={answer} disabled={result === "correct"} onChange={(event) => setAnswer(event.target.value)} placeholder="在这里输入答案" autoComplete="off" /></div>{supportOpen ? <GentleSupportPanel title="Lumi 发现你在想办法" text="我先帮一点点，剩下的我们慢慢来。" actionLabel={isAudio ? "再帮我读一遍" : "帮我写第一个字"} onAction={giveAHand} onClose={() => setSupportOpen(false)} /> : <>{result === "correct" && <FeedbackPanel kind="correct" title="苹果装进篮子啦！" text="你找到了答案，Lumi 开心地跳起来啦！" />}{result === "wrong" && <FeedbackPanel kind="wrong" title={attempts >= 3 ? "没关系，我们一起记住" : "差一点点，继续试试看"} text={wrongHint} />}</>}</div><ActivityActionDock primaryLabel={finished ? "继续赶路 →" : attempts ? "再检查一次" : "检查答案"} primaryDisabled={!finished && !answer.trim()} primaryType="submit" onPrevious={onPrevious} canPrevious={canPrevious} /></form>;
+  const feedback = result === "correct"
+    ? <FeedbackPanel kind="correct" title="答对啦！" text="你找到了正确答案。" />
+    : result === "wrong"
+      ? <FeedbackPanel kind="wrong" title={attempts >= 3 ? "一起记住它" : "再试一次"} text={wrongHint} />
+      : undefined;
+  const answerState = result ? `is-${result}` : answer.trim() ? "is-filled" : "";
+  return <form className="recall-learning-card" onSubmit={finished ? (event) => { event.preventDefault(); onNext(); } : submit}><div className="activity-content">{isAudio ? <div className="dictation-prompt"><AudioButton text={activity.prompt} label="点击听题" /><small>听清楚后，把答案写下来</small></div> : <div className="recall-prompt">{activity.prompt}</div>}<div className={`recall-form ${answerState}`}><div className="recall-form-heading"><span aria-hidden="true">✎</span><div><label htmlFor="recall-answer">写下你的答案</label><small>大胆试一试，写错也没关系</small></div>{answer.trim() && <b aria-hidden="true">{result === "correct" ? "答对啦" : "已填写"}</b>}</div><div className="recall-input-shell"><input id="recall-answer" value={answer} disabled={result === "correct"} onChange={(event) => { setAnswer(event.target.value); if (result === "wrong") setResult(null); }} placeholder="点这里开始输入…" autoComplete="off" /><span aria-hidden="true">{result === "correct" ? "✓" : "Aa"}</span></div></div></div><ActivityActionDock feedback={feedback} primaryLabel={finished ? "继续" : attempts ? "再检查一次" : "检查答案"} primaryDisabled={!finished && !answer.trim()} primaryType="submit" onPrevious={onPrevious} canPrevious={canPrevious} /></form>;
 }
 
 function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: PronunciationActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
@@ -215,7 +226,8 @@ function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevi
   const complete = () => { setState("done"); setSupportOpen(false); playLumiSound("correct"); onCompleted(true); };
   const primary = state === "idle" ? () => setState("recording") : state === "recording" ? complete : onNext;
   const listenFirst = () => { setState("idle"); speak(activity.content, () => undefined); setSupportOpen(false); };
-  return <div className="pronunciation-learning-card"><div className="activity-content"><strong className="activity-main-word">{activity.content}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.content} /><div className={state === "recording" ? "recording-visual active" : "recording-visual"} aria-hidden="true">{[1,2,3,4,5,6,7].map((bar) => <i key={bar} />)}</div>{supportOpen ? <GentleSupportPanel title="Lumi 来陪你热热身" text="先听 Lumi 读一遍，嘴巴准备好再开始。" actionLabel="我先听一遍" onAction={listenFirst} onClose={() => setSupportOpen(false)} /> : state === "done" && <FeedbackPanel kind="correct" title="声音飞过小木桥啦！" text="Lumi 听见你勇敢地开口了。" />}</div><ActivityActionDock primaryLabel={state === "idle" ? "🎙 开始跟读" : state === "recording" ? "■ 完成录音" : "继续去水果店 →"} onPrimary={primary} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+  const feedback = state === "done" ? <FeedbackPanel kind="correct" title="读得真棒！" text="Lumi 清楚地听见你了。" /> : undefined;
+  return <div className="pronunciation-learning-card"><div className="activity-content"><strong className="activity-main-word">{activity.content}</strong><span className="activity-meaning">{activity.meaning}</span><AudioButton text={activity.content} /><div className={state === "recording" ? "recording-visual active" : "recording-visual"} aria-hidden="true">{[1,2,3,4,5,6,7].map((bar) => <i key={bar} />)}</div>{supportOpen && <GentleSupportPanel title="先听一遍也可以" text="听清楚以后，再跟着 Lumi 开口。" actionLabel="听示范" onAction={listenFirst} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock feedback={feedback} primaryLabel={state === "idle" ? "开始跟读" : state === "recording" ? "完成录音" : "继续"} onPrimary={primary} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, isLast }: { activity: DialogActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean; isLast: boolean }) {
@@ -234,7 +246,8 @@ function DialogView({ activity, onCompleted, onNext, onPrevious, canPrevious, is
     onCompleted(true);
   };
   const chooseWithLumi = () => { setInput(replies[0]); setSupportOpen(false); };
-  return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>你已经走进</span><strong>🍎 {activity.scene}</strong><small>试着告诉店员：你喜欢什么水果？</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}</div>{!sent && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="试着用英语回答" aria-label="场景对话回答" /></div></>}{supportOpen ? <GentleSupportPanel title="Lumi 来帮你选一句" text="点一下就能把整句话放进输入框。" actionLabel="帮我选一句" onAction={chooseWithLumi} onClose={() => setSupportOpen(false)} /> : sent && <FeedbackPanel kind="correct" title="店员听懂你啦！" text="你用刚学会的句子完成了水果店对话。" />}</div><ActivityActionDock primaryLabel={sent ? isLast ? "打开星星宝箱 ★" : "继续冒险 →" : "发送回答 ↑"} primaryDisabled={!sent && !input.trim()} onPrimary={sent ? onNext : send} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
+  const feedback = sent ? <FeedbackPanel kind="correct" title="对话完成！" text="店员听懂了你的英语。" /> : undefined;
+  return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>情景对话</span><strong>🍎 {activity.scene}</strong><small>告诉店员你喜欢什么水果</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}</div>{!sent && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="用英语回答" aria-label="场景对话回答" /></div></>}{supportOpen && <GentleSupportPanel title="需要 Lumi 帮忙吗？" text="可以先选一句，再试着读出来。" actionLabel="帮我选一句" onAction={chooseWithLumi} onClose={() => setSupportOpen(false)} />}</div><ActivityActionDock feedback={feedback} primaryLabel={sent ? isLast ? "打开星星宝箱" : "继续" : "发送回答"} primaryDisabled={!sent && !input.trim()} onPrimary={sent ? onNext : send} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
 export function LessonActivityView({ activity, step, total, onCompleted, onNext, onPrevious, canPrevious }: { activity: LessonActivity; step: number; total: number; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
@@ -253,7 +266,5 @@ export function LessonCourseCard({ lesson, onStart }: { lesson: LessonPackage; o
 
 export function LessonComplete({ correct, total, onRestart, onHome }: { correct: number; total: number; onRestart: () => void; onHome: () => void }) {
   useEffect(() => { playLumiSound("complete"); }, []);
-  return <div className="lesson-complete"><div className="complete-confetti" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i><i>✦</i><i>●</i></div><div className="complete-stars" aria-hidden="true">★ ✦ ★</div><div className="complete-mascot-stage"><LumiMascot size="large" mood="proud" /><span>水果店小英雄</span></div><span className="activity-kicker">ADVENTURE COMPLETE</span><h2>你把英语带到水果店啦！</h2><p>Lumi 想抱抱你：愿意尝试、愿意开口，就是今天最棒的收获。</p><div className="complete-stats"><div><strong>{total}</strong><span>走过的小站</span></div><div><strong>{correct}</strong><span>收集的苹果</span></div><div><strong>★</strong><span>勇气贴纸</span></div></div><div className="complete-actions"><Button onClick={onRestart}>和 Lumi 再玩一次</Button><Button variant="secondary" onClick={onHome}>带着星星回乐园</Button></div></div>;
+  return <div className="lesson-complete"><div className="complete-confetti" aria-hidden="true"><i>★</i><i>✦</i><i>●</i><i>★</i><i>✦</i><i>●</i></div><div className="complete-stars" aria-hidden="true">★ ✦ ★</div><div className="complete-mascot-stage"><LumiMascot size="large" variant="full" mood="proud" /><span>水果店小英雄</span></div><span className="activity-kicker">ADVENTURE COMPLETE</span><h2>你把英语带到水果店啦！</h2><p>Lumi 想抱抱你：愿意尝试、愿意开口，就是今天最棒的收获。</p><div className="complete-stats"><div><strong>{total}</strong><span>走过的小站</span></div><div><strong>{correct}</strong><span>收集的苹果</span></div><div><strong>★</strong><span>勇气贴纸</span></div></div><div className="complete-actions"><Button onClick={onRestart}>和 Lumi 再玩一次</Button><Button variant="secondary" onClick={onHome}>带着星星回乐园</Button></div></div>;
 }
-
-

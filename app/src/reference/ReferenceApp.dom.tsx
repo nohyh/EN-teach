@@ -60,7 +60,7 @@ function LoginPage({ onNext }: { onNext: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <main className="stage"><PhoneShell label="登录页面" className="auth-page"><FloatingDecorations /><StatusBar />
-      <header className="brand-lockup"><span className="eyebrow">HELLO, LITTLE STAR!</span><div className="brand-name">LUMI</div><p>和小鹿一起，开心学英语</p><LumiMascot size="large" /></header>
+      <header className="brand-lockup"><div className="brand-mascot"><span className="brand-halo" aria-hidden="true" /><LumiMascot size="large" /></div><span className="eyebrow">HELLO, LITTLE STAR!</span><div className="brand-name">LUMI</div><p>和小熊一起，开心学英语</p></header>
       <form className="login-form" onSubmit={(event) => { event.preventDefault(); onNext(); }}>
         <p className="helper-bubble">请家长或老师帮助小朋友登录哦</p>
         <label>学习账号<span className="field-wrap"><b aria-hidden="true">小</b><input defaultValue="lumi_student" aria-label="学习账号" /></span></label>
@@ -235,8 +235,8 @@ function LearnPage({ onNavigate }: { onNavigate: (tab: StudentTab) => void }) {
       <StudentPage active="learn" onNavigate={onNavigate} label={`${meta.studentTitle}页面`} hideNav>
         <header className="lesson-focus-header">
           <button type="button" onClick={() => setView("catalog")} aria-label="退出当前课程">×</button>
-          <div><span>LUMI ADVENTURE</span><strong>{sectionTitle}</strong></div>
-          <Pill tone="yellow">⭐ 126</Pill>
+          <div><strong>{sectionTitle}</strong><span>{meta.studentTitle}</span></div>
+          <b className="lesson-score">★ 126</b>
         </header>
         <LessonActivityView
           activity={activity}

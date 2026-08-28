@@ -77,18 +77,19 @@ export function FloatingDecorations() {
   );
 }
 
-/* ---- Lumi 小鹿吉祥物 ---- */
+/* ---- Lumi 小熊吉祥物 ---- */
 export type LumiMood = "neutral" | "happy" | "encourage" | "curious" | "listening" | "resting" | "proud";
 type MascotSize = "small" | "medium" | "large";
+export type MascotVariant = "head" | "full";
 
 const MOOD_LABEL: Record<LumiMood, string> = {
-  neutral: "Lumi 小鹿吉祥物",
-  happy: "开心跳起来庆祝的 Lumi 小鹿",
-  encourage: "点头为你加油的 Lumi 小鹿",
-  curious: "歪着头等你回答的 Lumi 小鹿",
-  listening: "竖起耳朵认真听的 Lumi 小鹿",
-  resting: "陪你慢慢休息的 Lumi 小鹿",
-  proud: "为完成任务骄傲庆祝的 Lumi 小鹿",
+  neutral: "Lumi 小熊吉祥物",
+  happy: "开心跳起来庆祝的 Lumi 小熊",
+  encourage: "点头为你加油的 Lumi 小熊",
+  curious: "歪着头等你回答的 Lumi 小熊",
+  listening: "竖起耳朵认真听的 Lumi 小熊",
+  resting: "陪你慢慢休息的 Lumi 小熊",
+  proud: "为完成任务骄傲庆祝的 Lumi 小熊",
 };
 
 const SIZE_CFG: Record<MascotSize, { w: number; h: number; bw: number; earBw: number; antler: number }> = {
@@ -130,13 +131,16 @@ function useMoodLoop(mood: LumiMood) {
   return { transform };
 }
 
-/** 新版：直接渲染队友分支的原始网页小鹿（'use dom' 组件；web 端零损耗，原生端内嵌 WebView）。 */
-export function LumiMascot({ size = "medium", mood = "neutral" }: { size?: MascotSize; mood?: LumiMood }) {
+/** Web 使用原始 SVG；原生端由 Expo DOM 内嵌同一份角色。 */
+export function LumiMascot({ size = "medium", mood = "neutral", variant = "head" }: { size?: MascotSize; mood?: LumiMood; variant?: MascotVariant }) {
+  const fullSize = { small: { w: 78, h: 96 }, medium: { w: 128, h: 158 }, large: { w: 190, h: 234 } }[size];
+  const domSize = variant === "full" ? fullSize : { w: SIZE_CFG[size].w, h: SIZE_CFG[size].w };
   return (
     <DomLumiMascot
       size={size}
       mood={mood}
-      dom={{ scrollEnabled: false, style: { width: SIZE_CFG[size].w, height: SIZE_CFG[size].h } }}
+      variant={variant}
+      dom={{ scrollEnabled: false, style: { width: domSize.w, height: domSize.h } }}
     />
   );
 }
