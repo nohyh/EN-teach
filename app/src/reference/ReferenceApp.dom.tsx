@@ -5,9 +5,10 @@ import "./learning-components.css";
 import "./reference-app.css";
 import "./playful-learning-theme.css";
 
-import { FormEvent, useEffect, useState } from "react";
-import { activityCatalog, Button, Card, FloatingDecorations, LessonActivityView, LessonComplete, LumiMascot, PageHeader, PhoneShell, Pill, StatusBar, StudentPage, type StudentTab } from "./components";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { activityCatalog, Button, Card, FloatingDecorations, LessonActivityView, LessonComplete, LumiMascot, PageHeader, PhoneShell, Pill, SpeechRuntimeProvider, StatusBar, StudentPage, type StudentTab } from "./components";
 import { LESSONS } from "../data/mock";
+import type { SpeechRuntime } from "../types/speech";
 import lumiLogo from "../../assets/lumi-logo-plain-shirt.png";
 
 type EntryScreen = "login" | "role";
@@ -365,24 +366,59 @@ function AdventurePage({ onNavigate, checkInDays, hasCheckedIn, onCheckIn, activ
   );
 }
 
-function AiPage({ onNavigate }: { onNavigate: (tab: StudentTab) => void }) {
+function AiPage({ onNavigate, runtime }: { onNavigate: (tab: StudentTab) => void; runtime: SpeechRuntime }) {
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
-  const [messages, setMessages] = useState([{ role: "lumi", text: "Hi，小鹿！今天想聊动物、学校，还是听一个英语故事？", translation: "嗨，小鹿！选择一个你喜欢的话题吧。" }]);
-  const sendMessage = (text: string) => {
+  const [waiting, setWaiting] = useState(false);
+  const [voiceError, setVoiceError] = useState("");
+  const [messages, setMessages] = useState<Array<{ role: "lumi" | "student"; text: string; translation: string }>>([{ role: "lumi", text: "Hi，小鹿！今天想聊动物、学校，还是听一个英语故事？", translation: "嗨，小鹿！选择一个你喜欢的话题吧。" }]);
+  useEffect(() => () => { void runtime.cancelRecording(); }, [runtime]);
+
+  const sendMessage = async (text: string) => {
     const value = text.trim();
-    if (!value) return;
-    setMessages((items) => [...items, { role: "student", text: value, translation: "" }, { role: "lumi", text: "Great choice! Let’s say it together: I like pandas!", translation: "很棒！我们一起说：我喜欢熊猫！" }]);
+    if (!value || waiting) return;
+    const userMessage = { role: "student" as const, text: value, translation: "" };
+    const history = [...messages, userMessage]
+      .slice(-20)
+      .map((message) => ({ role: message.role === "lumi" ? "assistant" as const : "user" as const, content: message.text }));
+    setMessages((items) => [...items, userMessage]);
     setInput("");
+    setWaiting(true);
+    try {
+      const reply = await runtime.chatWithLumi(history);
+      setMessages((items) => [...items, { role: "lumi", text: reply.english, translation: reply.translation }]);
+    } catch {
+      // 云端 AI 未配置时保留一个安全的演示回复，课程与语音功能不被阻断。
+      setMessages((items) => [...items, { role: "lumi", text: "Great choice! Let’s say it together: I like pandas!", translation: "很棒！我们一起说：我喜欢熊猫！（当前为本地演示回复）" }]);
+    } finally {
+      setWaiting(false);
+    }
   };
-  const submit = (event: FormEvent) => { event.preventDefault(); sendMessage(input); };
+  const submit = (event: FormEvent) => { event.preventDefault(); void sendMessage(input); };
+  const toggleVoice = async () => {
+    setVoiceError("");
+    try {
+      if (!listening) {
+        await runtime.startRecording();
+        setListening(true);
+      } else {
+        const text = await runtime.stopAndTranscribe();
+        setInput(text);
+        setListening(false);
+      }
+    } catch (error) {
+      setListening(false);
+      setVoiceError(error instanceof Error ? error.message : "语音输入失败，请重试");
+    }
+  };
   return (
     <StudentPage active="ai" onNavigate={onNavigate} label="AI英语伙伴页面">
       <div className="ai-page-layout"><PageHeader eyebrow="LUMI AI BUDDY" title="AI 英语伙伴" />
         <Card className="ai-companion-card" tone="violet"><LumiMascot size="medium" /><div><strong>Lumi 在这里</strong><p>可以说中文，也可以试试英语。说错没关系，我会给你小提示。</p></div><span>✨</span></Card>
-        <div className="chat-list" aria-live="polite">{messages.map((message, index) => <div className={`chat-row ${message.role}`} key={`${message.role}-${index}`}>{message.role === "lumi" && <span className="mini-ai mini-lumi"><img className="mini-lumi-image" src={lumiLogo} alt="" /></span>}<div className="chat-bubble"><strong>{message.text}</strong>{message.translation && <small>{message.translation}</small>}{message.role === "lumi" && <button type="button" aria-label="播放回答">▶ 听一听</button>}</div></div>)}</div>
-        <div className="quick-prompts" aria-label="快捷提问">{["我想聊动物", "讲个小故事", "陪我练口语"].map((text) => <button key={text} type="button" onClick={() => sendMessage(text)}>{text}</button>)}</div>
-        <form className="chat-composer" onSubmit={submit}><button className={listening ? "voice-button listening" : "voice-button"} type="button" aria-label="语音输入" onClick={() => setListening((value) => !value)}>{listening ? "◼" : "🎙"}</button><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={listening ? "正在听你说…" : "输入想问的问题"} aria-label="向Lumi提问" /><button className="send-button" type="submit" aria-label="发送消息">↑</button></form>
+        <div className="chat-list" aria-live="polite">{messages.map((message, index) => <div className={`chat-row ${message.role}`} key={`${message.role}-${index}`}>{message.role === "lumi" && <span className="mini-ai mini-lumi"><img className="mini-lumi-image" src={lumiLogo} alt="" /></span>}<div className="chat-bubble"><strong>{message.text}</strong>{message.translation && <small>{message.translation}</small>}{message.role === "lumi" && <button type="button" aria-label="播放回答" onClick={() => void runtime.speakText(message.text)}>▶ 听一听</button>}</div></div>)}{waiting && <div className="chat-row lumi"><span className="mini-ai mini-lumi"><img className="mini-lumi-image" src={lumiLogo} alt="" /></span><div className="chat-bubble"><strong>正在想一想…</strong></div></div>}</div>
+        <div className="quick-prompts" aria-label="快捷提问">{["我想聊动物", "讲个小故事", "陪我练口语"].map((text) => <button key={text} type="button" disabled={waiting} onClick={() => void sendMessage(text)}>{text}</button>)}</div>
+        {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
+        <form className="chat-composer" onSubmit={submit}><button className={listening ? "voice-button listening" : "voice-button"} type="button" aria-label={listening ? "完成语音输入" : "开始语音输入"} onClick={() => void toggleVoice()}>{listening ? "◼" : "🎙"}</button><input value={input} disabled={waiting} onChange={(event) => setInput(event.target.value)} placeholder={listening ? "正在听你说…" : "输入想问的问题"} aria-label="向Lumi提问" /><button className="send-button" type="submit" disabled={waiting || !input.trim()} aria-label="发送消息">↑</button></form>
       </div>
     </StudentPage>
   );
@@ -523,22 +559,35 @@ function GrowthPage({ onNavigate, onLogout, onSwitchAccount, activeCourseIndex, 
   );
 }
 
-export default function ReferenceApp({ dom: _dom }: { dom?: import("expo/dom").DOMProps }) {
+type ReferenceAppProps = SpeechRuntime & { dom?: import("expo/dom").DOMProps };
+
+export default function ReferenceApp({ dom: _dom, ...speechRuntime }: ReferenceAppProps) {
   const [screen, setScreen] = useState<Screen>("login");
   const [checkInDays, setCheckInDays] = useState(12);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [activeCourseIndex, setActiveCourseIndex] = useState(0);
   const [mascotSkin, setMascotSkin] = useState<MascotSkin>("honey");
+  const runtime = useMemo<SpeechRuntime>(() => speechRuntime, [
+    speechRuntime.startRecording,
+    speechRuntime.cancelRecording,
+    speechRuntime.stopAndTranscribe,
+    speechRuntime.stopAndEvaluate,
+    speechRuntime.chatWithLumi,
+    speechRuntime.checkDialog,
+    speechRuntime.speakText,
+  ]);
   useEffect(() => {
     document.documentElement.dataset.lumiSkin = mascotSkin;
     return () => { delete document.documentElement.dataset.lumiSkin; };
   }, [mascotSkin]);
   const checkIn = () => { if (!hasCheckedIn) { setCheckInDays((days) => days + 1); setHasCheckedIn(true); } };
-  if (screen === "login") return <LoginPage onNext={() => setScreen("role")} />;
-  if (screen === "role") return <RolePage onEnter={() => setScreen("home")} onBack={() => setScreen("login")} />;
   const navigate = (tab: StudentTab) => setScreen(tab);
-  if (screen === "ai") return <AiPage onNavigate={navigate} />;
-  if (screen === "homework") return <HomeworkPage onNavigate={navigate} />;
-  if (screen === "growth") return <GrowthPage onNavigate={navigate} onLogout={() => setScreen("login")} onSwitchAccount={() => setScreen("role")} activeCourseIndex={activeCourseIndex} onCourseChange={setActiveCourseIndex} />;
-  return <AdventurePage onNavigate={navigate} checkInDays={checkInDays} hasCheckedIn={hasCheckedIn} onCheckIn={checkIn} activeCourseIndex={activeCourseIndex} onCourseChange={setActiveCourseIndex} mascotSkin={mascotSkin} onMascotSkinChange={setMascotSkin} />;
+  let page: React.ReactNode;
+  if (screen === "login") page = <LoginPage onNext={() => setScreen("role")} />;
+  else if (screen === "role") page = <RolePage onEnter={() => setScreen("home")} onBack={() => setScreen("login")} />;
+  else if (screen === "ai") page = <AiPage onNavigate={navigate} runtime={runtime} />;
+  else if (screen === "homework") page = <HomeworkPage onNavigate={navigate} />;
+  else if (screen === "growth") page = <GrowthPage onNavigate={navigate} onLogout={() => setScreen("login")} onSwitchAccount={() => setScreen("role")} activeCourseIndex={activeCourseIndex} onCourseChange={setActiveCourseIndex} />;
+  else page = <AdventurePage onNavigate={navigate} checkInDays={checkInDays} hasCheckedIn={hasCheckedIn} onCheckIn={checkIn} activeCourseIndex={activeCourseIndex} onCourseChange={setActiveCourseIndex} mascotSkin={mascotSkin} onMascotSkinChange={setMascotSkin} />;
+  return <SpeechRuntimeProvider runtime={runtime}>{page}</SpeechRuntimeProvider>;
 }

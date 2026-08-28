@@ -11,7 +11,10 @@
 - 10 节 mock 课程及课程目录、节点式学习进度
 - 五种课程活动：`word`、`sentence`、`recall`、`pronunciation`、`dialog`
 - Lumi 全身角色、不同学习状态和答对庆祝效果
-- 发音播放、答题校验、错误提示、课程完成反馈
+- 手机原生麦克风录音、16kHz PCM 语音转文字
+- 跟读评分（SSECP；未配置时自动使用本地 Mock）
+- 系统英文发音、AI 对话与情景对话判定
+- 答题校验、错误提示、课程完成反馈
 - 记忆题采用固定单屏布局，不产生横向或纵向内部滚动
 - 支持 `prefers-reduced-motion`，用户选择减少动态效果时会关闭庆祝动画
 
@@ -22,19 +25,31 @@
 | 应用框架 | Expo SDK 57 + React Native 0.86 + TypeScript |
 | 路由 | Expo Router |
 | Web 视觉实现 | Expo DOM + CSS |
+| 录音 | Expo Audio 原生 PCM Stream |
 | 发音 | Expo Speech / Web Speech API |
-| 当前数据 | 本地 JSON mock 课程 |
+| 后端 | FastAPI + SQLite + 阿里云 NLS/SSECP + DeepSeek |
+| 课程数据 | 本地 JSON mock + 后端内容库 |
 
-当前阶段主要完成学生端视觉原型和课程运行时。FastAPI、数据库和真实 AI 接口尚未在本仓库落地。
+当前学生端保留 Expo DOM 高保真 UI，录音和网络能力由原生父层注入，因此 Android/iOS 真机不依赖 WebView 的麦克风实现。
 
 ## 本地运行
 
-需要先进入 `app` 目录安装依赖：
+先启动后端：
+
+```powershell
+cd server
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+python ..\scripts\seed_db.py
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+另开终端启动 App：
 
 ```powershell
 cd app
 npm install
-npx expo start --web
+npx expo start
 ```
 
 指定开发端口：
@@ -83,6 +98,9 @@ EN-teach/
 │       ├── screens/             # 组件化页面实现
 │       ├── services/            # TTS 等客户端服务
 │       └── types/               # 课程数据类型
+├── server/                      # FastAPI、SQLite、ASR/TTS/评分/AI
+├── content/                     # 后端课程内容源
+├── scripts/                     # 灌库与语音端到端验证
 ├── docs/                        # 产品、架构与课程契约文档
 └── README.md
 ```
