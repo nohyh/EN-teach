@@ -5,7 +5,7 @@ uvicorn app.main:app --reload --port 8000
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import attempts, tts, units
+from app.api import ai, attempts, tts, units
 from app.db.database import init_db
 
 
@@ -25,6 +25,7 @@ def create_app() -> FastAPI:
     app.include_router(units.router)
     app.include_router(attempts.router)
     app.include_router(tts.router)
+    app.include_router(ai.router)
 
     @app.get("/health")
     def health():

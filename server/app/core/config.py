@@ -56,6 +56,11 @@ class Settings(BaseSettings):
     # 评测业务
     pass_threshold: float = 90.0  # 单词 / 句子 overall >= 90 算过
 
+    # DeepSeek (AI 英语伙伴)
+    deepseek_api_key: str = ""            # 空 = 未配置, /api/v1/ai/chat 返回 503
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-chat"
+
     @field_validator("database_url", mode="before")
     @classmethod
     def _default_db_url(cls, v: str) -> str:
