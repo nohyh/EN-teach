@@ -1,5 +1,3 @@
-<p align="right"><a href="./README.en.md">English</a> | <strong>简体中文</strong></p>
-
 # EN-teach · AI 英语私教
 
 面向儿童与初级英语学习者的移动端 AI 英语学习应用。项目以虚拟角色 **Lumi** 作为学习陪伴者，将课程拆成可交互的学习活动，并围绕“学习 → 练习 → 反馈 → 复习”组织体验。
@@ -7,10 +5,6 @@
 > **当前状态：移动端 MVP 已完成主要页面与学习交互；FastAPI 后端仍处于骨架 / 设计阶段。**
 
 ## 已实现内容
-
-### 移动端学习体验
-
-当前 Expo / React Native 客户端已经包含：
 
 - 登录与角色选择
 - 学习首页与课程入口
@@ -22,8 +16,6 @@
 - TTS 标准发音播放
 
 ### 五类课程组件
-
-课程内容统一抽象为五种活动类型：
 
 | 类型 | 用途 |
 | --- | --- |
@@ -64,19 +56,17 @@
 
 ```text
 EN-teach/
-├── app/                  # Expo + React Native 客户端
-│   ├── src/
-│   │   ├── app/          # Expo Router 路由
-│   │   ├── components/   # 学习组件、UI、Lumi 吉祥物
-│   │   ├── screens/      # Home / Learn / Homework / AI / Growth 等页面
-│   │   ├── services/     # TTS 等客户端服务
-│   │   ├── data/         # 课程 / 演示数据
-│   │   └── types/        # 课程组件类型定义
-│   └── package.json
-├── server/               # FastAPI 后端骨架
-├── scripts/              # 教材导入 / 批量生成脚本预留
-├── docs/                 # 产品、架构与数据契约文档
-└── README.md
+├── app/
+│   └── src/
+│       ├── app/
+│       ├── components/
+│       ├── screens/
+│       ├── services/
+│       ├── data/
+│       └── types/
+├── server/        # FastAPI 后端骨架
+├── scripts/
+└── docs/
 ```
 
 ## 本地运行
@@ -101,14 +91,6 @@ npm run typecheck
 - **儿童友好交互**：吉祥物、即时反馈、旅程式进度和低压力重试。
 - **运行时调用克制**：适合预生成的内容尽量提前生成，运行时 AI 主要服务于对话等开放任务。
 - **MVP 优先**：先验证学习体验，再增加复杂基础设施。
-
-## 文档
-
-| 文档 | 内容 |
-| --- | --- |
-| [`docs/product.md`](docs/product.md) | 产品定位、学习闭环、阶段规划 |
-| [`docs/architecture.md`](docs/architecture.md) | 架构分层与扩展设计 |
-| [`docs/lesson-components.md`](docs/lesson-components.md) | 五类课程组件 JSON 契约 |
 
 ## Roadmap
 
