@@ -1,3 +1,5 @@
+<p align="right"><a href="./README.en.md">English</a> | <strong>简体中文</strong></p>
+
 # EN-teach · AI 英语私教
 
 面向儿童与初级英语学习者的移动端 AI 英语学习应用。项目以虚拟角色 **Lumi** 作为学习陪伴者，将课程拆成可交互的学习活动，并围绕“学习 → 练习 → 反馈 → 复习”组织体验。
@@ -79,22 +81,13 @@ EN-teach/
 
 ## 本地运行
 
-### 1. 安装依赖
-
 ```bash
 cd app
 npm install
-```
-
-### 2. 启动 Expo
-
-```bash
 npm start
 ```
 
-然后可以通过 Expo Go、Android / iOS 模拟器或 Web 端运行。
-
-其他命令：
+可通过 Expo Go、Android / iOS 模拟器或 Web 端运行。
 
 ```bash
 npm run android
