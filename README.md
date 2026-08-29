@@ -1,53 +1,133 @@
 # EN-teach · AI 英语私教
 
-面向学生的 AI 英语学习应用：虚拟角色居中讲解，下方展示互动组件，
-课程内容由五种组件构成（word / sentence / recall / pronunciation / dialog）。
+面向儿童与初级英语学习者的移动端 AI 英语学习应用。项目以虚拟角色 **Lumi** 作为学习陪伴者，将课程拆成可交互的学习活动，并围绕“学习 → 练习 → 反馈 → 复习”组织体验。
 
-> **仓库当前状态：只初始化了目录结构与设计文档，还没有任何代码。**
-> 五种组件的数据结构是前后端唯一契约，见 [docs/lesson-components.md](docs/lesson-components.md)。
+> **当前状态：移动端 MVP 已完成主要页面与学习交互；FastAPI 后端仍处于骨架 / 设计阶段。**
 
-## 技术栈约定
+## 已实现内容
 
-| 层 | 技术 | 用途 |
-| --- | --- | --- |
-| App | Expo + React Native + TypeScript（Expo Router） | iOS / Android 客户端 |
-| 状态 | Zustand | 课程流、学生状态 |
-| 后端 | Python + FastAPI + Pydantic v2 | API、教学逻辑 |
-| ORM | SQLAlchemy 2.x | 数据库访问 |
-| 数据库 | SQLite | 第一版唯一存储 |
-| AI | OpenAI 兼容接口 | 题库生成、dialog 运行时对话 |
+### 移动端学习体验
 
-第一版明确不做：Redis / Docker / PostgreSQL / MQ / 微服务 / K8s。
+当前 Expo / React Native 客户端已经包含：
 
-## 目录结构（当前仅保留两级，细分目录搭脚手架时再建）
+- 登录与角色选择
+- 学习首页与课程入口
+- 课程学习流程
+- 作业页
+- AI 助教页
+- 学习成长 / 进度页
+- Lumi 吉祥物与引导反馈
+- TTS 标准发音播放
+
+### 五类课程组件
+
+课程内容统一抽象为五种活动类型：
+
+| 类型 | 用途 |
+| --- | --- |
+| `word` | 单词认识与发音 |
+| `sentence` | 句型学习与理解 |
+| `recall` | 中英互译、听音识别、填空等记忆练习 |
+| `pronunciation` | 跟读与发音训练 |
+| `dialog` | 场景化英语对话 |
+
+学习流程中还实现了旅程进度、正误反馈、Lumi 提示、完成庆祝等交互，使课程更接近面向儿童的游戏化学习体验。
+
+组件数据契约见 [`docs/lesson-components.md`](docs/lesson-components.md)。
+
+## 技术栈
+
+### 当前已落地
+
+| 层 | 技术 |
+| --- | --- |
+| App | Expo SDK 57 + React Native + TypeScript |
+| 路由 | Expo Router |
+| UI | React Native + Expo Linear Gradient |
+| 语音 | Expo Speech |
+| Web 兼容 | React Native Web |
+
+### 后端规划
+
+| 层 | 技术 |
+| --- | --- |
+| API | Python + FastAPI + Pydantic v2 |
+| ORM | SQLAlchemy 2.x |
+| 数据库 | SQLite |
+| AI | OpenAI-compatible API |
+
+第一版暂不引入 Redis、PostgreSQL、MQ、微服务或 Kubernetes，优先保证产品闭环与迭代速度。
+
+## 项目结构
 
 ```text
 EN-teach/
-├── app/        # Expo + React Native 客户端（页面/组件/状态/类型等子目录届时生成）
-├── server/     # FastAPI 后端（api → services → repositories 三层）
-│   ├── app/    #   业务代码：路由、模型、schema、服务编排
-│   └── tests/
-├── scripts/    # 教材导入 / LLM 批量生成题库脚本
-├── prototype/  # ★ LUMI 学生端 HTML 视觉原型（零依赖单文件，浏览器直接打开）
-├── docs/       # ★ 设计文档
+├── app/                  # Expo + React Native 客户端
+│   ├── src/
+│   │   ├── app/          # Expo Router 路由
+│   │   ├── components/   # 学习组件、UI、Lumi 吉祥物
+│   │   ├── screens/      # Home / Learn / Homework / AI / Growth 等页面
+│   │   ├── services/     # TTS 等客户端服务
+│   │   ├── data/         # 课程 / 演示数据
+│   │   └── types/        # 课程组件类型定义
+│   └── package.json
+├── server/               # FastAPI 后端骨架
+├── scripts/              # 教材导入 / 批量生成脚本预留
+├── docs/                 # 产品、架构与数据契约文档
 └── README.md
 ```
 
-## 下一步（两端脚手架落地时参考）
+## 本地运行
 
-- `server/`：`requirements.txt` + `uvicorn app.main:app --reload`，先跑通 `/health`
-- `app/`：Expo SDK 57 脚手架（`create-expo-app` 或手写配置），真机连后端用
-  `EXPO_PUBLIC_API_BASE_URL=http://<电脑局域网IP>:8000`
+### 1. 安装依赖
 
-## 文档索引
+```bash
+cd app
+npm install
+```
+
+### 2. 启动 Expo
+
+```bash
+npm start
+```
+
+然后可以通过 Expo Go、Android / iOS 模拟器或 Web 端运行。
+
+其他命令：
+
+```bash
+npm run android
+npm run ios
+npm run typecheck
+```
+
+## 设计原则
+
+- **组件契约优先**：前后端围绕统一的课程 JSON 结构协作。
+- **儿童友好交互**：吉祥物、即时反馈、旅程式进度和低压力重试。
+- **运行时调用克制**：适合预生成的内容尽量提前生成，运行时 AI 主要服务于对话等开放任务。
+- **MVP 优先**：先验证学习体验，再增加复杂基础设施。
+
+## 文档
 
 | 文档 | 内容 |
 | --- | --- |
-| [docs/product.md](docs/product.md) | 产品定位、学习闭环、阶段规划 |
-| [docs/architecture.md](docs/architecture.md) | 架构分层、扩展机制、序列化约定 |
-| [docs/lesson-components.md](docs/lesson-components.md) | ★ 五种组件 JSON 契约 |
+| [`docs/product.md`](docs/product.md) | 产品定位、学习闭环、阶段规划 |
+| [`docs/architecture.md`](docs/architecture.md) | 架构分层与扩展设计 |
+| [`docs/lesson-components.md`](docs/lesson-components.md) | 五类课程组件 JSON 契约 |
 
-## 协作一句话规则
+## Roadmap
 
-契约变更（组件 JSON / API 字段）必须在一个 PR 内同步三处：
-`docs/lesson-components.md` + 前端 types + 后端 schemas，缺一不合入。
+- [x] Expo / React Native 客户端骨架
+- [x] 核心学习页面与导航
+- [x] 五类课程活动组件
+- [x] Lumi 引导、反馈与 TTS
+- [ ] FastAPI API 与数据持久化
+- [ ] 课程生成 / 导入流水线
+- [ ] 对话类活动接入运行时 LLM
+- [ ] 学习记录与个性化复习闭环
+
+---
+
+这个项目目前重点验证的是：**如何把 LLM 能力放进一个真正可交互、低延迟、适合儿童使用的英语学习产品，而不是把聊天框直接包装成“AI 教育”。**
