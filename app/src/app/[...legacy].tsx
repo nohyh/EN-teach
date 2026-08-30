@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
 
-export default function LoginPage() {
+export default function LegacyRoute() {
   return <Redirect href="/" />;
 }

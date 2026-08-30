@@ -30,18 +30,4 @@ function groupBySection(activities: Activity[]): LessonSection[] {
   return sections;
 }
 
-export const COURSE_TITLE = flat.title.replace("（10 小节合并测试版）", "");
-export const COURSE_INTRO = flat.intro;
 export const LESSONS: LessonSection[] = groupBySection(flat.activities);
-
-/** 每节课的展示配色 / 图标（纯装饰循环使用） */
-const LESSON_EMOJI = ["👋", "🌈", "🔢", "👨‍👩‍👧", "🍎", "🐼", "🎒", "🙋", "🌤️", "🌅"];
-const TONES = ["violet", "mint", "sky", "yellow", "pink"] as const;
-
-export function lessonEmoji(index: number): string {
-  return LESSON_EMOJI[index % LESSON_EMOJI.length];
-}
-
-export function lessonTone(index: number): (typeof TONES)[number] {
-  return TONES[index % TONES.length];
-}
