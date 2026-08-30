@@ -8,13 +8,17 @@
 
 - 登录与学生身份选择
 - 学生首页、课程学习、AI 伙伴、作业和成长页面
+- 独立错题复习入口，进入答题后复用课程学习播放器
 - 10 节 mock 课程及课程目录、节点式学习进度
 - 五种课程活动：`word`、`sentence`、`recall`、`pronunciation`、`dialog`
 - Lumi 全身角色、不同学习状态和答对庆祝效果
 - 手机原生麦克风录音、16kHz PCM 语音转文字
 - 跟读评分（SSECP；未配置时自动使用本地 Mock）
 - 系统英文发音、AI 对话与情景对话判定
+- 单词、例句和整句正文均可直接点击播放美式英语发音
 - 答题校验、错误提示、课程完成反馈
+- 课程、作业、错题、签到、星星、书籍与设置保存在本机，可连续演示
+- AI 和跟读在后端未启动时自动进入有明确标识的本地演示模式
 - 记忆题采用固定单屏布局，不产生横向或纵向内部滚动
 - 支持 `prefers-reduced-motion`，用户选择减少动态效果时会关闭庆祝动画
 
@@ -64,8 +68,20 @@ npx expo start --web --port 8083
 npm run android
 npm run ios
 npm run typecheck
+npm run doctor
+npm run check
 npm run fix:deps
 ```
+
+## 演示建议
+
+- 完整演示路径：登录 → 学生身份 → 冒险地图 → 继续当前课程 → 完成活动并领取星星 → 作业/错题 → AI 伙伴 → 我的学习。
+- 演示状态会保存在当前浏览器或手机 WebView；需要恢复初始数据时，进入“我的学习 → 设置 → 重置演示数据”。
+- 电脑和手机展示同一套内容与进度。电脑更适合投屏和稳定讲解；手机额外展示原生录音、系统发音、软键盘与触控体验。
+- 不启动后端仍可演示页面、课程、作业、错题、AI 本地回复和跟读本地评分；语音转文字仍需要后端服务。
+- 真机联调时手机与电脑应在同一局域网，并让后端监听 `0.0.0.0:8000`。
+
+更完整的现场流程和异常预案见 [演示手册](docs/demo-playbook.md)。
 
 ### 常见启动问题
 
@@ -81,7 +97,7 @@ npm run fix:deps
 app/src/reference/ReferenceApp.dom.tsx
 ```
 
-这是目前持续调试的高保真学生端实现。`app/src/screens/` 和 `app/src/components/` 中保留了组件化页面实现，后续原生端收敛时可继续复用。
+这是唯一的学生端实现。旧版且未被入口引用的 `screens/`、`components/` 已删除，避免两套 UI 长期漂移。
 
 ## 目录结构
 
@@ -92,11 +108,9 @@ EN-teach/
 │   ├── public/course-art/       # 教材封面和课程地图资源
 │   └── src/
 │       ├── app/                 # Expo Router 路由
-│       ├── components/          # 学习组件、UI 与 Lumi 角色
 │       ├── data/                # mock 课程加载和分节
-│       ├── reference/           # 当前高保真 DOM 学生端
-│       ├── screens/             # 组件化页面实现
-│       ├── services/            # TTS 等客户端服务
+│       ├── reference/           # 唯一的高保真 DOM 学生端与学习组件
+│       ├── services/            # 录音、API 与演示兜底
 │       └── types/               # 课程数据类型
 ├── server/                      # FastAPI、SQLite、ASR/TTS/评分/AI
 ├── content/                     # 后端课程内容源
@@ -118,13 +132,12 @@ app/assets/mock/dudulu_fake_course_10_lessons_bundle/
 
 ## 课程组件契约
 
-五种组件的数据结构以以下三处为准：
+五种组件的数据结构以以下两处为准：
 
 - `docs/lesson-components.md`
 - `app/src/types/lesson.ts`
-- 后续后端 schemas
 
-契约变更必须同步文档、前端类型和后端 schema，避免课程生成端与运行时发生字段漂移。
+课程目前由本地 JSON 驱动；契约变更必须同步文档、前端类型和 mock 数据。等后端真正提供课程流接口时，再增加对应的 Pydantic 模型，不提前维护一份空契约。
 
 ## 文档索引
 

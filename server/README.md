@@ -11,11 +11,11 @@ server/
 │   ├── db/
 │   │   ├── database.py        # SQLAlchemy engine + session
 │   │   └── models.py          # User / Unit / Sentence / UnitProgress / SentenceAttempt
-│   ├── schemas/               # (Pydantic 请求/响应模型, 后续加)
+│   ├── schemas/               # 后端课程契约落地后再启用
 │   ├── repositories/          # SQL 层, 不写业务
 │   │   ├── units.py
 │   │   └── attempts.py
-│   ├── services/              # 业务逻辑
+│   ├── services/              # AI、语音、评分等外部能力编排
 │   │   ├── speech_service.py  # TTS (阿里云 NLS)
 │   │   ├── ssecp_client.py    # SSECP 鉴权 + WebSocket
 │   │   └── evaluation_service.py  # 评测抽象 (Mock + 真实 SSECP)
