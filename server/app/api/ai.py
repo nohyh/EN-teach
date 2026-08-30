@@ -3,7 +3,7 @@
 POST /api/v1/ai/chat           把最近对话发给 LLM, 返回 {english, translation}
 POST /api/v1/ai/dialog-check   判定口语对话的回答, 返回 {correct, feedback, translation, hint}
 """
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -20,7 +20,6 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[ChatMessage]
-    user_id: Optional[int] = None  # 预留: 以后做会话持久化
 
 
 @router.post("/chat")

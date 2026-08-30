@@ -13,7 +13,7 @@ def create_app() -> FastAPI:
     init_db()
     app = FastAPI(title="EN-teach Backend", version="0.1.0")
 
-    # CORS: 允许浏览器从 file:// 或其他端口调过来 (prototype 是 file:// 打开的)
+    # 演示期允许 Expo Web / 本地开发端口访问；上线前改为部署域名白名单。
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # demo 阶段全开, 生产要锁白名单

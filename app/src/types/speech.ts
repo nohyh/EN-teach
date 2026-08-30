@@ -52,5 +52,5 @@ export type SpeechRuntime = {
   stopAndEvaluate: (referenceText: string) => Promise<EvaluationResult>;
   chatWithLumi: (messages: ChatMessage[]) => Promise<ChatReply>;
   checkDialog: (request: DialogCheckRequest) => Promise<DialogCheckResult>;
-  speakText: (text: string) => Promise<void>;
+  speakText: (text: string, options?: { rate?: number }) => Promise<void>;
 };

@@ -11,6 +11,7 @@ import type {
 } from "@/types/speech";
 
 const REQUEST_TIMEOUT_MS = 60_000;
+const HEALTH_TIMEOUT_MS = 1_500;
 
 export class ApiError extends Error {
   constructor(
@@ -102,7 +103,7 @@ export async function chatWithLumi(messages: ChatMessage[]) {
   const response = await request("/api/v1/ai/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, user_id: 2 }),
+    body: JSON.stringify({ messages }),
   });
   return (await response.json()) as ChatReply;
 }
@@ -114,4 +115,17 @@ export async function checkDialog(requestBody: DialogCheckRequest) {
     body: JSON.stringify(requestBody),
   });
   return (await response.json()) as DialogCheckResult;
+}
+
+export async function checkBackendHealth() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/health`, { signal: controller.signal });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
