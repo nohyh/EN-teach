@@ -47,7 +47,7 @@ export function LumiMascot({ size = "medium", mood = "neutral", variant = "head"
             <g className="bear-ear bear-ear-left" transform="translate(106 74)"><ellipse rx="34" ry="35" fill="url(#lumiBearFur)" stroke="#513323" strokeWidth="4.2" /><ellipse cx="3" cy="6" rx="18" ry="19" fill="#F4B49F" /><ellipse cy="2" rx="11" ry="12" fill="#FFF8E9" opacity=".42" /></g>
             <g className="bear-ear bear-ear-right" transform="translate(254 74)"><ellipse rx="34" ry="35" fill="url(#lumiBearFur)" stroke="#513323" strokeWidth="4.2" /><ellipse cx="-3" cy="6" rx="18" ry="19" fill="#F4B49F" /><ellipse cy="2" rx="11" ry="12" fill="#FFF8E9" opacity=".42" /></g>
             <path d="M180 51C122 51 82 84 76 137C70 190 106 232 158 242C172 245 188 245 202 242C254 232 290 190 284 137C278 84 238 51 180 51Z" fill="url(#lumiBearFur)" stroke="#513323" strokeWidth="4.6" strokeLinejoin="round" /><path d="M145 65C158 52 168 49 180 58C190 47 201 52 211 66" stroke="#FFE0A7" strokeWidth="8" strokeLinecap="round" fill="none" opacity=".65" /><path d="M162 58Q169 41 180 57Q190 40 198 59" stroke="#513323" strokeWidth="4" strokeLinecap="round" fill="none" />
-            {mood === "proud" && <g className="bear-party-hat" transform="translate(184 56) rotate(14)"><path d="M-36 16L32 24L0-48Z" fill="#FF8FA3" stroke="#513323" strokeWidth="4.5" strokeLinejoin="round" /><circle cx="-8" cy="6" r="4" fill="#FFF8E9" /><circle cx="8" cy="10" r="3.4" fill="#FFF8E9" /><circle cx="-2" cy="-14" r="4" fill="#FFF8E9" /><circle cy="-48" r="9" fill="#FFCF4D" stroke="#F0A51F" strokeWidth="3.5" /></g>}
+            {mood === "proud" && <g className="bear-party-hat-anchor" transform="translate(184 56)"><g className="bear-party-hat" transform="rotate(14)"><path d="M-36 16L32 24L0-48Z" fill="#FF8FA3" stroke="#513323" strokeWidth="4.5" strokeLinejoin="round" /><circle cx="-8" cy="6" r="4" fill="#FFF8E9" /><circle cx="8" cy="10" r="3.4" fill="#FFF8E9" /><circle cx="-2" cy="-14" r="4" fill="#FFF8E9" /><circle cy="-48" r="9" fill="#FFCF4D" stroke="#F0A51F" strokeWidth="3.5" /></g></g>}
             <path d="M180 158C151 158 134 174 136 197C138 219 158 230 180 230C202 230 222 219 224 197C226 174 209 158 180 158Z" fill="url(#lumiBearCream)" stroke="#F4DDB8" strokeWidth="2.2" /><ellipse cx="166" cy="174" rx="22" ry="10" fill="#fff" opacity=".2" />
             <ellipse className="bear-cheek" cx="116" cy="184" rx="17" ry="10.5" fill="#F58F91" /><ellipse className="bear-cheek" cx="244" cy="184" rx="17" ry="10.5" fill="#F58F91" />
             <g className="bear-open-eyes"><g className="bear-eye bear-eye-left" transform="translate(144 142)"><circle className="bear-pupil" r="13.5" fill="#513323" /><circle cx="-4.6" cy="-4.8" r="4.8" fill="#fff" /><circle cx="3.8" cy="3" r="2.2" fill="#fff" opacity=".88" /></g><g className="bear-eye bear-eye-right" transform="translate(216 142)"><circle className="bear-pupil" r="13.5" fill="#513323" /><circle cx="-4.6" cy="-4.8" r="4.8" fill="#fff" /><circle cx="3.8" cy="3" r="2.2" fill="#fff" opacity=".88" /></g></g>
@@ -78,9 +78,9 @@ export function Pill({ children, tone = "violet", className = "" }: { children: 
   return <span className={`ui-pill tone-${tone} ${className}`}>{children}</span>;
 }
 
-export function ProgressBar({ value, tone = "violet", label }: { value: number; tone?: Tone; label?: string }) {
-  const safeValue = Math.max(0, Math.min(100, value));
-  return <div className="ui-progress" aria-label={label ?? `完成 ${safeValue}%`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeValue}><span className={`tone-${tone}`} style={{ width: `${safeValue}%` }} /></div>;
+export function DemoToast({ message }: { message: string }) {
+  if (!message) return null;
+  return <div className="demo-toast" role="status" aria-live="polite">{message}</div>;
 }
 
 export function PageHeader({ eyebrow, title, subtitle, trailing, onBack }: { eyebrow?: string; title: string; subtitle?: string; trailing?: ReactNode; onBack?: () => void }) {
@@ -90,22 +90,6 @@ export function PageHeader({ eyebrow, title, subtitle, trailing, onBack }: { eye
       <div><span className="page-eyebrow">{eyebrow}</span><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
       {trailing && <div className="page-header-trailing">{trailing}</div>}
     </header>
-  );
-}
-
-export function SectionTitle({ eyebrow, title, action, onAction }: { eyebrow?: string; title: string; action?: string; onAction?: () => void }) {
-  return <div className="section-title"><div>{eyebrow && <span>{eyebrow}</span>}<h2>{title}</h2></div>{action && <button type="button" onClick={onAction}>{action}</button>}</div>;
-}
-
-export function TaskRow({ icon, title, detail, meta, reward, tone = "violet", badge, onClick }: { icon: string; title: string; detail: string; meta?: string; reward?: string; tone?: Tone; badge?: string; onClick?: () => void }) {
-  return (
-    <button className="ui-task-row" type="button" onClick={onClick}>
-      <span className={`ui-task-icon tone-${tone}`}>{icon}</span>
-      <span className="ui-task-copy"><strong>{title}</strong><small>{detail}</small>{meta && <i>{meta}</i>}</span>
-      {reward && <Pill tone="yellow">{reward}</Pill>}
-      <span className="ui-row-arrow" aria-hidden="true">›</span>
-      {badge && <span className="ui-corner-badge">{badge}</span>}
-    </button>
   );
 }
 

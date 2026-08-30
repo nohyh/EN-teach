@@ -38,9 +38,7 @@ h1, h2, h3, strong,
 button,
 .brand-name,
 .page-eyebrow,
-.eyebrow,
-.section-title span,
-.tiny-label {
+.eyebrow {
   letter-spacing: -.01em;
 }
 
@@ -103,28 +101,6 @@ button,
   font-size: 9px;
 }
 
-.ui-progress {
-  height: 12px;
-  border: 2px solid rgba(213, 215, 226, .72);
-  background: #e7e8ef;
-  box-shadow: inset 0 2px 0 rgba(36, 35, 58, .035);
-}
-
-.ui-progress > span {
-  position: relative;
-  min-width: 8px;
-  transition: width 320ms cubic-bezier(.23, 1, .32, 1);
-}
-
-.ui-progress > span::after {
-  content: "";
-  position: absolute;
-  inset: 1px 4px auto;
-  height: 2px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .45);
-}
-
 .field-wrap > b { top: 13px; border-radius: 9px; }
 .login-form input {
   height: 56px;
@@ -142,10 +118,7 @@ button,
 .page-header { min-height: 88px; padding-block: 11px 16px; }
 .page-header h1 { margin-top: 3px; font-size: 26px; line-height: 1.15; }
 .page-header p { font-size: 11px; line-height: 1.45; }
-.page-eyebrow, .eyebrow, .section-title span, .tiny-label { font-size: 9px; letter-spacing: .11em; }
-.section-title { margin-top: 25px; }
-.section-title h2 { font-size: 19px; line-height: 1.2; }
-.section-title button { min-height: 40px; font-size: 11px; }
+.page-eyebrow, .eyebrow { font-size: 9px; letter-spacing: .11em; }
 .back-button,
 .settings-button {
   border: 2px solid #dfdbff;
@@ -242,27 +215,19 @@ button,
 .status-locked .adventure-node { box-shadow: 0 6px 0 #b9bec4, 0 10px 18px rgba(66, 72, 78, .12); }
 
 /* Secondary screens use the same tactile grammar. */
-.ui-task-row,
-.homework-card,
 .chat-bubble,
 .quick-prompts button,
 .month-controller,
-.calendar-day,
-.badge-grid > div {
+.calendar-day {
   border-width: 2px;
   border-color: var(--line);
   box-shadow: 0 3px 0 var(--line);
 }
-.ui-task-row:active { box-shadow: 0 1px 0 var(--line); transform: translateY(2px) scale(.992); }
 .chat-bubble strong { font-size: 12px; }
 .chat-bubble small { font-size: 10px; }
 .quick-prompts button { min-height: 38px; font-size: 10px; }
-.segmented-tabs { border: 2px solid var(--line); }
-.segmented-tabs button { min-height: 39px; font-size: 10px; }
-.segmented-tabs button.active { box-shadow: 0 3px 0 var(--line-deep); }
 .homework-card h3 { font-size: 14px; }
 .homework-card p { font-size: 10px; }
-.skill-card .ui-progress { height: 13px; }
 
 /* Stable high-frequency navigation: strong state, no sliding animation. */
 .bottom-nav {
@@ -312,13 +277,20 @@ button,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .status-current .adventure-node {
+  .status-current::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 1px;
+    border: 5px solid rgba(255, 211, 78, .34);
+    border-radius: 50%;
+    pointer-events: none;
     animation: playful-current-node 1.6s ease-in-out infinite alternate;
   }
   @keyframes playful-current-node {
     to {
-      transform: translateY(-3px) scale(1.035);
-      box-shadow: 0 0 0 9px rgba(255, 211, 78, .22), 0 9px 0 #d39e19, 0 17px 28px rgba(132, 89, 20, .24);
+      opacity: .2;
+      transform: scale(1.24);
     }
   }
 }
@@ -611,12 +583,10 @@ button.adventure-stat:active { box-shadow: 0 1px 0 var(--line); transform: trans
 .mascot-skin-placeholder.skin-midnight { background: linear-gradient(145deg,#dcdfff,#8588d9); }
 .mascot-skin-list > button > strong { font-size: 11px; }
 .mascot-skin-list > button > b { position: absolute; right: 7px; top: 7px; width: 22px; height: 22px; display: grid; place-items: center; border: 2px solid white; border-radius: 50%; color: white; background: var(--violet); font-size: 9px; }
-.bear-mascot svg,.adventure-logo-image,.mini-lumi-image { transition: filter 240ms ease-out; }
-html[data-lumi-skin="mint"] .bear-mascot svg,html[data-lumi-skin="mint"] .adventure-logo-image,html[data-lumi-skin="mint"] .mini-lumi-image { filter: hue-rotate(72deg) saturate(.82) brightness(1.05) drop-shadow(0 10px 14px rgba(45,112,91,.17)); }
-html[data-lumi-skin="berry"] .bear-mascot svg,html[data-lumi-skin="berry"] .adventure-logo-image,html[data-lumi-skin="berry"] .mini-lumi-image { filter: hue-rotate(304deg) saturate(.92) brightness(1.04) drop-shadow(0 10px 14px rgba(132,54,92,.17)); }
-html[data-lumi-skin="midnight"] .bear-mascot svg,html[data-lumi-skin="midnight"] .adventure-logo-image,html[data-lumi-skin="midnight"] .mini-lumi-image { filter: hue-rotate(168deg) saturate(.88) brightness(.94) drop-shadow(0 10px 14px rgba(41,48,108,.2)); }
-.mini-ai.mini-lumi { overflow: hidden; border: 2px solid #ddd8ff; background: var(--violet-soft); }
-.mini-lumi-image { width: 33px; height: 43px; display: block; object-fit: contain; transform: translateY(5px); }
+.bear-mascot svg,.adventure-logo-image { transition: filter 240ms ease-out; }
+html[data-lumi-skin="mint"] .bear-mascot svg,html[data-lumi-skin="mint"] .adventure-logo-image { filter: hue-rotate(72deg) saturate(.82) brightness(1.05) drop-shadow(0 10px 14px rgba(45,112,91,.17)); }
+html[data-lumi-skin="berry"] .bear-mascot svg,html[data-lumi-skin="berry"] .adventure-logo-image { filter: hue-rotate(304deg) saturate(.92) brightness(1.04) drop-shadow(0 10px 14px rgba(132,54,92,.17)); }
+html[data-lumi-skin="midnight"] .bear-mascot svg,html[data-lumi-skin="midnight"] .adventure-logo-image { filter: hue-rotate(168deg) saturate(.88) brightness(.94) drop-shadow(0 10px 14px rgba(41,48,108,.2)); }
 
 /* --------------------------------------------------------------------------
  * Homework + mistake review desk
@@ -738,6 +708,15 @@ html[data-lumi-skin="midnight"] .bear-mascot svg,html[data-lumi-skin="midnight"]
 .settings-toggle-row,.settings-link-row { min-height: 57px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; border: 0; border-top: 1px solid #eeeeF3; padding: 8px 2px; color: var(--ink); background: transparent; text-align: left; }.settings-toggle-row > span,.settings-link-row > span { display: grid; gap: 3px; }.settings-toggle-row strong,.settings-link-row strong { font-size: 10px; }.settings-toggle-row small,.settings-link-row small { color: var(--muted); font-size: 7px; }
 .settings-toggle-row > i { position: relative; width: 40px; height: 24px; border-radius: 99px; background: #d9dae1; transition: background 160ms ease-out; }.settings-toggle-row > i b { position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(31,31,49,.22); transition: transform 160ms ease-out; }.settings-toggle-row > i.on { background: var(--violet); }.settings-toggle-row > i.on b { transform: translateX(16px); }
 .settings-link-row > b { color: #a2a4ae; font-size: 18px; }.account-switch-row strong { color: var(--violet); }.settings-logout { min-height: 44px; border: 2px solid #f1d5d9; border-radius: 14px; color: #c45161; background: #fff1f3; font-size: 9px; font-weight: 1000; }
+.settings-reset-demo { min-height: 42px; border: 2px solid #dedaf7; border-radius: 14px; color: var(--violet); background: var(--violet-soft); font-size: 9px; font-weight: 1000; }
+.mistake-review-card.reviewed { border-color: #bfe9df; background: #f0fbf8; box-shadow: 0 5px 0 #cbe9e3; }
+.mistake-review-card.reviewed::after { content: "已复习 ✓"; justify-self: end; border-radius: 99px; padding: 4px 8px; color: #167f70; background: #d9f6ef; font-size: 8px; font-weight: 1000; }
+.demo-toast { position: fixed; z-index: 200; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom)); width: max-content; max-width: calc(100% - 36px); border: 2px solid rgba(255,255,255,.7); border-radius: 14px; padding: 10px 14px; color: white; background: rgba(48,43,133,.94); box-shadow: 0 12px 30px rgba(31,27,86,.24); font-size: 11px; font-weight: 900; text-align: center; transform: translateX(-50%); }
+
+/* Keep controls stationary for reliable taps; only decorative layers animate. */
+.status-current .adventure-node { animation: none !important; }
+.adventure-stop.status-current { isolation: isolate; }
+html[data-effects="off"] *, html[data-effects="off"] *::before, html[data-effects="off"] *::after { animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
 
 @media (max-width: 370px) {
   .mascot-skin-panel { width: 284px; }

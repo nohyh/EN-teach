@@ -71,31 +71,40 @@
 .activity-body { flex: 1; min-height: 0; display: flex; padding: 20px 24px 0; background: white; }
 .activity-body:has(.recall-learning-card) { padding-inline: 16px; }
 .activity-body > div,.activity-body > form { width: 100%; min-height: 0; flex: 1; display: flex; flex-direction: column; }
-.activity-content { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; padding: 2px 0 14px; }
+.activity-content { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; padding: 2px 0 14px; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+.activity-content::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .recall-learning-card .activity-content { flex: 1; justify-content: center; overflow: visible; padding: 4px 0 0; }
 .dialog-learning-card .activity-content { justify-content: flex-start; padding-top: 24px; }
 .word-learning-card,.sentence-learning-card,.pronunciation-learning-card { text-align: center; }
 .activity-kicker { color: var(--violet); font-size: 13px; font-weight: 1000; letter-spacing: .08em; }
-.activity-main-word { display: block; margin-top: 9px; color: #3d3c45; font-size: 54px; line-height: 1.05; }
-.activity-main-sentence { display: block; margin-top: 10px; color: #3d3c45; font-size: 34px; line-height: 1.25; }
+.speakable-text { width: fit-content; max-width: 100%; display: grid; justify-items: center; align-self: center; border: 0; padding: 0; color: #3d3c45; background: transparent; font: inherit; cursor: pointer; }
+.speakable-text > strong { font: inherit; overflow-wrap: anywhere; }
+.speakable-text > span { width: 32px; height: 32px; display: grid; place-items: center; margin-top: 8px; border-radius: 50%; color: #167aa6; background: #e4f6ff; font-size: 14px; line-height: 1; }
+.speakable-text:hover > span,.speakable-text:focus-visible > span { color: white; background: #1cb0f6; }
+.speakable-text:focus-visible { border-radius: 12px; outline: 3px solid rgba(28,176,246,.3); outline-offset: 5px; }
+.speakable-text.playing > span { color: #bd4d61; background: #ffe8ec; }
+.activity-main-word { margin-top: 9px; font-size: 54px; line-height: 1.05; }
+.activity-main-sentence { margin-top: 10px; font-size: 34px; line-height: 1.25; }
 .activity-meaning { display: block; margin: 10px 0 20px; color: #777680; font-size: 18px; font-weight: 850; }
 
-.lesson-audio-button { align-self: center; min-height: 52px; display: inline-flex; align-items: center; gap: 10px; border: 2px solid #bbe5f8; border-radius: 17px; padding: 0 18px; color: #167aa6; background: #e4f6ff; font-size: 13px; font-weight: 1000; box-shadow: inset 0 -3px 0 #c7eaf9; }
-.lesson-audio-button > span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: white; background: #1cb0f6; font-size: 11px; }
+.lesson-audio-button { width: 52px; height: 52px; align-self: center; display: grid; place-items: center; border: 2px solid #bbe5f8; border-radius: 50%; padding: 0; color: #167aa6; background: #e4f6ff; box-shadow: inset 0 -3px 0 #c7eaf9; }
+.lesson-audio-button > span { font-size: 18px; line-height: 1; }
 .lesson-audio-button.playing { border-color: #ffc0ca; color: #bd4d61; background: #ffe8ec; box-shadow: inset 0 -3px 0 #ffd1d8; }
-.lesson-audio-button.playing > span { background: var(--coral); }
+.lesson-audio-button.playing > span { color: var(--coral); }
 .example-card { display: grid; gap: 7px; margin-top: 24px; border: 2px solid #e5e5eb; border-radius: 19px; padding: 17px 18px; background: #fafafa; text-align: left; box-shadow: inset 0 -3px 0 #f0f0f3; }
 .example-card span { color: var(--violet); font-size: 12px; font-weight: 1000; }
-.example-card strong { font-size: 18px; }
+.example-card .example-sentence { width: 100%; display: grid; grid-template-columns: minmax(0,1fr) 32px; align-items: center; justify-items: stretch; align-self: stretch; gap: 12px; font-size: 18px; text-align: left; }
+.example-card .example-sentence > strong { justify-self: start; }
+.example-card .example-sentence > span { justify-self: end; margin-top: 0; color: #167aa6; background: #e4f6ff; font-size: 14px; }
 .example-card small { color: var(--muted); font-size: 13px; }
 .sentence-pattern { display: grid; grid-template-columns: 1fr 25px 1fr; align-items: center; gap: 8px; margin-top: 22px; }
 .sentence-pattern span { border: 2px solid #dedaff; border-radius: 16px; padding: 14px 9px; color: var(--violet); background: #f4f2ff; font-size: 13px; font-weight: 900; }
 .sentence-pattern i { color: #aaa9b4; font-style: normal; }
 
-.recall-question-stage { flex: 0 0 140px; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 12px; text-align: center; }
+.recall-question-stage { flex: 0 0 auto; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 12px 12px; text-align: center; }
 .recall-question-stage .lesson-audio-button { margin: 0; }
 .recall-prompt { display: block; max-width: 100%; margin: 0; color: #3d3c45; font-size: clamp(40px,11vw,58px); font-weight: 1000; line-height: 1.12; overflow-wrap: anywhere; }
-.recall-form { flex: 0 0 auto; width: min(100%,320px); min-width: min(100%,320px); align-self: center; display: grid; margin: 10px auto 0; padding: 0; background: transparent; text-align: left; }
+.recall-form { flex: 0 0 auto; width: min(100%,320px); min-width: min(100%,320px); align-self: center; display: grid; margin: 12px auto 0; padding: 0; background: transparent; text-align: left; }
 .recall-input-shell { position: relative; flex: 0 0 64px; min-height: 64px; }
 .recall-form input,.dialog-input input { min-width: 0; height: 58px; border: 2px solid #dcdce4; border-radius: 17px; outline: 0; padding: 0 17px; color: var(--ink); background: white; font-size: 16px; font-weight: 850; box-shadow: inset 0 -3px 0 #f1f1f4; }
 .recall-form input { width: 100%; min-width: 100%; height: 64px; min-height: 64px; border: 2px solid #e2e2e9; border-radius: 18px; padding: 0 56px 0 17px; background: #fafafa; font-size: 18px; box-shadow: inset 0 -3px 0 #eeeeF2; transition: border-color .18s ease,box-shadow .18s ease,background .18s ease; }
@@ -147,7 +156,8 @@
 .dialog-scene span { font-size: 12px; font-weight: 1000; }
 .dialog-scene strong { font-size: 17px; }
 .dialog-scene small { font-size: 12px; }
-.lesson-chat { min-height: 104px; max-height: 142px; display: grid; align-content: start; gap: 8px; overflow-y: auto; margin: 10px 0; padding: 2px; }
+.lesson-chat { min-height: 104px; max-height: 142px; display: grid; align-content: start; gap: 8px; overflow-y: auto; margin: 10px 0; padding: 2px; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+.lesson-chat::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .lesson-chat-bubble { width: fit-content; max-width: 86%; border-radius: 17px 17px 17px 6px; padding: 12px 15px; background: #f0f0f3; font-size: 13px; font-weight: 800; line-height: 1.5; }
 .lesson-chat-bubble.student { justify-self: end; border-radius: 15px 15px 5px 15px; color: white; background: var(--violet); }
 .dialog-replies { display: grid; gap: 8px; margin-bottom: 10px; }

@@ -23,7 +23,8 @@
     },
     "owner": "nohyhs-team",
     "android": {
-      "package": "com.nohyhsteam.nohyh"
+      "package": "com.nohyhsteam.nohyh",
+      "softwareKeyboardLayoutMode": "resize"
     }
   }
 }
