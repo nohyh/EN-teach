@@ -32,6 +32,7 @@ venv/
 
 # Runtime data
 server/data/
+server/audio/
 *.db
 *.sqlite3
 *.log
