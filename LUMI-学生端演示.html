@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LUMI 英语教培学生端单文件交互演示" />
+  <title>LUMI 学生端交互演示</title>
+  <style>
+    /* ===== 主题变量：需要换品牌色时优先修改这里 ===== */
+    :root {
+      --violet: #6d62e8;
+      --violet-dark: #4c43b6;
+      --mint: #35bca7;
+      --mint-soft: #dff8f1;
+      --yellow: #ffc957;
+      --yellow-soft: #fff3be;
+      --pink: #ff9fba;
+      --ink: #2f3650;
+      --muted: #7e8498;
+      --line: #eceaf7;
+      --paper: #fffefa;
+      --shadow: 0 20px 50px rgba(57, 47, 119, .16);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255, 216, 112, .38), transparent 23%),
+        radial-gradient(circle at 88% 85%, rgba(76, 203, 181, .28), transparent 27%),
+        linear-gradient(135deg, #f4f0ff, #edfaff);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .demo-layout {
+      width: min(1180px, calc(100% - 36px));
+      min-height: 100vh;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 210px 390px minmax(270px, 1fr);
+      align-items: center;
+      justify-content: center;
+      gap: 34px;
+      padding: 28px 0;
+    }
+
+    /* ===== 演示目录 ===== */
+    .demo-sidebar, .demo-notes {
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: 28px;
+      background: rgba(255,255,255,.65);
+      box-shadow: 0 14px 40px rgba(74, 62, 139, .10);
+      backdrop-filter: blur(18px);
+    }
+
+    .demo-sidebar { padding: 22px 16px; }
+    .demo-brand { display: flex; align-items: center; gap: 10px; margin: 0 6px 20px; }
+    .demo-brand-mark {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 14px; background: linear-gradient(145deg, var(--violet), #9187ff);
+      color: white; font-size: 22px; box-shadow: 0 8px 16px rgba(81,69,188,.24);
+    }
+    .demo-brand strong { display: block; letter-spacing: .12em; }
+    .demo-brand small { color: var(--muted); font-size: 10px; }
+    .demo-nav { display: grid; gap: 7px; }
+    .demo-nav button {
+      width: 100%; min-height: 42px; display: flex; align-items: center; gap: 10px;
+      border: 0; border-radius: 13px; padding: 0 12px; color: #636a80;
+      background: transparent; text-align: left; font-size: 12px; font-weight: 800;
+    }
+    .demo-nav button:hover, .demo-nav button.active { color: var(--violet-dark); background: #eeebff; }
+    .demo-nav i { width: 24px; font-size: 17px; font-style: normal; text-align: center; }
+    .demo-tip { margin: 18px 6px 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+
+    /* ===== 手机外框 ===== */
+    .phone {
+      position: relative;
+      width: 390px;
+      height: min(844px, calc(100vh - 42px));
+      overflow: hidden;
+      border: 9px solid #303241;
+      border-radius: 44px;
+      background: var(--paper);
+      box-shadow: 0 34px 80px rgba(48, 42, 91, .27);
+    }
+    .phone::before {
+      content: ""; position: absolute; z-index: 20; left: 50%; top: 7px;
+      width: 112px; height: 25px; border-radius: 999px; background: #303241;
+      transform: translateX(-50%); pointer-events: none;
+    }
+    .screen {
+      position: absolute; inset: 0; display: none; overflow-y: auto;
+      padding: 42px 18px 92px; background: var(--paper); scrollbar-width: none;
+    }
+    .screen::-webkit-scrollbar { display: none; }
+    .screen.active { display: block; animation: screen-in .25s ease both; }
+    @keyframes screen-in { from { opacity: .25; transform: translateY(8px); } }
+
+    .eyebrow { color: var(--violet); font-size: 9px; font-weight: 1000; letter-spacing: .13em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font-size: 25px; }
+    .subcopy { color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .card { border: 1px solid #f0eef8; border-radius: 22px; background: white; box-shadow: 0 10px 25px rgba(59,52,107,.08); }
+    .primary {
+      min-height: 48px; border: 0; border-radius: 16px; padding: 0 18px;
+      color: white; background: linear-gradient(135deg, var(--violet), #887df4);
+      font-weight: 900; box-shadow: 0 9px 18px rgba(92,79,211,.25);
+    }
+    .primary:active { transform: scale(.98); }
+
+    /* ===== 登录与身份 ===== */
+    .auth-screen { background: linear-gradient(180deg, #f1eeff 0%, #fffefa 60%); }
+    .auth-hero { margin: 28px 0 24px; text-align: center; }
+    .auth-logo { margin: 6px 0 1px; color: var(--violet-dark); font-size: 38px; font-weight: 1000; letter-spacing: .16em; }
+    .deer {
+      position: relative; width: 118px; height: 118px; display: grid; place-items: center;
+      margin: 20px auto 8px; border-radius: 42% 58% 48% 52%;
+      background: linear-gradient(145deg, #fff2bd, #ffd17a); font-size: 65px;
+      box-shadow: 0 14px 30px rgba(148,102,30,.16); animation: deer-float 2s ease-in-out infinite alternate;
+    }
+    .deer::after { content: "✦"; position: absolute; right: 4px; top: -5px; color: var(--pink); font-size: 25px; }
+    @keyframes deer-float { to { transform: translateY(-5px) rotate(1deg); } }
+    .login-form { display: grid; gap: 13px; }
+    .login-form label { color: #5a6073; font-size: 11px; font-weight: 900; }
+    .login-form input {
+      width: 100%; height: 48px; margin-top: 7px; border: 2px solid #edeaf8;
+      border-radius: 15px; padding: 0 14px; outline: none; color: var(--ink); background: white;
+    }
+    .login-form input:focus { border-color: #afa8f8; box-shadow: 0 0 0 4px #efedff; }
+    .login-form .primary { width: 100%; margin-top: 5px; }
+    .helper { margin: 0; border-radius: 14px; padding: 10px 12px; color: #7a6590; background: #f8edff; font-size: 10px; text-align: center; }
+    .role-card { margin-top: 25px; padding: 20px; text-align: center; }
+    .role-avatar { width: 82px; height: 82px; display: grid; place-items: center; margin: auto; border-radius: 28px; background: var(--mint-soft); font-size: 48px; }
+    .role-card h2 { margin: 13px 0 5px; }
+    .role-card .primary { width: 100%; margin-top: 15px; }
+
+    /* ===== 应用通用区域 ===== */
+    .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .page-head h1 { margin-top: 3px; }
+    .status-pill { border-radius: 999px; padding: 8px 10px; color: #8c6314; background: var(--yellow-soft); font-size: 10px; font-weight: 1000; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin: 22px 2px 10px; }
+    .section-head h2 { margin: 0; font-size: 16px; }
+    .section-head button { border: 0; padding: 5px; color: var(--violet); background: transparent; font-size: 10px; font-weight: 900; }
+    .bottom-nav {
+      position: absolute; z-index: 12; left: 12px; right: 12px; bottom: 10px;
+      height: 66px; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center;
+      border: 1px solid rgba(238,235,249,.9); border-radius: 23px; background: rgba(255,255,255,.94);
+      box-shadow: 0 10px 30px rgba(58,52,103,.15); backdrop-filter: blur(12px);
+    }
+    .bottom-nav button { display: grid; justify-items: center; gap: 3px; border: 0; color: #9ca0af; background: transparent; font-size: 9px; font-weight: 900; }
+    .bottom-nav button span { font-size: 19px; line-height: 1; }
+    .bottom-nav button.active { color: var(--violet); }
+
+    /* ===== 首页 ===== */
+    .home-welcome { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+    .checkin {
+      width: 46px; height: 46px; display: grid; place-items: center; border: 0; border-radius: 16px;
+      color: #b56318; background: #fff0d3; font-size: 22px; box-shadow: 0 8px 18px rgba(166,105,26,.12);
+    }
+    .today-card { padding: 15px; background: linear-gradient(135deg, #6e64e9, #9086f4); color: white; }
+    .today-top { display: flex; justify-content: space-between; align-items: center; }
+    .today-top small { opacity: .76; font-size: 9px; font-weight: 900; }
+    .today-top strong { font-size: 12px; }
+    .today-card h2 { margin: 13px 0 5px; font-size: 18px; }
+    .today-card p { margin-bottom: 13px; opacity: .78; font-size: 10px; }
+    .today-progress { height: 8px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.24); }
+    .today-progress i { display: block; width: 42%; height: 100%; border-radius: inherit; background: #ffe07c; }
+    .today-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+    .task-chip { border-radius: 14px; padding: 10px; background: rgba(255,255,255,.14); font-size: 9px; }
+    .task-chip strong { display: block; margin-top: 3px; font-size: 10px; }
+    .course-scroller { display: flex; gap: 12px; overflow-x: auto; margin: 0 -18px; padding: 2px 18px 12px; scrollbar-width: none; }
+    .course-card { flex: 0 0 245px; display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 12px; }
+    .book-cover { position: relative; min-height: 98px; display: grid; place-items: center; overflow: hidden; border-radius: 15px; color: white; background: linear-gradient(145deg,#4fc8b1,#7164e8); font-size: 31px; }
+    .book-cover.orange { background: linear-gradient(145deg,#ffbd61,#ff829c); }
+    .book-cover.blue { background: linear-gradient(145deg,#76c9ff,#7068e7); }
+    .book-cover small { position: absolute; left: 8px; top: 7px; font-size: 6px; letter-spacing: .12em; }
+    .course-copy h3 { margin: 3px 0 4px; font-size: 13px; }
+    .course-copy p { min-height: 27px; margin-bottom: 8px; color: var(--muted); font-size: 8px; line-height: 1.5; }
+    .mini-progress { height: 6px; overflow: hidden; border-radius: 99px; background: #edebf7; }
+    .mini-progress i { display: block; height: 100%; border-radius: inherit; background: var(--violet); }
+    .course-copy button { margin-top: 9px; border: 0; border-radius: 9px; padding: 7px 9px; color: var(--violet-dark); background: #eeecff; font-size: 8px; font-weight: 900; }
+
+    /* ===== 学习地图 ===== */
+    .current-book { display: grid; grid-template-columns: 70px 1fr; gap: 12px; padding: 12px; }
+    .current-book .book-cover { min-height: 93px; }
+    .current-book h2 { margin: 6px 0 5px; font-size: 15px; }
+    .current-book p { color: var(--muted); font-size: 9px; }
+    .map {
+      position: relative; height: 1030px; overflow: hidden; border: 4px solid white; border-radius: 28px;
+      background:
+        radial-gradient(ellipse at 24% 14%, #ffe4b8 0 8%, transparent 8.5%),
+        radial-gradient(ellipse at 68% 29%, #f7dfb2 0 8%, transparent 8.5%),
+        radial-gradient(ellipse at 34% 41%, #ead2a8 0 8%, transparent 8.5%),
+        radial-gradient(ellipse at 70% 54%, #eed7aa 0 8%, transparent 8.5%),
+        radial-gradient(ellipse at 30% 66%, #f0d8a8 0 8%, transparent 8.5%),
+        radial-gradient(ellipse at 72% 78%, #eed7ad 0 8%, transparent 8.5%),
+        radial-gradient(ellipse at 54% 92%, #f1d6aa 0 9%, transparent 9.5%),
+        linear-gradient(165deg, #caefd5 0 28%, #a8dfc2 28% 44%, #d9efb7 44% 64%, #b5e0cd 64% 100%);
+      box-shadow: 0 15px 32px rgba(50,89,73,.14);
+    }
+    .map::before {
+      content: "🏡　🌳　　　　　🏫\A　　　　🌸　　🍎　　　🌲\A　🛝　　　　　　☕\A　　　　　🐼　　　　　　\A　🌳　　　　　🎪　✨";
+      position: absolute; inset: 45px 15px; color: rgba(50,90,65,.76); font-size: 30px; line-height: 7.3;
+      white-space: pre-wrap; pointer-events: none;
+    }
+    .unit {
+      position: absolute; width: 64px; height: 64px; display: grid; place-items: center;
+      border: 5px solid white; border-radius: 50%; color: white; font-size: 20px; font-weight: 1000;
+      transform: translate(-50%,-50%); box-shadow: 0 10px 20px rgba(52,64,73,.22), inset 0 -5px rgba(45,54,76,.08);
+    }
+    .unit.done { background: linear-gradient(145deg,#60dac8,#25ad99); }
+    .unit.current { color: #7c580c; background: linear-gradient(145deg,#fff0a9,#ffc853); animation: pulse 1.4s ease-in-out infinite alternate; }
+    .unit.locked { color: #8a909a; background: rgba(226,229,232,.95); cursor: not-allowed; }
+    @keyframes pulse { to { transform: translate(-50%,-54%) scale(1.06); box-shadow: 0 0 0 10px rgba(255,219,97,.22), 0 15px 28px rgba(123,86,20,.27); } }
+    .u1 { left:35%; top:15.5%; }.u2 { left:65%; top:29.2%; }.u3 { left:36%; top:37.5%; }
+    .u4 { left:67.5%; top:49.1%; }.u5 { left:34%; top:61%; }.u6 { left:69.5%; top:72.8%; }.u7 { left:58%; top:92.3%; }
+
+    /* ===== AI、作业、成长 ===== */
+    .chat-area { display: grid; gap: 12px; padding-bottom: 74px; }
+    .ai-hero { padding: 16px; background: linear-gradient(135deg,#eeeaff,#fff3cd); }
+    .ai-hero-top { display: flex; align-items: center; gap: 12px; }
+    .ai-avatar { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 20px; background: white; font-size: 38px; }
+    .ai-hero h2 { margin: 0 0 4px; font-size: 16px; }
+    .quick-asks { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+    .quick-asks button { border: 1px solid #ddd8ff; border-radius: 999px; padding: 7px 9px; color: #665db7; background: white; font-size: 8px; font-weight: 800; }
+    .bubble { max-width: 84%; border-radius: 17px 17px 17px 5px; padding: 11px 13px; background: white; box-shadow: 0 7px 17px rgba(58,53,103,.08); font-size: 10px; line-height: 1.65; }
+    .bubble.me { justify-self: end; border-radius: 17px 17px 5px 17px; color: white; background: var(--violet); }
+    .composer { position: absolute; z-index: 11; left: 18px; right: 18px; bottom: 87px; display: grid; grid-template-columns: 1fr 43px; gap: 8px; }
+    .composer input { min-width: 0; height: 44px; border: 2px solid #e9e6f6; border-radius: 15px; padding: 0 12px; outline: none; background: white; }
+    .composer button { border: 0; border-radius: 15px; color: white; background: var(--violet); font-size: 18px; }
+    .homework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .homework-card { min-height: 132px; border: 0; padding: 15px; text-align: left; }
+    .homework-card span { font-size: 30px; }
+    .homework-card h3 { margin: 12px 0 4px; font-size: 13px; }
+    .homework-card p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.5; }
+    .homework-card:nth-child(1) { background: #ecf9f5; }.homework-card:nth-child(2) { background: #fff4cf; }
+    .homework-card:nth-child(3) { background: #ffeef3; }.homework-card:nth-child(4) { background: #eeecff; }
+    .score-card { padding: 18px; color: white; background: linear-gradient(135deg,#7166e7,#5abfac); }
+    .score-number { margin: 8px 0 2px; font-size: 40px; font-weight: 1000; }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin-top: 12px; }
+    .stat { padding: 12px 5px; text-align: center; }
+    .stat strong { display: block; color: var(--violet-dark); font-size: 18px; }
+    .stat small { color: var(--muted); font-size: 8px; }
+    .badges { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
+    .badge { padding: 12px 6px; text-align: center; }
+    .badge span { font-size: 29px; }.badge strong { display: block; margin-top: 6px; font-size: 9px; }
+    .weak-card { padding: 14px; }
+    .weak-row { display: grid; grid-template-columns: 1fr 72px; align-items: center; gap: 9px; margin-top: 10px; font-size: 9px; }
+    .weak-bar { height: 7px; border-radius: 99px; background: #eeeef3; }
+    .weak-bar i { display: block; height: 100%; border-radius: inherit; background: var(--pink); }
+
+    /* ===== 弹层与说明 ===== */
+    .modal {
+      position: absolute; z-index: 30; inset: 0; display: none; place-items: center;
+      padding: 24px; background: rgba(39,40,60,.42); backdrop-filter: blur(5px);
+    }
+    .modal.open { display: grid; }
+    .modal-card { width: 100%; max-height: 80%; overflow-y: auto; padding: 20px; text-align: center; }
+    .modal-card h2 { margin: 9px 0 5px; }
+    .modal-close { position: absolute; right: 22px; top: 42px; width: 34px; height: 34px; border: 0; border-radius: 12px; background: white; }
+    .calendar { display: grid; grid-template-columns: repeat(7,1fr); gap: 7px; margin: 17px 0; }
+    .calendar span { aspect-ratio: 1; display: grid; place-items: center; border-radius: 10px; color: #777d8d; background: #f5f4f8; font-size: 8px; }
+    .calendar .signed { color: white; background: var(--mint); }
+    .lesson-steps { display: grid; gap: 8px; margin: 16px 0; text-align: left; }
+    .lesson-steps div { border-radius: 12px; padding: 10px 12px; background: #f5f3ff; font-size: 9px; font-weight: 800; }
+    .toast {
+      position: absolute; z-index: 40; left: 50%; bottom: 90px; min-width: 220px;
+      border-radius: 14px; padding: 11px 15px; color: white; background: #34384b;
+      font-size: 10px; text-align: center; opacity: 0; pointer-events: none;
+      transform: translate(-50%,10px); transition: .22s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%,0); }
+    .demo-notes { padding: 28px; }
+    .demo-notes > span { display: inline-block; border-radius: 999px; padding: 7px 10px; color: var(--violet-dark); background: #ebe8ff; font-size: 9px; font-weight: 1000; }
+    .demo-notes h2 { margin: 15px 0 7px; font-size: 24px; }
+    .demo-notes p { color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .feature-list { display: grid; gap: 10px; margin-top: 22px; padding: 0; list-style: none; }
+    .feature-list li { display: grid; grid-template-columns: 28px 1fr; align-items: start; gap: 9px; color: #5d6478; font-size: 11px; line-height: 1.55; }
+    .feature-list i { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 9px; color: var(--mint); background: var(--mint-soft); font-style: normal; font-weight: 1000; }
+    .single-file { margin-top: 24px; border-top: 1px dashed #ddd9ee; padding-top: 17px; color: #8a8fa0; font-size: 10px; line-height: 1.7; }
+
+    @media (max-width: 980px) {
+      .demo-layout { grid-template-columns: 180px 390px; }
+      .demo-notes { display: none; }
+    }
+    @media (max-width: 650px) {
+      body { background: #303241; }
+      .demo-layout { width: 100%; display: block; padding: 0; }
+      .demo-sidebar { display: none; }
+      .phone { width: 100%; height: 100vh; border: 0; border-radius: 0; box-shadow: none; }
+      .phone::before { display: none; }
+      .screen { padding-top: 24px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main class="demo-layout">
+    <aside class="demo-sidebar" aria-label="演示页面目录">
+      <div class="demo-brand"><div class="demo-brand-mark">🦌</div><div><strong>LUMI</strong><small>学生端演示</small></div></div>
+      <nav class="demo-nav">
+        <button data-screen="login" class="active"><i>🔑</i>登录</button>
+        <button data-screen="role"><i>🧒</i>身份选择</button>
+        <button data-screen="home"><i>🏠</i>首页</button>
+        <button data-screen="learn"><i>📖</i>学习地图</button>
+        <button data-screen="ai"><i>🦌</i>AI伙伴</button>
+        <button data-screen="homework"><i>✏️</i>作业</button>
+        <button data-screen="growth"><i>🌱</i>我的成长</button>
+      </nav>
+      <p class="demo-tip">点击目录或手机底部导航切换页面。本文件仅展示前端交互，不连接真实账号和AI服务。</p>
+    </aside>
+
+    <section class="phone" aria-label="LUMI学生端手机演示">
+      <!-- 登录页 -->
+      <section class="screen auth-screen active" data-view="login">
+        <div class="auth-hero"><span class="eyebrow">HELLO, LITTLE STAR!</span><div class="auth-logo">LUMI</div><p class="subcopy">和小鹿一起，开心学英语</p><div class="deer">🦌</div></div>
+        <form class="login-form" id="loginForm">
+          <p class="helper">请家长或老师帮助小朋友登录哦</p>
+          <label>学习账号<input value="lumi_student" aria-label="学习账号" /></label>
+          <label>登录密码<input type="password" value="123456" aria-label="登录密码" /></label>
+          <button class="primary" type="submit">出发学习 →</button>
+        </form>
+      </section>
+
+      <!-- 身份选择 -->
+      <section class="screen auth-screen" data-view="role">
+        <div class="page-head"><div><span class="eyebrow">WHO ARE YOU?</span><h1>选择身份</h1><p class="subcopy">今天是谁来学习呢？</p></div></div>
+        <article class="card role-card"><div class="role-avatar">🧒</div><h2>我是学生</h2><p class="subcopy">进入课程、完成作业，与LUMI一起练习英语。</p><button class="primary" data-screen="home">进入学生端 →</button></article>
+        <div class="deer" style="width:92px;height:92px;font-size:49px;margin-top:38px">🦌</div>
+      </section>
+
+      <!-- 首页 -->
+      <section class="screen" data-view="home">
+        <header class="page-head home-welcome"><div><span class="eyebrow">GOOD AFTERNOON</span><h1>嗨，小宇！</h1><p class="subcopy">今天也和LUMI开心学英语吧</p></div><button class="checkin" id="checkinButton" aria-label="打开签到日历">🔥</button></header>
+        <article class="card today-card"><div class="today-top"><small>TODAY'S JOURNEY</small><strong>2 / 4</strong></div><h2>今日任务</h2><p>完成正常课程，再巩固一个薄弱知识点</p><div class="today-progress"><i></i></div><div class="today-actions"><div class="task-chip">📖 课程学习<strong>水果商店</strong></div><div class="task-chip">✨ 个性巩固<strong>颜色与数量</strong></div></div></article>
+        <div class="section-head"><h2>甲方课程资源</h2><button data-screen="learn">全部教材 →</button></div>
+        <div class="course-scroller">
+          <article class="card course-card"><div class="book-cover"><small>LUMI COURSE</small>🏘️</div><div class="course-copy"><span class="eyebrow">小学一年级</span><h3>奇妙小镇冒险</h3><p>Unit 4 · 水果商店<br />学习进度 42%</p><div class="mini-progress"><i style="width:42%"></i></div><button data-screen="learn">继续学习</button></div></article>
+          <article class="card course-card"><div class="book-cover orange"><small>LUMI COURSE</small>🌈</div><div class="course-copy"><span class="eyebrow">小学一年级</span><h3>彩虹生活岛</h3><p>Unit 2 · 我的家<br />学习进度 18%</p><div class="mini-progress"><i style="width:18%"></i></div><button>查看教材</button></div></article>
+          <article class="card course-card"><div class="book-cover blue"><small>LUMI COURSE</small>🌲</div><div class="course-copy"><span class="eyebrow">自然拼读</span><h3>字母森林</h3><p>Unit 3 · ABC树屋<br />学习进度 35%</p><div class="mini-progress"><i style="width:35%"></i></div><button>查看教材</button></div></article>
+        </div>
+        <nav class="bottom-nav"></nav>
+      </section>
+
+      <!-- 学习地图 -->
+      <section class="screen" data-view="learn">
+        <header class="page-head"><div><span class="eyebrow">MY STORY JOURNEY</span><h1>学习冒险</h1><p class="subcopy">沿着小镇探索7个英语单元</p></div><span class="status-pill">⭐ 126</span></header>
+        <article class="card current-book"><div class="book-cover">🏘️</div><div><span class="eyebrow">当前主教材</span><h2>奇妙小镇冒险</h2><p>Unit 4 · 水果商店　42%</p><div class="mini-progress"><i style="width:42%"></i></div></div></article>
+        <div class="section-head"><h2>7 单元冒险地图</h2></div>
+        <div class="map" aria-label="奇妙小镇7单元地图">
+          <button class="unit done u1" data-unit="1" aria-label="Unit 1 已完成">1</button>
+          <button class="unit done u2" data-unit="2" aria-label="Unit 2 已完成">2</button>
+          <button class="unit done u3" data-unit="3" aria-label="Unit 3 已完成">3</button>
+          <button class="unit current u4" data-unit="4" aria-label="Unit 4 正在学习">4</button>
+          <button class="unit locked u5" data-unit="5" disabled aria-label="Unit 5 尚未解锁">5</button>
+          <button class="unit locked u6" data-unit="6" disabled aria-label="Unit 6 尚未解锁">6</button>
+          <button class="unit locked u7" data-unit="7" disabled aria-label="Unit 7 尚未解锁">7</button>
+        </div>
+        <nav class="bottom-nav"></nav>
+      </section>
+
+      <!-- AI伙伴 -->
+      <section class="screen" data-view="ai">
+        <header class="page-head"><div><span class="eyebrow">LUMI AI PARTNER</span><h1>AI伙伴</h1><p class="subcopy">随时问英语，也可以一起练口语</p></div></header>
+        <div class="chat-area" id="chatArea">
+          <article class="card ai-hero"><div class="ai-hero-top"><div class="ai-avatar">🦌</div><div><h2>LUMI在这里</h2><p class="subcopy">我会用简单、温和的话陪你学习。</p></div></div><div class="quick-asks"><button data-ask="apple怎么读？">apple怎么读？</button><button data-ask="陪我练习颜色">练习颜色</button><button data-ask="讲一个英语小故事">英语小故事</button></div></article>
+          <div class="bubble">你好呀！今天在水果商店遇到了什么难题？可以直接问我哦。</div>
+        </div>
+        <form class="composer" id="chatForm"><input id="chatInput" placeholder="问LUMI一个英语问题…" aria-label="输入英语问题" /><button type="submit" aria-label="发送">➤</button></form>
+        <nav class="bottom-nav"></nav>
+      </section>
+
+      <!-- 作业 -->
+      <section class="screen" data-view="homework">
+        <header class="page-head"><div><span class="eyebrow">MY HOMEWORK</span><h1>作业乐园</h1><p class="subcopy">拍一拍、读一读，LUMI帮你检查</p></div><span class="status-pill">待完成 3</span></header>
+        <div class="homework-grid">
+          <button class="card homework-card"><span>✅</span><h3>选择与填空</h3><p>即时判断答案并给出简单讲解</p></button>
+          <button class="card homework-card"><span>📷</span><h3>手写作业</h3><p>上传图片，识别题目和手写答案</p></button>
+          <button class="card homework-card"><span>📝</span><h3>英语作文</h3><p>检查拼写、语法和表达建议</p></button>
+          <button class="card homework-card"><span>🎙️</span><h3>口语录音</h3><p>跟读评分并提示需要改善的发音</p></button>
+        </div>
+        <div class="section-head"><h2>最近反馈</h2></div>
+        <article class="card" style="padding:14px;display:flex;gap:12px;align-items:center"><span style="font-size:30px">🌟</span><div><strong style="font-size:12px">水果单词练习</strong><p class="subcopy" style="margin:4px 0 0">9/10 · 拼写越来越准确啦！</p></div></article>
+        <nav class="bottom-nav"></nav>
+      </section>
+
+      <!-- 成长 -->
+      <section class="screen" data-view="growth">
+        <header class="page-head"><div><span class="eyebrow">MY GROWTH</span><h1>我的成长</h1><p class="subcopy">每一次练习都在点亮新的能力</p></div></header>
+        <article class="card score-card"><span class="eyebrow" style="color:#fff3be">本周成长能量</span><div class="score-number">+126</div><p style="margin:0;font-size:10px;opacity:.8">比上周多收集了 28 颗星星</p></article>
+        <div class="stats"><article class="card stat"><strong>18</strong><small>学习天数</small></article><article class="card stat"><strong>12</strong><small>完成单元</small></article><article class="card stat"><strong>86%</strong><small>平均正确率</small></article></div>
+        <div class="section-head"><h2>我的勋章</h2></div>
+        <div class="badges"><article class="card badge"><span>🏅</span><strong>坚持之星</strong></article><article class="card badge"><span>🍎</span><strong>单词达人</strong></article><article class="card badge"><span>🎙️</span><strong>勇敢开口</strong></article></div>
+        <div class="section-head"><h2>继续加强</h2></div>
+        <article class="card weak-card"><strong style="font-size:11px">LUMI发现这些内容再练一练会更棒</strong><div class="weak-row"><span>颜色与数量</span><div class="weak-bar"><i style="width:56%"></i></div></div><div class="weak-row"><span>th 发音</span><div class="weak-bar"><i style="width:42%"></i></div></div></article>
+        <nav class="bottom-nav"></nav>
+      </section>
+
+      <!-- 签到弹层 -->
+      <div class="modal" id="checkinModal" role="dialog" aria-modal="true" aria-label="签到日历">
+        <button class="modal-close" data-close="checkinModal" aria-label="关闭">×</button>
+        <article class="card modal-card"><span style="font-size:40px">🔥</span><h2>8月签到</h2><p class="subcopy">这个月已经坚持学习 12 天啦！</p><div class="calendar" id="calendar"></div><button class="primary" data-close="checkinModal">继续保持</button></article>
+      </div>
+
+      <!-- 单元流程弹层 -->
+      <div class="modal" id="lessonModal" role="dialog" aria-modal="true" aria-label="单元学习流程">
+        <button class="modal-close" data-close="lessonModal" aria-label="关闭">×</button>
+        <article class="card modal-card"><span style="font-size:42px">🍎</span><h2 id="lessonTitle">Unit 4 · 水果商店</h2><p class="subcopy">本单元预计12分钟，每个练习10道题</p><div class="lesson-steps"><div>① 故事情境导入</div><div>② 单词学习</div><div>③ 句型学习</div><div>④ 听说跟读</div><div>⑤ 游戏练习</div><div>⑥ 个性化题库</div><div>⑦ 单元完成反馈</div></div><button class="primary" id="startLesson">开始本单元 →</button></article>
+      </div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </section>
+
+    <aside class="demo-notes">
+      <span>INTERACTIVE PROTOTYPE</span>
+      <h2 id="noteTitle">登录与身份识别</h2>
+      <p id="noteDescription">保留简单、清晰的登录流程，由家长或老师协助幼儿完成登录。</p>
+      <ul class="feature-list" id="featureList"></ul>
+      <div class="single-file">这是一个自包含演示文件：HTML、样式和交互代码全部在同一文件中，可直接复制到其他电脑双击打开。所有数据均为演示数据，不会上传。</div>
+    </aside>
+  </main>
+
+  <script>
+    // ===== 页面说明数据：可直接修改右侧演示文案 =====
+    const notes = {
+      login: { title: "登录与身份识别", description: "保留简单、清晰的登录流程，由家长或老师协助幼儿完成登录。", features: ["大按钮和清晰输入框", "LUMI小鹿建立品牌记忆", "不展示复杂技术信息"] },
+      role: { title: "学生身份入口", description: "演示版仅保留学生相关页面，减少幼儿在身份选择时的理解负担。", features: ["单一核心任务", "学生入口突出", "适合触屏操作"] },
+      home: { title: "首页与课程资源", description: "首页集中展示今日任务和甲方课程资源，同时区分正常课程与个性化巩固任务。", features: ["今日学习任务", "多套教材横向浏览", "签到和学习进度"] },
+      learn: { title: "7单元冒险地图", description: "一本主教材对应一张连续场景地图，七个纯数字按钮放置在插画广场中央。", features: ["1—3绿色已完成", "4黄色呼吸提示当前任务", "5—7灰色锁定且没有连接线"] },
+      ai: { title: "LUMI AI伙伴", description: "用儿童能够理解的表达回答英语问题，并通过快捷问题降低首次使用门槛。", features: ["知识问答", "口语陪练入口", "温和且鼓励性的反馈"] },
+      homework: { title: "英语作业批改", description: "集中展示一期需要支持的四类主要作业入口和即时反馈结果。", features: ["选择题与填空题", "手写图片与作文", "口语录音评分"] },
+      growth: { title: "学生成长反馈", description: "用星星、勋章和温和建议表现学习成果，不使用惩罚或断签焦虑。", features: ["学习数据概览", "成长勋章", "薄弱点巩固建议"] }
+    };
+
+    const appScreens = ["home", "learn", "ai", "homework", "growth"];
+    const navItems = [
+      ["home", "🏠", "首页"], ["learn", "📖", "学习"], ["ai", "🦌", "AI伙伴"],
+      ["homework", "✏️", "作业"], ["growth", "🌱", "成长"]
+    ];
+
+    // 为每个学生页面生成一致的底部导航
+    document.querySelectorAll(".bottom-nav").forEach((nav) => {
+      nav.innerHTML = navItems.map(([view, icon, label]) => `<button data-screen="${view}"><span>${icon}</span>${label}</button>`).join("");
+    });
+
+    function updateNotes(view) {
+      const info = notes[view] || notes.login;
+      document.getElementById("noteTitle").textContent = info.title;
+      document.getElementById("noteDescription").textContent = info.description;
+      document.getElementById("featureList").innerHTML = info.features.map((item) => `<li><i>✓</i><span>${item}</span></li>`).join("");
+    }
+
+    function showScreen(view) {
+      document.querySelectorAll(".screen").forEach((screen) => screen.classList.toggle("active", screen.dataset.view === view));
+      document.querySelectorAll("[data-screen]").forEach((button) => button.classList.toggle("active", button.dataset.screen === view));
+      document.querySelectorAll(".bottom-nav").forEach((nav) => nav.style.display = appScreens.includes(view) ? "grid" : "none");
+      updateNotes(view);
+      document.querySelector(`[data-view="${view}"]`)?.scrollTo(0, 0);
+    }
+
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-screen]");
+      if (target) showScreen(target.dataset.screen);
+      const close = event.target.closest("[data-close]");
+      if (close) document.getElementById(close.dataset.close)?.classList.remove("open");
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", (event) => { event.preventDefault(); showScreen("role"); });
+
+    // 签到日历
+    const signedDays = new Set([1,2,3,5,6,7,8,10,12,14,16,18]);
+    document.getElementById("calendar").innerHTML = Array.from({length: 31}, (_, index) => `<span class="${signedDays.has(index + 1) ? "signed" : ""}">${index + 1}</span>`).join("");
+    document.getElementById("checkinButton").addEventListener("click", () => document.getElementById("checkinModal").classList.add("open"));
+
+    // 单元按钮：1—4可进入，5—7锁定
+    document.querySelectorAll(".unit:not(.locked)").forEach((button) => button.addEventListener("click", () => {
+      document.getElementById("lessonTitle").textContent = `Unit ${button.dataset.unit} · ${button.dataset.unit === "4" ? "水果商店" : "复习已学单元"}`;
+      document.getElementById("lessonModal").classList.add("open");
+    }));
+
+    // 简单演示反馈
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+    document.getElementById("startLesson").addEventListener("click", () => { document.getElementById("lessonModal").classList.remove("open"); showToast("🦌 LUMI：准备好啦，我们出发！"); });
+    document.querySelectorAll(".homework-card").forEach((card) => card.addEventListener("click", () => showToast(`已打开：${card.querySelector("h3").textContent}（演示）`)));
+
+    // AI问答演示
+    const chatInput = document.getElementById("chatInput");
+    document.querySelectorAll("[data-ask]").forEach((button) => button.addEventListener("click", () => { chatInput.value = button.dataset.ask; chatInput.focus(); }));
+    document.getElementById("chatForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const question = chatInput.value.trim();
+      if (!question) return;
+      const area = document.getElementById("chatArea");
+      const ownBubble = document.createElement("div");
+      const replyBubble = document.createElement("div");
+      ownBubble.className = "bubble me";
+      ownBubble.textContent = question;
+      replyBubble.className = "bubble";
+      replyBubble.textContent = "好问题！这是前端演示回复。接入AI服务后，LUMI会结合教材内容认真回答你。";
+      area.append(ownBubble, replyBubble);
+      chatInput.value = "";
+      document.querySelector('[data-view="ai"]').scrollTo({ top: 9999, behavior: "smooth" });
+    });
+
+    updateNotes("login");
+  </script>
+</body>
+</html>
