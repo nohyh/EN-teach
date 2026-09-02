@@ -1,21 +1,29 @@
 {
   "name": "en-teach-app",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
+    "start:dev-client": "expo start --dev-client",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
+    "doctor": "npx expo-doctor",
+    "export:web": "expo export --platform web",
+    "build:apk": "eas build --platform android --profile preview",
+    "check": "npm run typecheck && npm run export:web",
     "fix:deps": "expo install --fix"
   },
   "dependencies": {
     "@expo/dom-webview": "~57.0.1",
     "@expo/metro-runtime": "~57.0.14",
-    "expo": "~57.0.17",
-    "expo-constants": "~57.0.15",
-    "expo-linear-gradient": "~57.0.1",
+    "expo": "~57.0.18",
+    "expo-asset": "~57.0.15",
+    "expo-audio": "~57.0.4",
+    "expo-blob": "^57.0.1",
+    "expo-constants": "~57.0.16",
+    "expo-dev-client": "~57.0.16",
     "expo-linking": "~57.0.8",
     "expo-router": "~57.0.17",
     "expo-speech": "~57.0.2",
@@ -30,6 +38,6 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.0",
-    "typescript": "^5.6.3"
+    "typescript": "~6.0.3"
   }
 }
