@@ -1,27 +1,11 @@
-# Node / H5 / Expo
+# ---- Node / Expo ----
 node_modules/
-.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 .expo/
-expo-env.d.ts
-
-# Build and test output
-coverage/
-.next/
-.vinext/
-out/
 dist/
 web-build/
-.wrangler/
-outputs/
-work/
+expo-env.d.ts
 
-# Python
+# ---- Python ----
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -30,28 +14,19 @@ __pycache__/
 .venv/
 venv/
 
-# Runtime data
+# ---- 运行时产物 ----
 server/data/
-server/audio/
 *.db
 *.sqlite3
 *.log
 
-# Environment variables
+# ---- 环境变量 ----
 .env
 .env.*
 !.env.example
 .skills/
 
-# Editors and system files
+# ---- 编辑器 / 系统 ----
 .idea/
-.vercel/
 .DS_Store
 Thumbs.db
-*.pem
-
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
