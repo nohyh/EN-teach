@@ -51,7 +51,7 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 另开终端启动 App：
 
 ```powershell
-cd mobile
+cd app
 npm install
 npx expo start
 ```
@@ -85,31 +85,34 @@ npm run fix:deps
 
 ### 常见启动问题
 
-- `npx` 提示临时安装 `expo@57`：通常是没有在 `mobile` 目录执行，或本地依赖尚未完整安装。先运行 `npm install`。
+- `npx` 提示临时安装 `expo@57`：通常是没有在 `app` 目录执行，或本地依赖尚未完整安装。先运行 `npm install`。
 - `ENOSPC: no space left on device`：磁盘或 npm 缓存所在分区空间不足，不是 Expo 代码错误。释放空间后重新执行安装或启动命令。
 - 端口被占用：换用 `--port <端口>`，或结束旧的 Expo 开发进程后重启。
 
 ## 当前应用入口
 
-`mobile/src/app/index.tsx` 当前渲染：
+`app/src/app/index.tsx` 当前渲染：
 
 ```text
-mobile/src/reference/ReferenceApp.dom.tsx
+app/src/screens/StudentApp.dom.tsx
 ```
 
-这是唯一的学生端实现。旧版且未被入口引用的 `screens/`、`components/` 已删除，避免两套 UI 长期漂移。
+这是唯一的学生端实现：Expo Router 只负责路由和原生能力桥接，页面集中在 `screens/`，课程分发与通用 UI 集中在 `components/`。根目录旧 Web 工程已删除，避免两套前端长期漂移。
 
 ## 目录结构
 
 ```text
 EN-teach/
-├── mobile/
+├── app/
 │   ├── assets/mock/             # 10 节 Dudulu mock 课程
 │   ├── public/course-art/       # 教材封面和课程地图资源
 │   └── src/
 │       ├── app/                 # Expo Router 路由
 │       ├── data/                # mock 课程加载和分节
-│       ├── reference/           # 唯一的高保真 DOM 学生端与学习组件
+│       ├── components/          # 课程分发器与通用 UI
+│       ├── screens/             # 高保真 DOM 学生端页面
+│       ├── stores/              # 本地演示状态
+│       ├── styles/              # 全局学习主题
 │       ├── services/            # 录音、API 与演示兜底
 │       └── types/               # 课程数据类型
 ├── server/                      # FastAPI、SQLite、ASR/TTS/评分/AI
@@ -124,18 +127,18 @@ EN-teach/
 运行时读取：
 
 ```text
-mobile/assets/mock/dudulu_fake_course_10_lessons_bundle/
+app/assets/mock/dudulu_fake_course_10_lessons_bundle/
 └── dudulu_fake_course_flat_parser_ready.json
 ```
 
-`mobile/src/data/mock.ts` 会根据 `sectionId` 将扁平活动列表重新组合为 10 节课。`lessons/lesson_01.json` 至 `lesson_10.json` 作为分节数据和调试样本保留。
+`app/src/data/mock.ts` 会根据 `sectionId` 将扁平活动列表重新组合为 10 节课。`lessons/lesson_01.json` 至 `lesson_10.json` 作为分节数据和调试样本保留。
 
 ## 课程组件契约
 
 五种组件的数据结构以以下两处为准：
 
 - `docs/lesson-components.md`
-- `mobile/src/types/lesson.ts`
+- `app/src/types/lesson.ts`
 
 课程目前由本地 JSON 驱动；契约变更必须同步文档、前端类型和 mock 数据。等后端真正提供课程流接口时，再增加对应的 Pydantic 模型，不提前维护一份空契约。
 

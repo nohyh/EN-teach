@@ -1,5 +1,5 @@
 import { createContext, FormEvent, useContext, useEffect, useState } from "react";
-import { Button, LumiMascot, type LumiMood, type Tone } from "./student-ui";
+import { Button, LumiMascot, type LumiMood, type Tone } from "../ui/StudentUI";
 import type {
   Activity as LessonActivity,
   DialogComponent as DialogActivity,
@@ -7,9 +7,9 @@ import type {
   RecallComponent as RecallActivity,
   SentenceComponent as SentenceActivity,
   WordComponent as WordActivity,
-} from "../types/lesson";
-import type { DialogCheckResult, EvaluationResult, SpeechRuntime } from "../types/speech";
-import type { CoursePresentation } from "./course-presentation";
+} from "../../types/lesson";
+import type { DialogCheckResult, EvaluationResult, SpeechRuntime } from "../../types/speech";
+import type { CoursePresentation } from "../../data/course-presentation";
 
 const SpeechRuntimeContext = createContext<SpeechRuntime | null>(null);
 
@@ -132,17 +132,17 @@ function SpeakableText({ text, className, cue = "点击听标准发音" }: { tex
   return <button className={`speakable-text ${className}${playing ? " playing" : ""}`} type="button" onClick={() => void play()} disabled={playing} aria-label={`${cue}：${text}`}><strong>{text}</strong><span aria-hidden="true">{playing ? "◼" : "🔊"}</span></button>;
 }
 
-function WordView({ activity, presentation, onNext, onPrevious, canPrevious }: { activity: WordActivity; presentation: CoursePresentation; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
+function WordCard({ activity, presentation, onNext, onPrevious, canPrevious }: { activity: WordActivity; presentation: CoursePresentation; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const next = () => { playLumiSound("correct"); onNext(); };
   return <div className="word-learning-card"><div className="activity-content"><span className="activity-kicker">今天的新单词</span><SpeakableText text={activity.word} className="activity-main-word" /><span className="activity-meaning">{activity.meaning}</span><div className="example-card"><span>放进一句话里</span><SpeakableText text={activity.example} className="example-sentence" cue="点击听例句" /><small>{activity.exampleMeaning}</small></div></div><ActivityActionDock primaryLabel={presentation.wordActionLabel} onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
-function SentenceView({ activity, presentation, onNext, onPrevious, canPrevious }: { activity: SentenceActivity; presentation: CoursePresentation; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
+function SentenceCard({ activity, presentation, onNext, onPrevious, canPrevious }: { activity: SentenceActivity; presentation: CoursePresentation; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const next = () => { playLumiSound("correct"); onNext(); };
   return <div className="sentence-learning-card"><div className="activity-content"><span className="activity-kicker">今天的神奇句子</span><SpeakableText text={activity.sentence} className="activity-main-sentence" cue="点击听整句话" /><span className="activity-meaning">{activity.meaning}</span>{presentation.sentencePattern && <div className="sentence-pattern"><span>{presentation.sentencePattern.prefix}</span><i>＋</i><span>{presentation.sentencePattern.suffix}</span></div>}</div><ActivityActionDock primaryLabel={presentation.sentenceActionLabel} onPrimary={next} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
-function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: RecallActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
+function RecallCard({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: RecallActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
   const [attempts, setAttempts] = useState(0);
@@ -185,7 +185,7 @@ function RecallView({ activity, onCompleted, onNext, onPrevious, canPrevious }: 
   );
 }
 
-function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: PronunciationActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
+function PronunciationCard({ activity, onCompleted, onNext, onPrevious, canPrevious }: { activity: PronunciationActivity; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const runtime = useContext(SpeechRuntimeContext);
   const [state, setState] = useState<"idle" | "recording" | "evaluating" | "done" | "error">("idle");
   const [score, setScore] = useState<EvaluationResult | null>(null);
@@ -243,7 +243,7 @@ function PronunciationView({ activity, onCompleted, onNext, onPrevious, canPrevi
   return <div className="pronunciation-learning-card"><div className="activity-content"><SpeakableText text={activity.content} className="activity-main-word" /><span className="activity-meaning">{activity.meaning}</span><div className={state === "recording" ? "recording-visual active" : "recording-visual"} aria-label={state === "recording" ? "正在录音" : state === "evaluating" ? "正在评分" : undefined}>{[1,2,3,4,5,6,7].map((bar) => <i key={bar} />)}</div>{state === "done" && !score?.passed && <button className="pronunciation-retry" type="button" onClick={() => void retry()}>再读一次</button>}</div><ActivityActionDock feedback={feedback} primaryLabel={primaryLabel} primaryDisabled={state === "evaluating"} onPrimary={primary} onPrevious={() => void previous()} canPrevious={canPrevious} /></div>;
 }
 
-function DialogView({ activity, presentation, onCompleted, onNext, onPrevious, canPrevious, isLast }: { activity: DialogActivity; presentation: CoursePresentation; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean; isLast: boolean }) {
+function DialogCard({ activity, presentation, onCompleted, onNext, onPrevious, canPrevious, isLast }: { activity: DialogActivity; presentation: CoursePresentation; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean; isLast: boolean }) {
   const runtime = useContext(SpeechRuntimeContext);
   const [messages, setMessages] = useState<Array<{ role: "ai" | "student"; text: string }>>([{ role: "ai", text: activity.opening }]);
   const [input, setInput] = useState("");
@@ -306,9 +306,9 @@ function DialogView({ activity, presentation, onCompleted, onNext, onPrevious, c
   return <div className="dialog-learning-card"><div className="activity-content"><div className="dialog-scene"><span>情景对话</span><strong>✨ {activity.scene || presentation.scene}</strong><small>{presentation.dialogDescription}</small></div><div className="lesson-chat" aria-live="polite">{messages.map((message, index) => <div className={`lesson-chat-bubble ${message.role}`} key={`${message.role}-${index}`}>{message.text}</div>)}</div>{!sent && <><div className="dialog-replies">{replies.map((reply) => <button className={input === reply ? "selected" : ""} type="button" key={reply} onClick={() => setInput(reply)}>{reply}</button>)}</div><div className="dialog-input"><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={listening ? "正在听你说…" : "用英语回答"} aria-label="场景对话回答" /><button className={listening ? "listening" : ""} type="button" onClick={() => void toggleVoice()} aria-label={listening ? "完成语音输入" : "开始语音输入"}>{listening ? "◼" : "🎙"}</button></div></>}</div><ActivityActionDock feedback={feedback} primaryLabel={sent ? isLast ? "打开星星宝箱" : "继续" : judging ? "正在判断…" : "发送回答"} primaryDisabled={!sent && (!input.trim() || judging)} onPrimary={sent ? onNext : () => void send()} onPrevious={onPrevious} canPrevious={canPrevious} /></div>;
 }
 
-export function LessonActivityView({ activity, presentation, step, total, onCompleted, onNext, onPrevious, canPrevious }: { activity: LessonActivity; presentation: CoursePresentation; step: number; total: number; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
+export function LessonRenderer({ activity, presentation, step, total, onCompleted, onNext, onPrevious, canPrevious }: { activity: LessonActivity; presentation: CoursePresentation; step: number; total: number; onCompleted: (correct: boolean) => void; onNext: () => void; onPrevious: () => void; canPrevious: boolean }) {
   const completeAndNext = () => { onCompleted(true); onNext(); };
-  return <div className="lesson-focus-layout"><LessonJourney step={step} total={total} presentation={presentation} /><ActivityFrame activity={activity} step={step} presentation={presentation}>{activity.type === "word" ? <WordView activity={activity} presentation={presentation} onNext={completeAndNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : activity.type === "sentence" ? <SentenceView activity={activity} presentation={presentation} onNext={completeAndNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : activity.type === "recall" ? <RecallView key={`${step}-${activity.mode}`} activity={activity} onCompleted={onCompleted} onNext={onNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : activity.type === "pronunciation" ? <PronunciationView key={step} activity={activity} onCompleted={onCompleted} onNext={onNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : <DialogView key={step} activity={activity} presentation={presentation} onCompleted={onCompleted} onNext={onNext} onPrevious={onPrevious} canPrevious={canPrevious} isLast={step === total - 1} />}</ActivityFrame></div>;
+  return <div className="lesson-focus-layout"><LessonJourney step={step} total={total} presentation={presentation} /><ActivityFrame activity={activity} step={step} presentation={presentation}>{activity.type === "word" ? <WordCard activity={activity} presentation={presentation} onNext={completeAndNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : activity.type === "sentence" ? <SentenceCard activity={activity} presentation={presentation} onNext={completeAndNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : activity.type === "recall" ? <RecallCard key={`${step}-${activity.mode}`} activity={activity} onCompleted={onCompleted} onNext={onNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : activity.type === "pronunciation" ? <PronunciationCard key={step} activity={activity} onCompleted={onCompleted} onNext={onNext} onPrevious={onPrevious} canPrevious={canPrevious} /> : <DialogCard key={step} activity={activity} presentation={presentation} onCompleted={onCompleted} onNext={onNext} onPrevious={onPrevious} canPrevious={canPrevious} isLast={step === total - 1} />}</ActivityFrame></div>;
 }
 
 export function LearningTypeGrid({ onSelect }: { onSelect: (type: LessonActivity["type"]) => void }) {

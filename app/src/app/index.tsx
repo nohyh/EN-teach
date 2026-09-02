@@ -3,7 +3,7 @@ import * as Speech from "expo-speech";
 import { Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import ReferenceApp from "@/reference/ReferenceApp.dom";
+import StudentApp from "@/screens/StudentApp.dom";
 import { chatWithLumi, checkBackendHealth, checkDialog, evaluatePcm, transcribePcm } from "@/services/api";
 import { createDemoChatReply, createDemoEvaluation } from "@/services/demo-fallback";
 import { useSpeechRecorder } from "@/services/speech-recorder";
@@ -100,5 +100,5 @@ export default function Index() {
     speakText,
   }), [recorder.startRecording, recorder.cancelRecording, safeChatWithLumi, safeCheckDialog, speakText, stopAndEvaluate, stopAndTranscribe]);
 
-  return <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: "#f7f8fc" }}><ReferenceApp {...runtime} dom={{ style: { flex: 1, width: "100%" } }} /></SafeAreaView>;
+  return <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: "#f7f8fc" }}><StudentApp {...runtime} dom={{ style: { flex: 1, width: "100%" } }} /></SafeAreaView>;
 }

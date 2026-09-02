@@ -1,21 +1,21 @@
 "use dom";
 
-import "./student-ui.css";
-import "./learning-components.css";
-import "./reference-app.css";
-import "./playful-learning-theme.css";
+import "../components/ui/student-ui.css";
+import "../components/lesson/lesson-components.css";
+import "./student-app.css";
+import "../styles/playful-learning-theme.css";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { activityCatalog, LessonActivityView, LessonComplete, SpeechRuntimeProvider } from "./learning-components";
-import { Button, Card, DemoToast, FloatingDecorations, LumiMascot, PageHeader, PhoneShell, Pill, StudentPage, type StudentTab } from "./student-ui";
+import { activityCatalog, LessonComplete, LessonRenderer, SpeechRuntimeProvider } from "../components/lesson/LessonRenderer";
+import { Button, Card, DemoToast, FloatingDecorations, LumiMascot, PageHeader, PhoneShell, Pill, StudentPage, type StudentTab } from "../components/ui/StudentUI";
 import { LESSONS } from "../data/mock";
 import type { Activity } from "../types/lesson";
 import type { SpeechRuntime } from "../types/speech";
 import lumiLogo from "../../assets/lumi-logo-plain-shirt.png";
 import lumiBookCovers from "../../public/course-art/lumi-book-covers-v1.png";
 import wonderTownMap from "../../public/course-art/wonder-town-map-v1.png";
-import { getCoursePresentation } from "./course-presentation";
-import { lessonProgressKey, useDemoState, type DemoState, type MascotSkin } from "./demo-state";
+import { getCoursePresentation } from "../data/course-presentation";
+import { lessonProgressKey, useDemoState, type DemoState, type MascotSkin } from "../stores/demo-state";
 
 type EntryScreen = "login" | "role";
 type Screen = EntryScreen | StudentTab;
@@ -339,7 +339,7 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
           <div><strong>{activeLesson.title}</strong><span>{meta.studentTitle}</span></div>
           <b className="lesson-score">★ {demoState.stars}</b>
         </header>
-        <LessonActivityView
+        <LessonRenderer
           activity={activity}
           presentation={presentation}
           step={step}
@@ -569,7 +569,7 @@ function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: Studen
           <div><strong>错题修炼场</strong><span>{currentMistake.type} · 找出误区再答一次</span></div>
           <b className="lesson-score">↻ {reviewStep + 1}/{reviewQueue.length}</b>
         </header>
-        <LessonActivityView activity={currentMistake.activity} presentation={reviewPresentation} step={reviewStep} total={reviewQueue.length} onCompleted={(correct) => setReviewResults((results) => ({ ...results, [currentMistake.id]: correct }))} onNext={finishReviewStep} onPrevious={() => setReviewStep((value) => Math.max(0, value - 1))} canPrevious={reviewStep > 0} />
+        <LessonRenderer activity={currentMistake.activity} presentation={reviewPresentation} step={reviewStep} total={reviewQueue.length} onCompleted={(correct) => setReviewResults((results) => ({ ...results, [currentMistake.id]: correct }))} onNext={finishReviewStep} onPrevious={() => setReviewStep((value) => Math.max(0, value - 1))} canPrevious={reviewStep > 0} />
       </StudentPage>
     );
   }
@@ -700,9 +700,9 @@ function GrowthPage({ onNavigate, onLogout, onSwitchAccount, demo, onNotice }: {
   );
 }
 
-type ReferenceAppProps = SpeechRuntime & { dom?: import("expo/dom").DOMProps };
+type StudentAppProps = SpeechRuntime & { dom?: import("expo/dom").DOMProps };
 
-export default function ReferenceApp({ dom: _dom, ...speechRuntime }: ReferenceAppProps) {
+export default function StudentApp({ dom: _dom, ...speechRuntime }: StudentAppProps) {
   const [screen, setScreen] = useState<Screen>("login");
   const [notice, setNotice] = useState("");
   const noticeTimer = useRef<number | null>(null);

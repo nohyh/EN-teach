@@ -1,7 +1,7 @@
 # 教学组件契约（唯一契约源）
 
 > **本文件是前后端数据结构的唯一权威定义。**
-> 任何字段改动必须同一 PR 内同步：本文件 + `app/types/lesson.ts` + `server/app/schemas/lesson.py`。
+> 任何字段改动必须同一 PR 内同步：本文件 + `app/src/types/lesson.ts` + `server/app/schemas/lesson.py`。
 > 一节课程 = 以下组件对象组成的数组，顺序即展示顺序。
 
 ## 1. Word - 单词学习

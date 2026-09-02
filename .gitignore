@@ -1,4 +1,4 @@
-# Node / H5 / Expo
+# Node / Expo
 node_modules/
 .pnp
 .pnp.*
@@ -12,12 +12,9 @@ expo-env.d.ts
 
 # Build and test output
 coverage/
-.next/
-.vinext/
 out/
 dist/
 web-build/
-.wrangler/
 outputs/
 work/
 

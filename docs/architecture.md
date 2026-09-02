@@ -6,11 +6,11 @@
 ┌─────────────────────────┐        ┌──────────────────────────────────┐
 │ Expo App (RN + DOM)     │  HTTP  │ FastAPI (Python)                 │
 │                         │ ─────► │  api/          路由层             │
-│  app/index       原生桥  │        │   └► services/  业务编排           │
-│  reference/      唯一 UI │ ◄───── │       └► repositories/ 数据访问   │
-│  data/mock       课程数据 │  JSON  │            └► SQLite             │
-│  services/       请求出口 │        │                                  │
-│  localStorage    演示状态 │        │  ├── ai_service      LLM          │
+│  src/app/index   原生桥  │        │   └► services/  业务编排           │
+│  screens/        唯一 UI │ ◄───── │       └► repositories/ 数据访问   │
+│  components/     课程分发 │  JSON  │            └► SQLite             │
+│  data/           课程数据 │        │                                  │
+│  stores/services 状态/请求 │        │  ├── ai_service      LLM          │
 └─────────────────────────┘        │  └── speech_service   TTS / 发音评测 │
                                    └──────────────────────────────────┘
 ```
@@ -29,20 +29,20 @@
 ## 前端结构
 
 `app/src/app/index.tsx` 只负责原生录音、系统发音和 API 兜底，然后把能力传给
-`app/src/reference/ReferenceApp.dom.tsx`。页面与课程活动只有这一套实现。
+`app/src/screens/StudentApp.dom.tsx`。页面与课程活动只有这一套实现。
 
-课程活动由 `app/src/reference/learning-components.tsx` 按 `activity.type`
+课程活动由 `app/src/components/lesson/LessonRenderer.tsx` 按 `activity.type`
 分发到五种视图：
 
 ```tsx
-if (activity.type === "word") return <WordView ... />;
-if (activity.type === "sentence") return <SentenceView ... />;
-if (activity.type === "recall") return <RecallView ... />;
-if (activity.type === "pronunciation") return <PronunciationView ... />;
-return <DialogView ... />;
+if (activity.type === "word") return <WordCard ... />;
+if (activity.type === "sentence") return <SentenceCard ... />;
+if (activity.type === "recall") return <RecallCard ... />;
+if (activity.type === "pronunciation") return <PronunciationCard ... />;
+return <DialogCard ... />;
 ```
 
-演示状态集中在 `reference/demo-state.ts`，直接使用 `localStorage`，不引入状态库。
+演示状态集中在 `app/src/stores/demo-state.ts`，直接使用 `localStorage`，不引入额外状态库。
 
 ## 数据契约约定
 
