@@ -19,7 +19,9 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage]
+    # 至少包含一条消息；同时限制客户端提交的历史长度，避免滥用模型上下文。
+    # 服务层仍会截取 MAX_HISTORY，形成双重保护。
+    messages: list[ChatMessage] = Field(min_length=1, max_length=20)
 
 
 @router.post("/chat")

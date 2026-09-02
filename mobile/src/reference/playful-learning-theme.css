@@ -126,8 +126,24 @@ button,
 }
 
 /* Authentication keeps the mascot-led welcome, but gains sturdier choices. */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 .brand-name { font-size: 38px; text-shadow: 0 4px 0 rgba(73, 59, 181, .12); }
 .helper-bubble { border: 1px solid #dedaff; font-size: 12px; }
+.role-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.role-page .identity-hero {
+  margin: 0 20px 20px;
+}
+.role-page .role-actions {
+  margin: 32px 20px 0;
+}
 .role-card {
   min-height: 106px;
   border: 2px solid var(--line);
@@ -235,7 +251,7 @@ button,
   border-top: 2px solid var(--line);
   background: rgba(255, 255, 255, .985);
 }
-.app-page { grid-template-rows: 42px 1fr 76px; }
+.app-page { grid-template-rows: 1fr 76px; }
 .bottom-nav button {
   min-width: 44px;
   min-height: 44px;
@@ -298,6 +314,22 @@ button,
 @media (max-width: 520px) {
   .stage { padding: 0; }
   .phone-shell { border: 0; }
+
+  .auth-page .brand-lockup { padding: clamp(12px, 3dvh, 28px) 24px 12px; }
+  .auth-page .brand-mascot { width: clamp(108px, 17dvh, 144px); height: clamp(104px, 17dvh, 138px); margin-bottom: 2px; }
+  .auth-page .brand-mascot .bear-mascot { width: clamp(98px, 15dvh, 128px); height: clamp(98px, 15dvh, 128px); }
+  .auth-page .brand-name { margin-top: 2px; font-size: clamp(30px, 5dvh, 38px); }
+  .auth-page .brand-lockup > p { margin-top: 2px; }
+  .auth-page .login-form { gap: 11px; padding-inline: 22px; }
+  .auth-page .privacy-note { margin: 18px 22px 16px; }
+}
+
+@media (max-width: 520px), (max-height: 740px) {
+  .role-page .identity-hero { min-height: 112px; margin: 0 16px 14px; padding: 16px 18px; }
+  .role-page .identity-hero h1 { font-size: 24px; }
+  .role-page .role-list { gap: 9px; padding-inline: 16px; }
+  .role-page .role-card { min-height: 86px; padding: 10px 12px; }
+  .role-page .role-actions { gap: 8px; margin: 24px 16px 0; padding-top: 0; }
 }
 
 /* --------------------------------------------------------------------------
@@ -445,10 +477,10 @@ button.adventure-stat:active { box-shadow: 0 1px 0 var(--line); transform: trans
   margin-bottom: 0;
   border-radius: 28px;
 }
-.adventure-map-home.theme-town .adventure-map-stage { background-image: linear-gradient(rgba(237,255,232,.05),rgba(230,248,220,.1)),url("/course-art/wonder-town-map-v1.png"); }
-.adventure-map-home.theme-island .adventure-map-stage { background-image: linear-gradient(rgba(214,242,255,.24),rgba(109,201,241,.12)),url("/course-art/wonder-town-map-v1.png"); }
-.adventure-map-home.theme-school .adventure-map-stage { background-image: linear-gradient(rgba(255,230,235,.2),rgba(255,255,255,.04)),url("/course-art/wonder-town-map-v1.png"); }
-.adventure-map-home.theme-forest .adventure-map-stage { background-image: linear-gradient(rgba(227,242,220,.28),rgba(105,92,210,.08)),url("/course-art/wonder-town-map-v1.png"); }
+.adventure-map-home.theme-town .adventure-map-stage::before { background: linear-gradient(rgba(237,255,232,.05),rgba(230,248,220,.1)); }
+.adventure-map-home.theme-island .adventure-map-stage::before { background: linear-gradient(rgba(214,242,255,.24),rgba(109,201,241,.12)); }
+.adventure-map-home.theme-school .adventure-map-stage::before { background: linear-gradient(rgba(255,230,235,.2),rgba(255,255,255,.04)); }
+.adventure-map-home.theme-forest .adventure-map-stage::before { background: linear-gradient(rgba(227,242,220,.28),rgba(105,92,210,.08)); }
 
 .adventure-map-home .adventure-stop { z-index: 5; }
 .adventure-node-emoji { position: absolute; top: 69px; left: 50%; display: grid; place-items: center; width: 30px; height: 24px; border: 2px solid rgba(255,255,255,.82); border-radius: 10px; background: rgba(255,255,255,.86); font-size: 14px; transform: translateX(-50%); box-shadow: 0 3px 0 rgba(60,75,64,.12); }
@@ -465,8 +497,6 @@ button.adventure-stat:active { box-shadow: 0 1px 0 var(--line); transform: trans
 .adventure-map-home.theme-school .current-node-callout { color: #793143; background: #ffe9ed; box-shadow: 0 5px 0 #df7184,0 10px 18px rgba(154,52,72,.14); }
 .adventure-map-home.theme-forest .current-node-callout { color: #3f358c; background: #efedff; box-shadow: 0 5px 0 #9b91ea,0 10px 18px rgba(73,59,181,.14); }
 
-.map-lumi-guide { position: absolute; z-index: 5; right: 18px; bottom: 36px; display: flex; align-items: center; gap: 7px; }
-.map-lumi-guide > span { border: 3px solid white; border-radius: 15px 15px 4px 15px; padding: 9px 11px; color: #4c4a55; background: rgba(255,255,255,.9); font-size: 8px; font-weight: 1000; box-shadow: 0 4px 0 rgba(67,75,70,.13); }
 
 .lesson-confirm-layer {
   position: absolute;
@@ -722,4 +752,16 @@ html[data-effects="off"] *, html[data-effects="off"] *::before, html[data-effect
   .mascot-skin-panel { width: 284px; }
   .assignment-card { grid-template-columns: 44px minmax(0,1fr) 48px; gap: 8px; padding-inline: 9px; }
   .study-desk-tabs > button { grid-template-columns: 31px minmax(0,1fr) 19px; gap: 5px; padding-inline: 6px; }
+}
+
+@media (max-width: 520px), (max-height: 740px) {
+  .study-desk-header { min-height: 78px; padding-block: 7px 9px; }
+  .study-desk-tabs { gap: 6px; padding: 5px; }
+  .study-desk-tabs > button { min-height: 50px; }
+  .assignment-focus-card { min-height: 132px; margin-top: 10px; padding-block: 12px 40px; }
+  .study-section-heading { margin-block: 16px 8px; }
+  .assignment-card-list, .mistake-card-list { gap: 8px; }
+  .assignment-card { min-height: 96px; padding-block: 9px; }
+  .assignment-type-icon { height: 50px; }
+  .mistake-book-teaser { min-height: 80px; margin-top: 12px; padding-block: 9px; }
 }

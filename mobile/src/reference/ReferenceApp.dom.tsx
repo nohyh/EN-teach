@@ -7,11 +7,13 @@ import "./playful-learning-theme.css";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { activityCatalog, LessonActivityView, LessonComplete, SpeechRuntimeProvider } from "./learning-components";
-import { Button, Card, DemoToast, FloatingDecorations, LumiMascot, PageHeader, PhoneShell, Pill, StatusBar, StudentPage, type StudentTab } from "./student-ui";
+import { Button, Card, DemoToast, FloatingDecorations, LumiMascot, PageHeader, PhoneShell, Pill, StudentPage, type StudentTab } from "./student-ui";
 import { LESSONS } from "../data/mock";
 import type { Activity } from "../types/lesson";
 import type { SpeechRuntime } from "../types/speech";
 import lumiLogo from "../../assets/lumi-logo-plain-shirt.png";
+import lumiBookCovers from "../../public/course-art/lumi-book-covers-v1.png";
+import wonderTownMap from "../../public/course-art/wonder-town-map-v1.png";
 import { getCoursePresentation } from "./course-presentation";
 import { lessonProgressKey, useDemoState, type DemoState, type MascotSkin } from "./demo-state";
 
@@ -116,13 +118,13 @@ function getLessonProgress(node: MapLessonNode, courseIndex: number, lessonIndex
 }
 
 function BookCover({ book, compact = false }: { book: CourseBook; compact?: boolean }) {
-  return <div className={`book-cover-art cover-${book.cover}${compact ? " compact" : ""}`} role="img" aria-label={`${book.title}绘本封面`}><span className="book-lumi-mark">LUMI</span></div>;
+  return <div className={`book-cover-art cover-${book.cover}${compact ? " compact" : ""}`} role="img" aria-label={`${book.title}绘本封面`}><img className="book-cover-sprite" src={lumiBookCovers} alt="" aria-hidden="true" draggable={false} /><span className="book-lumi-mark">LUMI</span></div>;
 }
 
 function LoginPage({ onNext, onNotice }: { onNext: () => void; onNotice: (message: string) => void }) {
   const [showPassword, setShowPassword] = useState(false);
   return (
-    <main className="stage"><PhoneShell label="登录页面" className="auth-page"><FloatingDecorations /><StatusBar />
+    <main className="stage"><PhoneShell label="登录页面" className="auth-page"><FloatingDecorations />
       <header className="brand-lockup"><div className="brand-mascot"><span className="brand-halo" aria-hidden="true" /><LumiMascot size="large" /></div><span className="eyebrow">HELLO, LITTLE STAR!</span><div className="brand-name">LUMI</div><p>和小熊一起，开心学英语</p></header>
       <form className="login-form" onSubmit={(event) => { event.preventDefault(); onNext(); }}>
         <p className="helper-bubble">请家长或老师帮助小朋友登录哦</p>
@@ -137,7 +139,7 @@ function LoginPage({ onNext, onNotice }: { onNext: () => void; onNotice: (messag
 
 function RolePage({ onEnter, onBack }: { onEnter: () => void; onBack: () => void }) {
   return (
-    <main className="stage"><PhoneShell label="身份选择页面" className="role-page"><FloatingDecorations /><StatusBar />
+    <main className="stage"><PhoneShell label="身份选择页面" className="role-page"><FloatingDecorations />
       <header className="identity-hero"><div><span className="eyebrow">WHO ARE YOU?</span><h1>你是谁呀？</h1><p>选择身份，Lumi 带你去对应的小天地</p></div><LumiMascot size="small" /></header>
       <div className="role-list">
         <button className="role-card student-role" type="button" onClick={onEnter}><span className="role-icon lavender">学</span><span><strong>我是小学生</strong><small>课程、AI伙伴、作业与成长</small></span><em>进入 <b>→</b></em></button>
@@ -380,6 +382,7 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
           })}</div>}
         </div>
         <div className="adventure-map-stage" id="adventure-map" aria-label={`${activeBook.title}${activeCourseMap.lessons.length}节课程地图`}>
+          <img className="adventure-map-background" src={wonderTownMap} alt="" aria-hidden="true" draggable={false} />
           {activeCourseMap.lessons.map((lesson, index) => {
             const point = adventureRoutePoints[index];
             const side = point.x > 50 ? "side-left" : "side-right";
@@ -391,7 +394,6 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
               <span className="adventure-node-emoji" aria-hidden="true">{lesson.icon}</span>
             </div>;
           })}
-          <div className="map-lumi-guide"><LumiMascot size="small" mood="happy" /><span>沿着路线继续走吧！</span></div>
         </div>
       </section>
 
@@ -435,8 +437,12 @@ function AiPage({ onNavigate, runtime }: { onNavigate: (tab: StudentTab) => void
     setWaiting(true);
     try {
       const reply = await runtime.chatWithLumi(history);
-      setMessages((items) => [...items, { role: "lumi", text: reply.english, translation: reply.translation }]);
-    } catch {
+      const english = typeof reply?.english === "string" ? reply.english.trim() : "";
+      const translation = typeof reply?.translation === "string" ? reply.translation.trim() : "";
+      if (!english) throw new Error("AI 返回了空回复");
+      setMessages((items) => [...items, { role: "lumi", text: english, translation }]);
+    } catch (error) {
+      console.warn("Could not display AI reply; using local demo reply", error);
       // 云端 AI 未配置时保留一个安全的演示回复，课程与语音功能不被阻断。
       setMessages((items) => [...items, { role: "lumi", text: "Great choice! Let’s say it together: I like pandas!", translation: "很棒！我们一起说：我喜欢熊猫！（当前为本地演示回复）" }]);
     } finally {
@@ -722,11 +728,14 @@ export default function ReferenceApp({ dom: _dom, ...speechRuntime }: ReferenceA
     demo.state.settings.slowSpeech,
   ]);
   useEffect(() => {
+    const hostOs = (window as Window & { $$EXPO_DOM_HOST_OS?: string }).$$EXPO_DOM_HOST_OS;
+    document.documentElement.dataset.lumiHost = hostOs ?? "web";
     document.documentElement.dataset.lumiSkin = demo.state.mascotSkin;
     document.documentElement.dataset.effects = demo.state.settings.effects ? "on" : "off";
     document.documentElement.dataset.sound = demo.state.settings.sound ? "on" : "off";
     document.documentElement.dataset.slowSpeech = demo.state.settings.slowSpeech ? "on" : "off";
     return () => {
+      delete document.documentElement.dataset.lumiHost;
       delete document.documentElement.dataset.lumiSkin;
       delete document.documentElement.dataset.effects;
       delete document.documentElement.dataset.sound;

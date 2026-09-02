@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
 import * as Speech from "expo-speech";
 import { Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import ReferenceApp from "@/reference/ReferenceApp.dom";
 import { chatWithLumi, checkBackendHealth, checkDialog, evaluatePcm, transcribePcm } from "@/services/api";
@@ -36,13 +37,17 @@ export default function Index() {
   }, [canUseBackend, recorder.stopRecording]);
 
   const safeChatWithLumi = useCallback(async (messages: Parameters<typeof chatWithLumi>[0]) => {
-    if (!await canUseBackend()) return createDemoChatReply(messages);
+    // 聊天接口本身就是最准确的可用性检查。不要先做短超时 health 探测，
+    // 否则一次瞬时超时会被缓存，并让接下来数秒的消息全部误走演示回复。
     try {
-      return await chatWithLumi(messages);
-    } catch {
+      const reply = await chatWithLumi(messages);
+      // DOM 组件方法的返回值必须是完全 JSON 可序列化的普通对象。
+      return { english: reply.english, translation: reply.translation };
+    } catch (error) {
+      console.warn("AI chat request failed; using local demo reply", error);
       return createDemoChatReply(messages);
     }
-  }, [canUseBackend]);
+  }, []);
 
   const safeCheckDialog = useCallback(async (request: Parameters<typeof checkDialog>[0]) => {
     if (!await canUseBackend()) throw new Error("对话服务暂未连接");
@@ -95,5 +100,5 @@ export default function Index() {
     speakText,
   }), [recorder.startRecording, recorder.cancelRecording, safeChatWithLumi, safeCheckDialog, speakText, stopAndEvaluate, stopAndTranscribe]);
 
-  return <ReferenceApp {...runtime} dom={{ style: { flex: 1, width: "100%" } }} />;
+  return <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: "#f7f8fc" }}><ReferenceApp {...runtime} dom={{ style: { flex: 1, width: "100%" } }} /></SafeAreaView>;
 }

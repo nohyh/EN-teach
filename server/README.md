@@ -57,6 +57,26 @@ curl http://127.0.0.1:8000/api/v1/units
 # [{"id":"unit-1-hello",...},{"id":"unit-fruit",...}]
 ```
 
+### 启用 DeepSeek 英语助手
+
+在 `server/.env` 中填写服务端配置（不要把 Key 放进移动端或提交到 Git）：
+
+```text
+DEEPSEEK_API_KEY=你的_API_Key
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+重启后端后可直接验证：
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/ai/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"How do I say 苹果 in English?"}]}'
+```
+
+响应格式固定为 `{"english":"...","translation":"..."}`。移动端已经通过后端代理调用该接口，DeepSeek Key 不会暴露给客户端。
+
 ## 主要 API
 
 | Method | Path | 用途 |

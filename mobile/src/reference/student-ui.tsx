@@ -9,10 +9,6 @@ export function PhoneShell({ children, label, className = "" }: { children: Reac
   return <section className={`phone-shell ${className}`} aria-label={label}>{children}</section>;
 }
 
-export function StatusBar() {
-  return <div className="status-row" aria-hidden="true"><span>9:41</span><span>● ●</span></div>;
-}
-
 export function FloatingDecorations() {
   return <div className="floating-decorations" aria-hidden="true"><span className="sparkle sparkle-one">✦</span><span className="sparkle sparkle-two">★</span><span className="bubble bubble-one" /><span className="bubble bubble-two" /></div>;
 }
@@ -124,5 +120,5 @@ export function BottomNav({ active, onChange }: { active: StudentTab; onChange: 
 }
 
 export function StudentPage({ children, active, onNavigate, label, hideNav = false }: { children: ReactNode; active: StudentTab; onNavigate: (tab: StudentTab) => void; label: string; hideNav?: boolean }) {
-  return <main className="stage"><PhoneShell label={label} className={`app-page ${hideNav ? "focused-page" : ""}`}><StatusBar /><div className="page-scroll-content">{children}</div>{!hideNav && <BottomNav active={active} onChange={onNavigate} />}</PhoneShell></main>;
+  return <main className="stage"><PhoneShell label={label} className={`app-page ${hideNav ? "focused-page" : ""}`}><div className="page-scroll-content">{children}</div>{!hideNav && <BottomNav active={active} onChange={onNavigate} />}</PhoneShell></main>;
 }

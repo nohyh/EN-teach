@@ -100,12 +100,23 @@ export async function evaluatePcm(pcm: ArrayBuffer, referenceText: string) {
 }
 
 export async function chatWithLumi(messages: ChatMessage[]) {
+  // 不把空的模型回复带回后端；一次异常空回复不应污染后续整段会话。
+  // 与后端 MAX_HISTORY 保持一致，只提交最近 20 条有效消息。
+  const history = messages
+    .filter((message) => message.content.trim().length > 0)
+    .slice(-20);
   const response = await request("/api/v1/ai/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages: history }),
   });
-  return (await response.json()) as ChatReply;
+  const body = (await response.json()) as Partial<ChatReply>;
+  // expo/fetch 的 JSON 结果可能带有运行时对象原型；显式重建为普通、可序列化对象，
+  // 保证通过 Expo DOM bridge 后 english / translation 字段不会丢失。
+  return {
+    english: typeof body.english === "string" ? body.english : "",
+    translation: typeof body.translation === "string" ? body.translation : "",
+  } satisfies ChatReply;
 }
 
 export async function checkDialog(requestBody: DialogCheckRequest) {

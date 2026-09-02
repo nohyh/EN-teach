@@ -124,7 +124,11 @@ class AiService:
             data = json.loads(text)
             english = str(data.get("english") or "").strip()
             translation = str(data.get("translation") or "").strip()
+            if not english:
+                raise AiError("DeepSeek 返回了空的 english 字段")
             return english, translation
+        except AiError:
+            raise
         except (ValueError, TypeError, AttributeError):
             return text, ""
 
