@@ -511,3 +511,21 @@ class Notification(Base):
     delivered_at = Column(DateTime, default=utcnow, nullable=False)
     read_at = Column(DateTime, nullable=True, index=True)
     created_at = Column(DateTime, default=utcnow, nullable=False, index=True)
+
+
+class NotificationOutbox(Base):
+    __tablename__ = "notification_outbox"
+    id = Column(Integer, primary_key=True, index=True)
+    notification_id = Column(Integer, ForeignKey("notifications.id", ondelete="CASCADE"), nullable=False, index=True)
+    channel = Column(String(16), nullable=False, index=True)
+    status = Column(String(16), nullable=False, default="pending", index=True)
+    attempt_count = Column(Integer, nullable=False, default=0)
+    max_attempts = Column(Integer, nullable=False, default=3)
+    next_attempt_at = Column(DateTime, default=utcnow, nullable=False, index=True)
+    locked_at = Column(DateTime, nullable=True)
+    last_error = Column(String(500), nullable=True)
+    provider_message_id = Column(String(160), nullable=True)
+    idempotency_key = Column(String(220), unique=True, nullable=False, index=True)
+    sent_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)

@@ -8,7 +8,7 @@ from app.core.security import hash_password
 from app.db.database import Base, get_db
 from datetime import timedelta
 
-from app.db.models import Assignment, AssignmentProgress, AuditLog, LearningEvent, RewardRule, User, utcnow
+from app.db.models import Assignment, AssignmentProgress, AuditLog, LearningEvent, NotificationOutbox, RewardRule, User, utcnow
 from app.main import create_app
 
 
@@ -184,6 +184,11 @@ def test_parent_report_preferences_and_audited_points_adjustment():
     dispatched = client.post("/api/v1/admin/notifications/dispatch", headers=admin)
     assert dispatched.status_code == 200 and dispatched.json()["created"] >= 2
     assert client.post("/api/v1/admin/notifications/dispatch", headers=admin).json()["created"] == 0
+    assert client.get("/api/v1/admin/notifications/outbox", headers=parent_one).status_code == 403
+    outbox = client.get("/api/v1/admin/notifications/outbox", headers=admin)
+    assert outbox.status_code == 200 and outbox.json()["summary"]["pending"] >= 2
+    processed = client.post("/api/v1/admin/notifications/outbox/process", headers=admin)
+    assert processed.status_code == 200 and processed.json()["sent"] >= 2
     inbox = client.get("/api/v1/me/notifications?unread_only=true", headers=parent_one)
     assert inbox.status_code == 200 and any(item["type"] == "weekly_report" for item in inbox.json())
     notification_id = inbox.json()[0]["id"]
@@ -192,3 +197,4 @@ def test_parent_report_preferences_and_audited_points_adjustment():
     with sessions() as db:
         assert db.query(AuditLog).filter_by(action="points.adjust", target_id="20").count() == 1
         assert db.query(AuditLog).filter_by(action="reward_rule.update", target_id="activity_correct").count() == 1
+        assert db.query(NotificationOutbox).filter_by(status="sent", channel="mock").count() >= 2

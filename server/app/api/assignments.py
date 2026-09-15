@@ -1,5 +1,4 @@
 """Teacher-to-student assignments, progress and feedback APIs."""
-import json
 from datetime import datetime
 from typing import Literal
 
@@ -9,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, require_roles
 from app.db.database import get_db
-from app.db.models import Assignment, AssignmentFeedback, AssignmentProgress, ClassMembership, Classroom, Notification, User, utcnow
-from app.services import operations
+from app.db.models import Assignment, AssignmentFeedback, AssignmentProgress, ClassMembership, Classroom, User, utcnow
+from app.services import notifications as notification_service, operations
 from app.services.learning_loop import naive_utc
 
 
@@ -192,13 +191,12 @@ def upsert_assignment_feedback(
         )
         db.add(feedback)
     db.flush()
-    notification = Notification(
-        user_id=assignment.student_id, type="teacher_feedback", title=f"老师点评了《{assignment.title}》",
-        body=feedback.comment, channel="in_app", status="delivered",
+    notification_service.deliver(
+        db, user_id=assignment.student_id, notification_type="teacher_feedback",
+        title=f"老师点评了《{assignment.title}》", body=feedback.comment,
         dedupe_key=f"assignment-feedback:{assignment.id}:{feedback.revision}",
-        detail_json=json.dumps({"assignment_id": assignment.id, "feedback_id": feedback.id, "revision": feedback.revision}),
+        detail={"assignment_id": assignment.id, "feedback_id": feedback.id, "revision": feedback.revision},
     )
-    db.add(notification)
     operations.audit(
         db, user.id, "assignment.feedback.update", "assignment", assignment.id,
         detail={"feedback_id": feedback.id, "revision": feedback.revision, "student_id": assignment.student_id},
@@ -224,12 +222,12 @@ def respond_to_assignment_feedback(
         raise HTTPException(status_code=409, detail="已经回复过这条评语")
     feedback.student_response = request.response.strip()
     feedback.responded_at = utcnow()
-    db.add(Notification(
-        user_id=assignment.teacher_id, type="student_feedback_response", title=f"{student.name} 回复了作业评语",
-        body=feedback.student_response, channel="in_app", status="delivered",
+    notification_service.deliver(
+        db, user_id=assignment.teacher_id, notification_type="student_feedback_response",
+        title=f"{student.name} 回复了作业评语", body=feedback.student_response,
         dedupe_key=f"assignment-feedback-response:{feedback.id}",
-        detail_json=json.dumps({"assignment_id": assignment.id, "feedback_id": feedback.id}),
-    ))
+        detail={"assignment_id": assignment.id, "feedback_id": feedback.id},
+    )
     operations.audit(
         db, student.id, "assignment.feedback.respond", "assignment", assignment.id,
         detail={"feedback_id": feedback.id, "teacher_id": assignment.teacher_id},

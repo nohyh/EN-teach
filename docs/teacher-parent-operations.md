@@ -1,6 +1,6 @@
 # 教师运营与家长周报
 
-阶段 4 能力由 Alembic `0007_teacher_parent_ops` 至 `0011_assignment_feedback` 逐步提供数据结构。所有统计均由服务端学习事件、作业进度、发音记录、错题状态和幂等活跃计时计算，前端不能直接提交聚合统计结果。
+阶段 4 能力由 Alembic `0007_teacher_parent_ops` 至 `0012_notification_outbox` 逐步提供数据结构。所有统计均由服务端学习事件、作业进度、发音记录、错题状态和幂等活跃计时计算，前端不能直接提交聚合统计结果。教师端与家长端均提供适配手机窄屏的底部导航和单列卡片布局。
 
 ## 教师端
 
@@ -26,7 +26,11 @@
 - 学生端每分钟向 `POST /api/v1/me/usage-heartbeats` 提交带幂等键的可见页面活跃时间；服务端按规则时区归档每日用量并把最后一次计时截断到剩余额度。
 - `GET /api/v1/me/learning-policy` 返回学生当天已用/剩余时长和当前访问状态。学习事件、复习、ASR、评分、TTS 和 AI 接口会独立执行相同规则，关闭功能后不能通过绕过前端继续调用。
 
-`POST /api/v1/admin/notifications/dispatch` 根据作业临期、复习到期和周报偏好生成去重的站内通知；`GET /api/v1/me/notifications` 和已读接口提供收件箱。当前通知通道为站内信，生产环境的 APNs/邮件适配仍待接入。
+`POST /api/v1/admin/notifications/dispatch` 根据作业临期、复习到期和周报偏好生成去重的站内通知；`GET /api/v1/me/notifications` 和已读接口提供收件箱。每条新通知还会按 `NOTIFICATION_CHANNELS` 进入 outbox；开发默认 `mock`，生产可配置 `email,apns` 并替换发送适配器。
+
+- `GET /api/v1/admin/notifications/outbox` 查看待发送、失败、成功和人工处理数量。
+- `POST /api/v1/admin/notifications/outbox/process` 领取到期任务并发送；失败按指数退避重试，超过上限进入 `dead`。
+- `POST /api/v1/admin/notifications/outbox/{id}/retry` 由管理员重置失败任务。创建、处理和人工重试均保持幂等或写入审计。
 
 ## 审计与积分修正
 

@@ -77,6 +77,11 @@ class Settings(BaseSettings):
     sentry_dsn: str = ""
     sentry_traces_sample_rate: float = Field(default=0.0, ge=0.0, le=1.0)
 
+    # 通知发送。开发环境使用 mock；生产环境按需启用 email,apns 并配置适配器。
+    notification_channels: str = "mock"
+    notification_max_attempts: int = Field(default=3, ge=1, le=10)
+    notification_retry_base_seconds: int = Field(default=60, ge=1, le=3600)
+
     # 评测业务
     pass_threshold: float = 90.0  # 单词 / 句子 overall >= 90 算过
 
@@ -104,6 +109,11 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def notification_channel_list(self) -> list[str]:
+        supported = {"mock", "email", "apns"}
+        return [channel for channel in (item.strip() for item in self.notification_channels.split(",")) if channel in supported]
 
     @model_validator(mode="after")
     def _validate_production_secrets(self):

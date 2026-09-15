@@ -1,0 +1,19 @@
+.family-mobile-nav { display: none; }
+
+@media (max-width: 760px) {
+  .family-app { max-width: 620px; margin: auto; padding-bottom: 96px; }
+  .family-app > header h1 { max-width: 230px; font-size: 24px; }
+  .family-app > header nav { grid-template-columns: auto auto; gap: 7px; }
+  .family-app > header nav a { display: none; }
+  .family-app > header nav button { min-height: 34px; padding: 0 10px; font-size: 11px; }
+  .family-panel { display: flex; overflow-x: auto; padding: 13px; }
+  .family-panel h2 { flex: 0 0 100%; }
+  .family-panel button { flex: 0 0 150px; }
+  .family-card,.family-metrics article { border-radius: 17px; }
+  .family-mobile-nav { position: fixed; z-index: 20; left: 50%; bottom: max(10px,env(safe-area-inset-bottom)); width: min(calc(100% - 22px),590px); display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; transform: translateX(-50%); border: 1px solid #dfe5df; border-radius: 19px; padding: 7px; background: #fffffff2; box-shadow: 0 12px 35px #3a5b5030; backdrop-filter: blur(18px); }
+  .family-mobile-nav button { min-height: 49px; display: grid; place-items: center; gap: 1px; padding: 4px; color: #5d736b; background: transparent; font-size: 10px; }
+  .family-mobile-nav button span { color: #27806d; font-size: 15px; letter-spacing: 0; }
+  .family-mobile-nav button:active { color: #fff; background: #27806d; }
+  .family-mobile-nav button:active span { color: #fff; }
+  .learning-policy-card,.notifications-card,.family-metrics { scroll-margin-top: 14px; }
+}

@@ -15,9 +15,9 @@ from app.db.database import get_db
 from app.db.models import (
     Assignment, AssignmentBatch, AssignmentProgress, AuditLog, ClassMembership, Classroom,
     KnowledgePoint, LearningEvent, LearningProgress, NotificationPreference,
-    Notification, WrongItem, User, utcnow,
+    Notification, NotificationOutbox, WrongItem, User, utcnow,
 )
-from app.services import economy, notifications as notification_service, operations
+from app.services import economy, notification_delivery, notifications as notification_service, operations
 from app.services.learning_loop import naive_utc
 
 
@@ -388,6 +388,57 @@ def dispatch_notifications(admin: User = Depends(require_roles("admin")), db: Se
     operations.audit(db, admin.id, "notifications.dispatch", "notification", "due", detail=result)
     db.commit()
     return result
+
+
+def _outbox_payload(row: NotificationOutbox) -> dict:
+    return {
+        "id": row.id, "notification_id": row.notification_id, "channel": row.channel,
+        "status": row.status, "attempt_count": row.attempt_count, "max_attempts": row.max_attempts,
+        "next_attempt_at": row.next_attempt_at, "last_error": row.last_error,
+        "provider_message_id": row.provider_message_id, "sent_at": row.sent_at,
+        "created_at": row.created_at, "updated_at": row.updated_at,
+    }
+
+
+@router.get("/admin/notifications/outbox")
+def notification_outbox(
+    limit: int = Query(50, ge=1, le=200),
+    _: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    summary = {
+        status: db.query(NotificationOutbox).filter_by(status=status).count()
+        for status in ["pending", "failed", "sent", "dead"]
+    }
+    rows = db.query(NotificationOutbox).order_by(NotificationOutbox.id.desc()).limit(limit).all()
+    return {"summary": summary, "items": [_outbox_payload(row) for row in rows]}
+
+
+@router.post("/admin/notifications/outbox/process")
+def process_notification_outbox(
+    limit: int = Query(100, ge=1, le=500),
+    admin: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    result = notification_delivery.process_outbox(db, limit=limit)
+    operations.audit(db, admin.id, "notifications.outbox.process", "notification_outbox", "batch", detail=result)
+    db.commit()
+    return result
+
+
+@router.post("/admin/notifications/outbox/{outbox_id}/retry")
+def retry_notification_outbox(
+    outbox_id: int,
+    admin: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    row = db.get(NotificationOutbox, outbox_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="通知发送任务不存在")
+    notification_delivery.retry_outbox(db, row)
+    operations.audit(db, admin.id, "notifications.outbox.retry", "notification_outbox", row.id)
+    db.commit(); db.refresh(row)
+    return _outbox_payload(row)
 
 
 @router.get("/parent/children")

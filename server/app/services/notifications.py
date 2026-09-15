@@ -6,7 +6,8 @@ from datetime import timedelta
 
 from sqlalchemy.orm import Session
 
-from app.db.models import Assignment, AssignmentProgress, Notification, NotificationPreference, User, WrongItem, utcnow
+from app.core.config import get_settings
+from app.db.models import Assignment, AssignmentProgress, Notification, NotificationOutbox, NotificationPreference, User, WrongItem, utcnow
 
 
 def _enabled(db: Session, user_id: int, field: str) -> bool:
@@ -20,6 +21,7 @@ def deliver(
 ) -> tuple[Notification, bool]:
     existing = db.query(Notification).filter_by(dedupe_key=dedupe_key).first()
     if existing:
+        enqueue_outbox(db, existing)
         return existing, False
     row = Notification(
         user_id=user_id, type=notification_type, title=title, body=body,
@@ -27,7 +29,26 @@ def deliver(
         detail_json=json.dumps(detail, ensure_ascii=False) if detail else None,
     )
     db.add(row); db.flush()
+    enqueue_outbox(db, row)
     return row, True
+
+
+def enqueue_outbox(db: Session, notification: Notification) -> int:
+    created = 0
+    settings = get_settings()
+    for channel in settings.notification_channel_list:
+        key = f"notification:{notification.id}:{channel}"
+        if db.query(NotificationOutbox).filter_by(idempotency_key=key).first():
+            continue
+        db.add(NotificationOutbox(
+            notification_id=notification.id, channel=channel, status="pending",
+            attempt_count=0, max_attempts=settings.notification_max_attempts,
+            next_attempt_at=utcnow(), idempotency_key=key,
+        ))
+        created += 1
+    if created:
+        db.flush()
+    return created
 
 
 def dispatch_due(db: Session) -> dict[str, int]:
