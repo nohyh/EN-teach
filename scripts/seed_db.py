@@ -3,6 +3,7 @@
 用法: python scripts/seed_db.py
 """
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -10,8 +11,9 @@ SERVER = ROOT / "server"
 sys.path.insert(0, str(ROOT))         # content.adapters
 sys.path.insert(0, str(SERVER))       # app.xxx
 
-from app.db.database import SessionLocal, init_db
+from app.db.database import SessionLocal
 from app.db import models
+from app.core.security import hash_password
 from content.source import ContentSource
 from content.adapters.base import AdapterRegistry
 import content.adapters  # 触发注册
@@ -30,7 +32,6 @@ FRUIT_WORDS = [
 
 
 def main():
-    init_db()
     src = ContentSource(path=ROOT / "dd.md")
     units = AdapterRegistry.parse(src)
     print(f"从 dd.md 解析出 {len(units)} 个 Unit")
@@ -77,11 +78,135 @@ def main():
                     source="fruit-seed",
                 ))
 
-        # 3. 默认账号 (开发用, 生产要走注册流程)
-        if not db.query(models.User).filter_by(id=1).first():
-            db.add(models.User(id=1, role="parent", name="测试家长"))
-        if not db.query(models.User).filter_by(id=2).first():
-            db.add(models.User(id=2, role="child", name="小明", parent_id=1))
+        # 3. 默认账号（仅用于本地演示，生产环境必须关闭灌库流程）
+        parent = db.query(models.User).filter_by(id=1).first()
+        if not parent:
+            parent = models.User(
+                id=1,
+                username="lumi_parent",
+                password_hash=hash_password("LumiDemo123!"),
+                role="parent",
+                name="测试家长",
+            )
+            db.add(parent)
+        else:
+            parent.username = "lumi_parent"
+            parent.role = "parent"
+            if not parent.password_hash or parent.password_hash.startswith("!"):
+                parent.password_hash = hash_password("LumiDemo123!")
+
+        student = db.query(models.User).filter_by(id=2).first()
+        if not student:
+            student = models.User(
+                id=2,
+                username="lumi_student",
+                password_hash=hash_password("LumiDemo123!"),
+                role="student",
+                name="小明",
+                parent_id=1,
+            )
+            db.add(student)
+        else:
+            student.username = "lumi_student"
+            student.role = "student"
+            student.parent_id = 1
+            if not student.password_hash or student.password_hash.startswith("!"):
+                student.password_hash = hash_password("LumiDemo123!")
+
+        admin = db.query(models.User).filter_by(id=3).first()
+        if not admin:
+            admin = models.User(
+                id=3,
+                username="lumi_admin",
+                password_hash=hash_password("LumiAdmin123!"),
+                role="admin",
+                name="Lumi 内容管理员",
+            )
+            db.add(admin)
+        else:
+            admin.username = "lumi_admin"
+            admin.role = "admin"
+            if not admin.password_hash or admin.password_hash.startswith("!"):
+                admin.password_hash = hash_password("LumiAdmin123!")
+
+        teacher = db.query(models.User).filter_by(username="lumi_teacher").first()
+        if not teacher:
+            teacher = models.User(
+                username="lumi_teacher",
+                password_hash=hash_password("LumiTeacher123!"),
+                role="teacher",
+                name="王老师",
+            )
+            db.add(teacher)
+        else:
+            teacher.role = "teacher"
+            teacher.name = "王老师"
+            if not teacher.password_hash or teacher.password_hash.startswith("!"):
+                teacher.password_hash = hash_password("LumiTeacher123!")
+
+        db.flush()
+        classroom = db.query(models.Classroom).filter_by(invite_code="LUMI2026").first()
+        if not classroom:
+            classroom = models.Classroom(
+                teacher_id=teacher.id, name="一年级星星班", invite_code="LUMI2026", status="active",
+            )
+            db.add(classroom)
+            db.flush()
+        membership = db.query(models.ClassMembership).filter_by(
+            classroom_id=classroom.id, student_id=student.id,
+        ).first()
+        if not membership:
+            db.add(models.ClassMembership(classroom_id=classroom.id, student_id=student.id, status="active"))
+        else:
+            membership.status = "active"
+
+        # 4. 阶段 2 云端作业样本；进度只能由学习事件推进。
+        db.flush()
+        assignment = db.query(models.Assignment).filter_by(
+            student_id=student.id,
+            course_ref="mock:0",
+            section_id="lesson_01_greetings",
+            title="Hello! 第一次打招呼",
+        ).first()
+        if not assignment:
+            assignment = models.Assignment(
+                teacher_id=admin.id,
+                student_id=student.id,
+                title="Hello! 第一次打招呼",
+                course_ref="mock:0",
+                section_id="lesson_01_greetings",
+                total_activities=16,
+                due_at=models.utcnow() + timedelta(days=7),
+                status="assigned",
+                instructions="完成第一节全部活动，作业进度会自动同步。",
+            )
+            db.add(assignment)
+            db.flush()
+            db.add(models.AssignmentProgress(assignment_id=assignment.id, student_id=student.id))
+
+        batch = db.query(models.AssignmentBatch).filter_by(
+            classroom_id=classroom.id,
+            title="Hello! 第一次打招呼",
+        ).first()
+        if not batch:
+            batch = models.AssignmentBatch(
+                classroom_id=classroom.id,
+                teacher_id=teacher.id,
+                title=assignment.title,
+                course_ref=assignment.course_ref,
+                section_id=assignment.section_id,
+                total_activities=assignment.total_activities,
+                starts_at=assignment.starts_at,
+                due_at=assignment.due_at,
+                allow_late=True,
+                instructions=assignment.instructions,
+                status="active",
+                revision=1,
+            )
+            db.add(batch)
+            db.flush()
+        assignment.batch_id = batch.id
+        assignment.teacher_id = teacher.id
 
         db.commit()
 

@@ -1,0 +1,5 @@
+.notification-row { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; padding: 12px !important; text-align: left; color: #46534e !important; background: #f2f3ef !important; }
+.notification-row.unread { border-left: 4px solid #27806d; background: #e8f5f0 !important; }
+.notification-row span { display: grid; gap: 4px; color: inherit; letter-spacing: 0; }
+.notification-row small { color: #73786f; font-weight: 500; }
+.notification-row em { color: #27806d; font-size: 10px; font-style: normal; white-space: nowrap; }

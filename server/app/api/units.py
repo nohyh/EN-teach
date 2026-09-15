@@ -2,12 +2,12 @@
 
 只做参数解析 / HTTP 编码, 业务在 services/, DB 在 repositories/
 """
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_optional_current_user
 from app.db.database import get_db
+from app.db.models import User
 from app.repositories import units as units_repo
 
 router = APIRouter(prefix="/api/v1/units", tags=["units"])
@@ -15,10 +15,10 @@ router = APIRouter(prefix="/api/v1/units", tags=["units"])
 
 @router.get("")
 def list_units(
-    user_id: Optional[int] = Query(None, description="查指定用户进度"),
+    user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
-    return units_repo.get_units_with_progress(db, user_id)
+    return units_repo.get_units_with_progress(db, user.id if user else None)
 
 
 @router.get("/{unit_id}/sentences")

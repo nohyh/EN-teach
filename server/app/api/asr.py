@@ -1,7 +1,12 @@
 """语音识别路由 - 把前端录音转成文字 (AI 伙伴 + 口语对话的"说英文转文字")"""
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_optional_current_user
 from app.core.config import get_settings
+from app.db.database import get_db
+from app.db.models import User
+from app.services import parent_controls
 from app.services.asr_service import AsrError, MissingAsrConfigError, get_asr_service
 from app.services.audio_utils import pcm16_to_wav
 from app.services.evaluation_service import get_evaluator
@@ -30,7 +35,13 @@ async def transcribe(
     audio: UploadFile = File(...),
     fmt: str = Form("pcm"),
     sample_rate: int = Form(16000),
+    user: User | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
 ):
+    try:
+        parent_controls.ensure_access(db, user, feature="voice")
+    except parent_controls.LearningAccessDenied as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
     if fmt not in SUPPORTED_FORMATS:
         raise HTTPException(status_code=400, detail=f"不支持的音频格式: {fmt}")
     if sample_rate not in SUPPORTED_RATES:
@@ -52,12 +63,17 @@ async def transcribe(
 async def evaluate(
     reference_text: str = Form(...),
     audio: UploadFile = File(...),
-    user_id: str = Form("mobile-demo"),
     fmt: str = Form("pcm"),
     sample_rate: int = Form(16000),
+    user: User | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
 ):
     """给前端本地课程做无数据库依赖的跟读评分。"""
     reference_text = reference_text.strip()
+    try:
+        parent_controls.ensure_access(db, user, feature="voice")
+    except parent_controls.LearningAccessDenied as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
     if not reference_text or len(reference_text) > 500:
         raise HTTPException(status_code=400, detail="reference_text 长度需为 1-500")
     if fmt not in {"pcm", "wav", "ogg", "opus"}:
@@ -72,7 +88,7 @@ async def evaluate(
         result = get_evaluator().evaluate(
             evaluation_audio,
             reference_text,
-            user_id=user_id,
+            user_id=str(user.id) if user else "anonymous",
             audio_type=evaluation_format,
         )
     except SsecpError as e:

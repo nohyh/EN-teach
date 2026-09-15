@@ -14,6 +14,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_user
 from app.core.config import get_settings
 from app.db import models
 from app.db.database import get_db
@@ -34,18 +35,15 @@ ALLOWED_AUDIO_MIME = {
 
 @router.post("")
 async def submit_attempt(
-    user_id: int = Form(...),
     sentence_id: str = Form(...),
     audio: UploadFile = File(...),
+    user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    user_id = user.id
     sentence = units_repo.get_sentence(db, sentence_id)
     if not sentence:
         raise HTTPException(status_code=404, detail="Sentence not found")
-
-    user = db.get(models.User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
 
     # 格式校验
     filename = audio.filename or ""
@@ -125,7 +123,7 @@ async def submit_attempt(
 @router.get("/by-speech/{sentence_id}")
 def list_attempts(
     sentence_id: str,
-    user_id: int,
+    user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return attempts_repo.list_attempts_for_sentence(db, user_id, sentence_id)
+    return attempts_repo.list_attempts_for_sentence(db, user.id, sentence_id)

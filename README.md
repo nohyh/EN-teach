@@ -6,18 +6,24 @@
 
 ## 当前功能
 
-- 登录与学生身份选择
+- 真实账号登录、JWT 会话轮换与学生身份选择
 - 学生首页、课程学习、AI 伙伴、作业和成长页面
 - 独立错题复习入口，进入答题后复用课程学习播放器
 - 10 节 mock 课程及课程目录、节点式学习进度
+- 教材上传与内容工作台，支持 JSON、Markdown、DOCX、PDF 和扫描件 OCR 排队
+- 草稿校验、管理员审核、不可变课程版本、发布、下架和回滚
+- 学生端自动读取后端已发布课程，未审核内容不可见
+- 云端学习事件与课程进度同步，重复网络提交不会重复记账
+- 同知识点错题自动合并、到期复习、掌握度与 1/3/7/14/30 天间隔调度
+- 教师/管理员布置基础作业，完成度由真实课程活动自动推进
 - 五种课程活动：`word`、`sentence`、`recall`、`pronunciation`、`dialog`
 - Lumi 全身角色、不同学习状态和答对庆祝效果
 - 手机原生麦克风录音、16kHz PCM 语音转文字
 - 跟读评分（SSECP；未配置时自动使用本地 Mock）
-- 系统英文发音、AI 对话与情景对话判定
+- 阿里云英文发音（不可用时回退系统语音）、AI 对话与情景对话判定
 - 单词、例句和整句正文均可直接点击播放美式英语发音
 - 答题校验、错误提示、课程完成反馈
-- 课程、作业、错题、签到、星星、书籍与设置保存在本机，可连续演示
+- 课程进度、作业和错题同步至服务端；签到、星星、书籍与设置仍保存在本机，可离线演示
 - AI 和跟读在后端未启动时自动进入有明确标识的本地演示模式
 - 记忆题采用固定单屏布局，不产生横向或纵向内部滚动
 - 支持 `prefers-reduced-motion`，用户选择减少动态效果时会关闭庆祝动画
@@ -30,23 +36,49 @@
 | 路由 | Expo Router |
 | Web 视觉实现 | Expo DOM + CSS |
 | 录音 | Expo Audio 原生 PCM Stream |
-| 发音 | Expo Speech / Web Speech API |
-| 后端 | FastAPI + SQLite + 阿里云 NLS/SSECP + DeepSeek |
+| 发音 | 阿里云 NLS TTS + Expo Audio；Expo Speech / Web Speech API 兜底 |
+| 后端 | FastAPI + SQLAlchemy + PostgreSQL/SQLite + Alembic + 阿里云 NLS/SSECP + DeepSeek |
 | 课程数据 | 本地 JSON mock + 后端内容库 |
 
 当前学生端保留 Expo DOM 高保真 UI，录音和网络能力由原生父层注入，因此 Android/iOS 真机不依赖 WebView 的麦克风实现。
 
 ## 本地运行
 
-先启动后端：
+先用项目的 conda 环境启动后端（默认使用本地 SQLite）：
 
-```powershell
+```bash
 cd server
-python -m pip install -r requirements.txt
-Copy-Item .env.example .env
-python ..\scripts\seed_db.py
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+conda run -n en-teach python -m pip install -r requirements.txt
+cp .env.example .env
+conda run -n en-teach alembic upgrade head
+cd ..
+conda run -n en-teach python scripts/seed_db.py
+cd server
+conda run --no-capture-output -n en-teach python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+本地演示学生账号为 `lumi_student`，密码为 `LumiDemo123!`；家长账号为 `lumi_parent`，密码相同。教师账号为 `lumi_teacher`，密码为 `LumiTeacher123!`；内容工作台开发管理员为 `lumi_admin`，密码为 `LumiAdmin123!`。这些账号仅用于开发环境。
+
+需要用 PostgreSQL 联调时：
+
+```bash
+docker compose up -d postgres
+# 在 server/.env 中设置：
+# DATABASE_URL=postgresql+psycopg://en_teach:en_teach_dev_only@127.0.0.1:5433/en_teach
+cd server
+conda run -n en-teach alembic upgrade head
+```
+
+从旧 SQLite 搬迁到刚完成迁移的 PostgreSQL 空库：
+
+```bash
+conda run -n en-teach python scripts/migrate_sqlite_to_postgres.py \
+  --destination 'postgresql+psycopg://en_teach:en_teach_dev_only@127.0.0.1:5433/en_teach'
+```
+
+脚本不会删除 SQLite，也不会覆盖已有业务数据的目标库；刷新会话不会迁移，用户需要重新登录。`/health` 用于进程存活检查，`/ready` 会同时验证数据库连接和 Alembic 版本。
+
+如需接入 Sentry，在 `server/.env` 配置 `SENTRY_DSN`；默认不发送个人信息，性能采样默认关闭。
 
 另开终端启动 App：
 
@@ -77,9 +109,11 @@ npm run fix:deps
 
 - 完整演示路径：登录 → 学生身份 → 冒险地图 → 继续当前课程 → 完成活动并领取星星 → 作业/错题 → AI 伙伴 → 我的学习。
 - 演示状态会保存在当前浏览器或手机 WebView；需要恢复初始数据时，进入“我的学习 → 设置 → 重置演示数据”。
+- 首次登录真实账号时，原游客进度会复制到该账号的本地空间；后续不同用户之间互不混用。
 - 电脑和手机展示同一套内容与进度。电脑更适合投屏和稳定讲解；手机额外展示原生录音、系统发音、软键盘与触控体验。
 - 不启动后端仍可演示页面、课程、作业、错题、AI 本地回复和跟读本地评分；语音转文字仍需要后端服务。
 - 真机联调时手机与电脑应在同一局域网，并让后端监听 `0.0.0.0:8000`。
+- 内容与教师运营入口为 `http://localhost:8081/content-admin`；家长周报入口为 `http://localhost:8081/family`。内容工作台可上传 `content/examples/fruit-market.md` 走通校验、审核和发布。
 
 更完整的现场流程和异常预案见 [演示手册](docs/demo-playbook.md)。
 
@@ -97,7 +131,7 @@ npm run fix:deps
 app/src/screens/StudentApp.dom.tsx
 ```
 
-这是唯一的学生端实现：Expo Router 只负责路由和原生能力桥接，页面集中在 `screens/`，课程分发与通用 UI 集中在 `components/`。根目录旧 Web 工程已删除，避免两套前端长期漂移。
+学生端与内容工作台都由 Expo Router 提供入口：`/` 渲染学生端，`/content-admin` 渲染内容工作台。页面集中在 `screens/`，课程分发与通用 UI 集中在 `components/`。
 
 ## 目录结构
 
@@ -140,7 +174,7 @@ app/assets/mock/dudulu_fake_course_10_lessons_bundle/
 - `docs/lesson-components.md`
 - `app/src/types/lesson.ts`
 
-课程目前由本地 JSON 驱动；契约变更必须同步文档、前端类型和 mock 数据。等后端真正提供课程流接口时，再增加对应的 Pydantic 模型，不提前维护一份空契约。
+课程既可由本地 JSON Mock 驱动，也可从后端公开课程接口读取已发布版本。契约变更必须同步文档、前端类型、后端 Pydantic Schema 和测试数据。
 
 ## 文档索引
 
@@ -149,6 +183,11 @@ app/assets/mock/dudulu_fake_course_10_lessons_bundle/
 | [产品说明](docs/product.md) | 产品定位、学习闭环和阶段规划 |
 | [架构说明](docs/architecture.md) | 架构分层、扩展机制和序列化约定 |
 | [课程组件契约](docs/lesson-components.md) | 五种学习组件的 JSON 契约 |
+| [后续开发计划书](docs/remaining-work-plan.md) | 从演示原型到正式产品的功能、阶段与验收计划 |
+| [阶段 0 交接记录](docs/stage-0-handoff.md) | 数据库、鉴权、监控、安全检查与本地运行状态 |
+| [阶段 1 内容平台](docs/content-platform.md) | 教材格式、工作台、状态权限、存储校验和回滚说明 |
+| [阶段 2 学习闭环](docs/learning-loop.md) | 云端进度、幂等事件、错题合并、间隔复习与作业规则 |
+| [阶段 3 积分与成长](docs/economy-growth.md) | 权威积分账本、奖励规则、商城库存、装备、成长统计与徽章 |
 
 ## 仓库约定
 

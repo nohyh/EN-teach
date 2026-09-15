@@ -9,8 +9,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_optional_current_user
 from app.db.database import get_db
+from app.db.models import User
 from app.repositories import units as units_repo
+from app.services import parent_controls
 from app.services.speech_service import (
     MissingSpeechConfigError,
     SpeechError,
@@ -18,6 +21,13 @@ from app.services.speech_service import (
 )
 
 router = APIRouter(prefix="/api/v1/tts", tags=["tts"])
+
+
+def _ensure_voice(db: Session, user: User | None) -> None:
+    try:
+        parent_controls.ensure_access(db, user, feature="voice")
+    except parent_controls.LearningAccessDenied as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
 
 
 def _speech_call(operation):
@@ -34,7 +44,9 @@ def synth_for_sentence(
     sentence_id: str,
     fmt: str = Query("mp3", pattern="^(mp3|wav|pcm)$"),
     db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_current_user),
 ):
+    _ensure_voice(db, user)
     sentence = units_repo.get_sentence(db, sentence_id)
     if not sentence:
         raise HTTPException(status_code=404, detail="Sentence not found")
@@ -52,8 +64,10 @@ def synth_multiple_sentences(
     fmt: str = Query("wav", pattern="^(wav|pcm|mp3)$"),
     pause_ms: int = Query(600, ge=0, le=5000, description="句间静音毫秒, 0=不插静音"),
     db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_current_user),
 ):
     """按 ID 列表合成多句, 适合对话朗读 (默认 600ms 间隔)"""
+    _ensure_voice(db, user)
     id_list = [s.strip() for s in ids.split(",") if s.strip()]
     if not id_list:
         raise HTTPException(status_code=400, detail="ids 不能为空")
@@ -88,8 +102,10 @@ def synth_whole_unit(
     fmt: str = Query("wav", pattern="^(wav|pcm|mp3)$"),
     pause_ms: int = Query(600, ge=0, le=5000),
     db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_current_user),
 ):
     """把整个 unit 的所有句子串成一段音频 (用于 '整课播放' / '先听一遍')"""
+    _ensure_voice(db, user)
     sentences = units_repo.get_sentences_for_unit(db, unit_id)
     if sentences is None:
         raise HTTPException(status_code=404, detail="Unit not found")
@@ -109,12 +125,16 @@ def synth_whole_unit(
     )
 
 
+@router.get("/synthesize")
 @router.post("/synthesize")
 def synth_raw_text(
     text: str = Query(..., min_length=1, max_length=1000),
     fmt: str = Query("mp3", pattern="^(mp3|wav|pcm)$"),
+    user: User | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
 ):
     """直接传入文本合成 (调试 / 预览用)"""
+    _ensure_voice(db, user)
     audio = _speech_call(lambda: get_speech_service().synthesize(text, fmt=fmt))
     return Response(
         content=audio,

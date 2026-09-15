@@ -27,7 +27,7 @@ export type DemoState = {
   settings: DemoSettings;
 };
 
-const STORAGE_KEY = "lumi-demo-state-v1";
+const LEGACY_STORAGE_KEY = "lumi-demo-state-v1";
 
 const DONE: DemoLessonProgress = {
   completedActivities: 16,
@@ -84,10 +84,15 @@ function isDemoState(value: unknown): value is DemoState {
     && typeof candidate.settings === "object";
 }
 
-function loadDemoState() {
+function loadDemoState(storageKey: string) {
   const initial = createInitialDemoState();
   try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
+    let saved = window.localStorage.getItem(storageKey);
+    if (!saved && storageKey !== LEGACY_STORAGE_KEY) {
+      // 首次登录时把原游客进度复制到账号空间；保留原数据，便于异常时恢复。
+      saved = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (saved) window.localStorage.setItem(storageKey, saved);
+    }
     if (!saved) return initial;
     const parsed = JSON.parse(saved) as unknown;
     if (!isDemoState(parsed)) return initial;
@@ -103,31 +108,43 @@ function loadDemoState() {
   }
 }
 
-export function useDemoState() {
-  const [state, setState] = useState<DemoState>(loadDemoState);
+export function useDemoState(scope = "guest") {
+  const storageKey = `${LEGACY_STORAGE_KEY}:${scope}`;
+  const [stored, setStored] = useState(() => ({ scope, state: loadDemoState(storageKey) }));
+  const state = stored.state;
 
   useEffect(() => {
+    if (stored.scope !== scope) {
+      setStored({ scope, state: loadDemoState(storageKey) });
+    }
+  }, [scope, storageKey, stored.scope]);
+
+  useEffect(() => {
+    if (stored.scope !== scope) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
     } catch {
       // WebView storage may be unavailable in private/restricted contexts.
     }
-  }, [state]);
+  }, [scope, state, storageKey, stored.scope]);
 
   const patch = (next: Partial<DemoState> | ((current: DemoState) => Partial<DemoState>)) => {
-    setState((current) => ({
+    setStored((current) => ({
       ...current,
-      ...(typeof next === "function" ? next(current) : next),
+      state: {
+        ...current.state,
+        ...(typeof next === "function" ? next(current.state) : next),
+      },
     }));
   };
 
   const reset = () => {
     try {
-      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(storageKey);
     } catch {
       // Ignore restricted storage; in-memory reset still works.
     }
-    setState(createInitialDemoState());
+    setStored({ scope, state: createInitialDemoState() });
   };
 
   return { state, patch, reset };

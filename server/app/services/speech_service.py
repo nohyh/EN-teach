@@ -11,6 +11,7 @@ from pathlib import Path
 import requests
 
 from app.core.config import get_settings
+from app.services.nls_token_provider import NlsTokenError, get_nls_token_provider
 
 
 class SpeechError(RuntimeError):
@@ -57,7 +58,6 @@ class SpeechService:
     def __init__(self) -> None:
         s = get_settings()
         self.appkey = s.nls_appkey
-        self.token = s.nls_token
         self.voice = s.nls_voice
         self.url = s.nls_tts_url
         self.audio_dir = Path(s.audio_storage_dir)
@@ -75,12 +75,17 @@ class SpeechService:
         cache_path = self._cache_path(text, fmt, sample_rate)
         if cache_path.exists():
             return cache_path.read_bytes()
-        if not self.appkey or not self.token:
+        if not self.appkey:
             raise MissingSpeechConfigError("云端发音服务暂未配置")
+
+        try:
+            token = get_nls_token_provider().get_token()
+        except NlsTokenError as error:
+            raise MissingSpeechConfigError(str(error)) from error
 
         payload = {
             "appkey": self.appkey,
-            "token": self.token,
+            "token": token,
             "text": text,
             "format": fmt,
             "sample_rate": sample_rate,

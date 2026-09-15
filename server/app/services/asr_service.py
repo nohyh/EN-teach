@@ -8,6 +8,7 @@ from __future__ import annotations
 import requests
 
 from app.core.config import get_settings
+from app.services.nls_token_provider import NlsTokenError, get_nls_token_provider
 
 
 class AsrError(Exception):
@@ -22,13 +23,16 @@ class AsrService:
     def __init__(self) -> None:
         s = get_settings()
         self.appkey = s.nls_appkey
-        self.token = s.nls_token
         self.url = s.nls_asr_url
 
     def recognize(self, audio: bytes, fmt: str = "pcm", sample_rate: int = 16000) -> str:
         """返回识别文本; 失败抛 AsrError"""
-        if not self.appkey or not self.token:
+        if not self.appkey:
             raise MissingAsrConfigError("语音识别服务暂未配置")
+        try:
+            token = get_nls_token_provider().get_token()
+        except NlsTokenError as error:
+            raise MissingAsrConfigError(str(error)) from error
         params = {
             "appkey": self.appkey,
             "format": fmt,
@@ -38,7 +42,7 @@ class AsrService:
             "enable_voice_detection": "true",
         }
         headers = {
-            "X-NLS-Token": self.token,
+            "X-NLS-Token": token,
             "Content-Type": "application/octet-stream",
         }
         try:

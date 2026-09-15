@@ -20,7 +20,9 @@
         {
           "microphonePermission": "允许 Lumi 使用麦克风进行语音输入和跟读评分。"
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-splash-screen"
     ],
     "extra": {
       "router": {},

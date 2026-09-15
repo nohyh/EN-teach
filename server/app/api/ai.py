@@ -5,9 +5,14 @@ POST /api/v1/ai/dialog-check   判定口语对话的回答, 返回 {correct, fee
 """
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_optional_current_user
+from app.db.database import get_db
+from app.db.models import User
+from app.services import parent_controls
 from app.services.ai_service import AiError, MissingApiKeyError, get_ai_service
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
@@ -25,7 +30,15 @@ class ChatRequest(BaseModel):
 
 
 @router.post("/chat")
-def chat(req: ChatRequest):
+def chat(
+    req: ChatRequest,
+    user: User | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        parent_controls.ensure_access(db, user, feature="ai")
+    except parent_controls.LearningAccessDenied as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
     history = [{"role": m.role, "content": m.content} for m in req.messages]
     try:
         english, translation = get_ai_service().chat(history)
@@ -44,7 +57,15 @@ class DialogCheckRequest(BaseModel):
 
 
 @router.post("/dialog-check")
-def dialog_check(req: DialogCheckRequest):
+def dialog_check(
+    req: DialogCheckRequest,
+    user: User | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        parent_controls.ensure_access(db, user, feature="ai")
+    except parent_controls.LearningAccessDenied as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
     try:
         result = get_ai_service().judge_dialog(
             req.scene, req.goal, req.opening, req.utterance

@@ -11,6 +11,8 @@ import { Button, Card, DemoToast, FloatingDecorations, LumiMascot, PageHeader, P
 import { LESSONS } from "../data/mock";
 import type { Activity } from "../types/lesson";
 import type { SpeechRuntime } from "../types/speech";
+import type { AuthUser } from "../services/auth";
+import type { CloudAssignment, CloudProgress, CloudWrongItem, GrowthSummary, LearningEventInput, PointsAccount, PublishedCourse, StoreItem } from "../services/api";
 import lumiLogo from "../../assets/lumi-logo-plain-shirt.png";
 import lumiBookCovers from "../../public/course-art/lumi-book-covers-v1.png";
 import wonderTownMap from "../../public/course-art/wonder-town-map-v1.png";
@@ -117,20 +119,49 @@ function getLessonProgress(node: MapLessonNode, courseIndex: number, lessonIndex
   return { completed, label: `${completed}/${total}`, status };
 }
 
+function activityPrompt(activity: Activity) {
+  if (activity.type === "word") return activity.word;
+  if (activity.type === "sentence") return activity.sentence;
+  if (activity.type === "recall") return activity.prompt;
+  if (activity.type === "pronunciation") return activity.content;
+  return activity.opening;
+}
+
+function activityAnswer(activity: Activity) {
+  if (activity.type === "word") return activity.meaning;
+  if (activity.type === "sentence") return activity.meaning;
+  if (activity.type === "recall") return activity.answer;
+  if (activity.type === "pronunciation") return activity.content;
+  return activity.goal;
+}
+
 function BookCover({ book, compact = false }: { book: CourseBook; compact?: boolean }) {
   return <div className={`book-cover-art cover-${book.cover}${compact ? " compact" : ""}`} role="img" aria-label={`${book.title}绘本封面`}><img className="book-cover-sprite" src={lumiBookCovers} alt="" aria-hidden="true" draggable={false} /><span className="book-lumi-mark">LUMI</span></div>;
 }
 
-function LoginPage({ onNext, onNotice }: { onNext: () => void; onNotice: (message: string) => void }) {
+function LoginPage({ authReady, onLogin, onNotice }: { authReady: boolean; onLogin: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>; onNotice: (message: string) => void }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!authReady || submitting) return;
+    const form = new FormData(event.currentTarget);
+    setSubmitting(true);
+    setError("");
+    const result = await onLogin(String(form.get("username") ?? ""), String(form.get("password") ?? ""));
+    if (!result.ok) setError(result.error || "登录失败，请稍后重试");
+    setSubmitting(false);
+  };
   return (
     <main className="stage"><PhoneShell label="登录页面" className="auth-page"><FloatingDecorations />
       <header className="brand-lockup"><div className="brand-mascot"><span className="brand-halo" aria-hidden="true" /><LumiMascot size="large" /></div><span className="eyebrow">HELLO, LITTLE STAR!</span><div className="brand-name">LUMI</div><p>和小熊一起，开心学英语</p></header>
-      <form className="login-form" onSubmit={(event) => { event.preventDefault(); onNext(); }}>
+      <form className="login-form" onSubmit={handleSubmit}>
         <p className="helper-bubble">请家长或老师帮助小朋友登录哦</p>
-        <label>学习账号<span className="field-wrap"><b aria-hidden="true">小</b><input defaultValue="lumi_student" autoComplete="username" aria-label="学习账号" /></span></label>
-        <label>登录密码<span className="field-wrap password-field"><b aria-hidden="true">钥</b><input type={showPassword ? "text" : "password"} defaultValue="123456" autoComplete="current-password" aria-label="登录密码" /><button type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? "藏起来" : "看一眼"}</button></span></label>
-        <Button className="full-button" type="submit">出发学习 <b>→</b></Button>
+        <label>学习账号<span className="field-wrap"><b aria-hidden="true">小</b><input name="username" defaultValue="lumi_student" autoComplete="username" aria-label="学习账号" required /></span></label>
+        <label>登录密码<span className="field-wrap password-field"><b aria-hidden="true">钥</b><input name="password" type={showPassword ? "text" : "password"} defaultValue="LumiDemo123!" autoComplete="current-password" aria-label="登录密码" required /><button type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? "藏起来" : "看一眼"}</button></span></label>
+        {error && <p className="helper-bubble" role="alert">{error}</p>}
+        <Button className="full-button" type="submit" disabled={!authReady || submitting}>{!authReady ? "正在恢复登录…" : submitting ? "正在登录…" : <>出发学习 <b>→</b></>}</Button>
       </form>
       <button className="text-button" type="button" onClick={() => onNotice("演示账号无需重置密码，正式版可由老师统一管理")}>忘记密码 · 请联系老师</button><p className="privacy-note"><span>☁</span> 未成年人请在家长或教师指导下使用</p>
     </PhoneShell></main>
@@ -143,8 +174,8 @@ function RolePage({ onEnter, onBack }: { onEnter: () => void; onBack: () => void
       <header className="identity-hero"><div><span className="eyebrow">WHO ARE YOU?</span><h1>你是谁呀？</h1><p>选择身份，Lumi 带你去对应的小天地</p></div><LumiMascot size="small" /></header>
       <div className="role-list">
         <button className="role-card student-role" type="button" onClick={onEnter}><span className="role-icon lavender">学</span><span><strong>我是小学生</strong><small>课程、AI伙伴、作业与成长</small></span><em>进入 <b>→</b></em></button>
-        <button className="role-card disabled" type="button" disabled><span className="role-icon sky">师</span><span><strong>我是老师</strong><small>教师端本期暂不制作</small></span><em>暂未开放</em></button>
-        <button className="role-card disabled" type="button" disabled><span className="role-icon peach">家</span><span><strong>我是家长</strong><small>家长端本期暂不制作</small></span><em>暂未开放</em></button>
+        <button className="role-card" type="button" onClick={() => { window.location.href = "/content-admin"; }}><span className="role-icon sky">师</span><span><strong>我是老师</strong><small>班级、作业、课程与学习看板</small></span><em>进入 <b>→</b></em></button>
+        <button className="role-card" type="button" onClick={() => { window.location.href = "/family"; }}><span className="role-icon peach">家</span><span><strong>我是家长</strong><small>周报、进步点与通知偏好</small></span><em>进入 <b>→</b></em></button>
       </div>
       <div className="role-actions"><Button onClick={onEnter}>以学生身份进入</Button><Button variant="secondary" onClick={onBack}>返回登录</Button></div>
     </PhoneShell></main>
@@ -205,7 +236,7 @@ function CheckInCalendar({ onNavigate, onBack, checkInDays, hasCheckedIn, onChec
   );
 }
 
-function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => void; demo: DemoController }) {
+function AdventurePage({ onNavigate, demo, publishedCourses, cloudAssignments, onLearningEvent }: { onNavigate: (tab: StudentTab) => void; demo: DemoController; publishedCourses: PublishedCourse[]; cloudAssignments: CloudAssignment[]; onLearningEvent: (event: LearningEventInput) => Promise<{ ok: boolean }> }) {
   const [view, setView] = useState<"home" | "player" | "complete">("home");
   const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
   const [showCourseSwitcher, setShowCourseSwitcher] = useState(false);
@@ -217,7 +248,9 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
   const [sessionStart, setSessionStart] = useState(0);
   const [sessionReward, setSessionReward] = useState(0);
   const [results, setResults] = useState<Record<number, boolean>>({});
+  const [cloudSelection, setCloudSelection] = useState<{ courseIndex: number; sectionIndex: number } | null>(null);
   const resultsRef = useRef<Record<number, boolean>>({});
+  const sessionEventPrefix = useRef(`learn-${Date.now().toString(36)}`);
   const { state: demoState } = demo;
   const { activeCourseIndex, mascotSkin, checkInDays, hasCheckedIn } = demoState;
   const activeCourseMap = courseAdventureMaps[activeCourseIndex] ?? courseAdventureMaps[0];
@@ -225,11 +258,16 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
   const activeLesson = activeCourseMap.lessons[activeLessonIndex] ?? activeCourseMap.lessons[0];
   const pendingLesson = pendingLessonIndex == null ? null : activeCourseMap.lessons[pendingLessonIndex];
   const pendingLessonProgress = pendingLesson && pendingLessonIndex != null ? getLessonProgress(pendingLesson, activeCourseIndex, pendingLessonIndex, demoState) : null;
-  const todayTaskCount = Object.values(demoState.assignmentProgress).filter((progress) => progress < 100).length;
+  const todayTaskCount = Object.values(demoState.assignmentProgress).filter((progress) => progress < 100).length
+    + cloudAssignments.filter((assignment) => assignment.progress.status !== "completed").length;
 
-  const section = LESSONS[Math.min(sectionIndex, LESSONS.length - 1)];
+  const cloudCourse = cloudSelection ? publishedCourses[cloudSelection.courseIndex] : undefined;
+  const cloudSection = cloudCourse && cloudSelection ? cloudCourse.content.sections[cloudSelection.sectionIndex] : undefined;
+  const section = cloudSection ?? LESSONS[Math.min(sectionIndex, LESSONS.length - 1)];
   const presentation = getCoursePresentation(section.id);
-  const activeProgressKey = lessonProgressKey(activeCourseIndex, activeLessonIndex);
+  const activeProgressKey = cloudCourse
+    ? `published-${cloudCourse.id}-${cloudCourse.version}-${section.id}`
+    : lessonProgressKey(activeCourseIndex, activeLessonIndex);
 
   useEffect(() => {
     (document.activeElement as HTMLElement | null)?.blur?.();
@@ -255,6 +293,7 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
   }, [showMascotPicker]);
 
   const startAt = (index = 0, nextSection = sectionIndex) => {
+    sessionEventPrefix.current = `learn-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
     setSectionIndex(nextSection);
     setStep(index);
     setSessionStart(index);
@@ -277,6 +316,23 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
     const previousProgress = demoState.lessonProgress[activeProgressKey];
     const lastStep = step >= section.activities.length - 1;
     const reward = lastStep && !previousProgress?.completed ? 10 : 0;
+    const activity = section.activities[step];
+    const correct = effectiveResults[step] ?? true;
+    void onLearningEvent({
+      idempotency_key: `${sessionEventPrefix.current}:${step}`,
+      course_ref: cloudCourse ? `course:${cloudCourse.id}:v${cloudCourse.version}` : `mock:${activeCourseIndex}`,
+      course_id: cloudCourse?.id,
+      client_progress_key: activeProgressKey,
+      section_id: section.id,
+      activity_index: step,
+      activity_type: activity.type,
+      knowledge_key: `${section.id}:${activity.type}:${step}`,
+      prompt: activityPrompt(activity),
+      correct_answer: activityAnswer(activity),
+      correct,
+      completed_activities: lastStep ? section.activities.length : step + 1,
+      total_activities: section.activities.length,
+    });
     demo.patch((current) => ({
       lessonProgress: {
         ...current.lessonProgress,
@@ -305,7 +361,15 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
     const nextActivities = LESSONS[nextSection]?.activities ?? [];
     const resumeStep = Math.min(completedChallenges, Math.max(0, nextActivities.length - 1));
     setActiveLessonIndex(index);
+    setCloudSelection(null);
     startAt(resumeStep, nextSection);
+  };
+  const openPublishedLesson = (courseIndex: number, nextSectionIndex: number) => {
+    const nextCourse = publishedCourses[courseIndex];
+    const nextSection = nextCourse?.content.sections[nextSectionIndex];
+    if (!nextSection) return;
+    setCloudSelection({ courseIndex, sectionIndex: nextSectionIndex });
+    startAt(0, 0);
   };
   const switchCourse = (index: number) => {
     demo.patch({ activeCourseIndex: index });
@@ -336,7 +400,7 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
       <StudentPage active="home" onNavigate={onNavigate} label={`${meta.studentTitle}页面`} hideNav>
         <header className="lesson-focus-header">
           <button type="button" onClick={() => setView("home")} aria-label="退出当前课程并返回地图">×</button>
-          <div><strong>{activeLesson.title}</strong><span>{meta.studentTitle}</span></div>
+          <div><strong>{cloudCourse ? `${cloudCourse.title} · ${section.title}` : activeLesson.title}</strong><span>{meta.studentTitle}</span></div>
           <b className="lesson-score">★ {demoState.stars}</b>
         </header>
         <LessonRenderer
@@ -370,6 +434,13 @@ function AdventurePage({ onNavigate, demo }: { onNavigate: (tab: StudentTab) => 
       </header>
 
       <section className={`adventure-map-home theme-${activeCourseMap.theme}`}>
+        {publishedCourses.length > 0 && <section className="published-course-shelf" aria-label="已发布课程">
+          <header><div><span>NEW CONTENT</span><strong>老师新发布的课程</strong></div><em>{publishedCourses.length} 门</em></header>
+          {publishedCourses.map((course, courseIndex) => <article key={`${course.id}-${course.version}`}>
+            <div><b>{course.title}</b><small>版本 {course.version} · {course.content.sections.length} 节</small></div>
+            <div className="published-section-list">{course.content.sections.map((lessonSection, nextSectionIndex) => <button type="button" key={lessonSection.id} onClick={() => openPublishedLesson(courseIndex, nextSectionIndex)}>{lessonSection.title}<span>开始 →</span></button>)}</div>
+          </article>)}
+        </section>}
         <div className={`map-course-switcher${showCourseSwitcher ? " open" : ""}`}>
           <button className="map-course-trigger" type="button" aria-expanded={showCourseSwitcher} aria-label={`当前章节 ${activeBook.title}，进度 ${activeBook.progress}%，点击切换`} onClick={() => setShowCourseSwitcher((value) => !value)}>
             <span className={`course-world-icon theme-${activeCourseMap.theme}`}>{activeCourseMap.icon}</span>
@@ -496,6 +567,7 @@ type MistakeItem = {
   reviews: string;
   tone: string;
   activity: Activity;
+  cloud?: { sessionId: number; wrongItemId: number };
 };
 
 const mistakeItems: MistakeItem[] = [
@@ -504,16 +576,19 @@ const mistakeItems: MistakeItem[] = [
   { id: "apple-listening", type: "听力", icon: "听", question: "听音写词：apple", wrong: "orange", correct: "apple", note: "注意开头的 /æ/", reviews: "需巩固", tone: "sky", activity: { type: "recall", mode: "audio_to_text", prompt: "apple", answer: "apple", message: "竖起耳朵，听清 /æ/ 开头的单词。" } },
 ];
 
-function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: StudentTab) => void; demo: DemoController; onNotice: (message: string) => void }) {
+function HomeworkPage({ onNavigate, demo, onNotice, cloudAssignments, cloudWrongItems, onStartCloudReview, onCloudReviewAnswer, onAssignmentFeedbackResponse }: { onNavigate: (tab: StudentTab) => void; demo: DemoController; onNotice: (message: string) => void; cloudAssignments: CloudAssignment[]; cloudWrongItems: CloudWrongItem[]; onStartCloudReview: () => Promise<{ ok: boolean; error?: string; session?: { id: number; items: CloudWrongItem[] } }>; onCloudReviewAnswer: (sessionId: number, wrongItemId: number, correct: boolean) => Promise<{ ok: boolean }>; onAssignmentFeedbackResponse: (assignmentId: number, response: string) => Promise<{ ok: boolean; error?: string }> }) {
   const [mode, setMode] = useState<"assignments" | "mistakes">("assignments");
   const [mistakeFilter, setMistakeFilter] = useState("全部");
-  const [reviewQueue, setReviewQueue] = useState<string[] | null>(null);
+  const [reviewQueue, setReviewQueue] = useState<MistakeItem[] | null>(null);
   const [reviewStep, setReviewStep] = useState(0);
   const [reviewResults, setReviewResults] = useState<Record<string, boolean>>({});
   const [reviewReward, setReviewReward] = useState(0);
+  const [feedbackResponses, setFeedbackResponses] = useState<Record<number, string>>({});
   const visibleMistakes = mistakeFilter === "全部" ? mistakeItems : mistakeItems.filter((item) => item.type === mistakeFilter);
   const assignmentProgress = (id: string, fallback: number) => demo.state.assignmentProgress[id] ?? fallback;
   const pendingAssignments = assignmentItems.filter((item) => assignmentProgress(item.id, item.progress) < 100);
+  const pendingCloudAssignments = cloudAssignments.filter((item) => item.progress.status !== "completed");
+  const activeCloudWrongItems = cloudWrongItems.filter((item) => item.status === "active");
   const pendingMistakes = mistakeItems.filter((item) => !demo.state.reviewedMistakes.includes(item.id));
   const focusAssignment = pendingAssignments[0] ?? assignmentItems[assignmentItems.length - 1];
   const focusProgress = assignmentProgress(focusAssignment.id, focusAssignment.progress);
@@ -532,19 +607,46 @@ function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: Studen
     }));
     onNotice(next === 100 ? `作业完成，获得 ${item.reward} 颗星星！` : `作业进度更新为 ${next}%`);
   };
-  const startReview = (ids: string[]) => {
-    if (!ids.length) return;
-    setReviewQueue(ids);
+  const respondToFeedback = async (assignmentId: number) => {
+    const response = (feedbackResponses[assignmentId] || "").trim();
+    if (!response) { onNotice("先写一句给老师的回复吧"); return; }
+    const result = await onAssignmentFeedbackResponse(assignmentId, response);
+    onNotice(result.ok ? "回复已发送给老师" : result.error || "回复失败，请稍后重试");
+  };
+  const startReview = (items: MistakeItem[]) => {
+    if (!items.length) return;
+    setReviewQueue(items);
     setReviewStep(0);
     setReviewResults({});
     setReviewReward(0);
   };
+  const startSyncedReview = async () => {
+    const result = await onStartCloudReview();
+    if (!result.ok || !result.session) {
+      onNotice(result.error || "今天没有到期的云端错题");
+      return;
+    }
+    const session = result.session;
+    startReview(session.items.map((item) => ({
+      id: `cloud-${item.id}`, type: item.kind === "word" ? "单词" : "句子", icon: "云",
+      question: item.prompt, wrong: `累计错误 ${item.error_count} 次`, correct: item.correct_answer || "按课程标准判定",
+      note: `当前掌握度 ${item.mastery_level}/4`, reviews: `已复习 ${item.review_count} 次`, tone: "mint",
+      activity: { type: "recall", mode: "zh_to_en", prompt: item.prompt, answer: item.correct_answer || item.prompt, message: "这是跨设备同步的到期错题。" },
+      cloud: { sessionId: session.id, wrongItemId: item.id },
+    })));
+  };
   const leaveReview = () => setReviewQueue(null);
   const reviewPresentation = getCoursePresentation("mistake_review");
-  const currentMistake = reviewQueue ? mistakeItems.find((item) => item.id === reviewQueue[reviewStep]) : undefined;
+  const currentMistake = reviewQueue?.[reviewStep];
   const finishReviewStep = () => {
     if (!reviewQueue || !currentMistake) return;
     const correct = reviewResults[currentMistake.id] === true;
+    if (currentMistake.cloud) {
+      void onCloudReviewAnswer(currentMistake.cloud.sessionId, currentMistake.cloud.wrongItemId, correct);
+      onNotice(correct ? "复习结果已同步，下一次间隔已延长" : "已同步，本题明天会再次出现");
+      setReviewStep((value) => value + 1);
+      return;
+    }
     const newlyMastered = correct && !demo.state.reviewedMistakes.includes(currentMistake.id);
     if (newlyMastered) {
       demo.patch((state) => ({ reviewedMistakes: [...state.reviewedMistakes, currentMistake.id], stars: state.stars + 2 }));
@@ -577,11 +679,11 @@ function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: Studen
     <StudentPage active="homework" onNavigate={onNavigate} label="作业与错题复习中心">
       <header className="study-desk-header">
         <div><span>STUDY DESK</span><h1>作业与复习</h1></div>
-        <div className={`study-desk-count ${mode}`}><strong>{mode === "assignments" ? pendingAssignments.length : pendingMistakes.length}</strong><small>{mode === "assignments" ? "待完成" : "待复习"}</small></div>
+        <div className={`study-desk-count ${mode}`}><strong>{mode === "assignments" ? pendingAssignments.length + pendingCloudAssignments.length : pendingMistakes.length + activeCloudWrongItems.length}</strong><small>{mode === "assignments" ? "待完成" : "待复习"}</small></div>
       </header>
       <div className="study-desk-tabs" role="tablist" aria-label="作业与错题切换">
-        <button type="button" role="tab" aria-selected={mode === "assignments"} className={mode === "assignments" ? "selected" : ""} onClick={() => setMode("assignments")}><span>✓</span><strong>我的作业</strong><b>{pendingAssignments.length}</b></button>
-        <button type="button" role="tab" aria-selected={mode === "mistakes"} className={mode === "mistakes" ? "selected" : ""} onClick={() => setMode("mistakes")}><span>↻</span><strong>错题本</strong><b>{pendingMistakes.length}</b></button>
+        <button type="button" role="tab" aria-selected={mode === "assignments"} className={mode === "assignments" ? "selected" : ""} onClick={() => setMode("assignments")}><span>✓</span><strong>我的作业</strong><b>{pendingAssignments.length + pendingCloudAssignments.length}</b></button>
+        <button type="button" role="tab" aria-selected={mode === "mistakes"} className={mode === "mistakes" ? "selected" : ""} onClick={() => setMode("mistakes")}><span>↻</span><strong>错题本</strong><b>{pendingMistakes.length + activeCloudWrongItems.length}</b></button>
       </div>
 
       {mode === "assignments" ? <>
@@ -591,6 +693,7 @@ function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: Studen
           <button type="button" onClick={() => pendingAssignments.length ? continueAssignment(focusAssignment.id) : setMode("mistakes")}>{pendingAssignments.length ? "继续完成 ›" : "去复习 ›"}</button>
         </section>
         <div className="study-section-heading"><div><span>TODAY</span><h2>今天的任务</h2></div><small>按截止时间排列</small></div>
+        {cloudAssignments.length > 0 && <div className="cloud-learning-list" aria-label="云端作业">{cloudAssignments.map((item) => { const percent = Math.min(100, Math.round(item.progress.completed_activities / item.total_activities * 100)); return <article key={item.id}><span>云</span><div><small>老师布置 · {item.section_id}</small><strong>{item.title}</strong><p>{item.instructions || "完成指定课程活动，进度会自动同步。"}</p><i><b style={{ width: `${percent}%` }} /></i>{item.feedback && <section className="teacher-feedback"><small>{item.feedback.teacher.name}老师的评语</small><p>{item.feedback.comment}</p>{item.feedback.student_response ? <em>我的回复：{item.feedback.student_response}</em> : <div><input aria-label={`回复《${item.title}》的老师评语`} value={feedbackResponses[item.id] || ""} maxLength={500} placeholder="谢谢老师，我会继续努力！" onChange={(event) => setFeedbackResponses((items) => ({ ...items, [item.id]: event.currentTarget.value }))} /><button type="button" onClick={() => void respondToFeedback(item.id)}>回复老师</button></div>}</section>}</div><em>{percent}%</em></article>; })}</div>}
         <div className="assignment-card-list">{assignmentItems.map((item) => { const progress = assignmentProgress(item.id, item.progress); return <button type="button" className={`assignment-card tone-${item.tone}`} aria-label={`进入任务：${item.title}`} key={item.title} onClick={() => continueAssignment(item.id)}>
           <span className="assignment-type-icon">{item.icon}</span>
           <span className="assignment-card-copy"><small>{item.subject}</small><strong>{item.title}</strong><p>{progress >= 100 ? "已完成 · 奖励已领取" : item.detail}</p><span className="assignment-card-progress"><i style={{ width: `${progress}%` }} /></span></span>
@@ -598,12 +701,13 @@ function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: Studen
         </button>; })}</div>
         <button className="mistake-book-teaser" type="button" onClick={() => setMode("mistakes")}><span>↻</span><div><small>错题本</small><strong>{pendingMistakes.length} 道题正在等你重新挑战</strong></div></button>
       </> : <>
+        {cloudWrongItems.length > 0 && <section className="cloud-wrongbook" aria-label="云端错题本"><header><div><span>SYNCED WRONG BOOK</span><strong>跨设备错题记录</strong></div><em>{activeCloudWrongItems.length} 待掌握</em></header>{cloudWrongItems.map((item) => <article key={item.id}><div><small>{item.kind} · 错误 {item.error_count} 次</small><strong>{item.prompt}</strong><p>正确答案：{item.correct_answer || "按课程标准判定"}</p></div><span className={`mastery level-${item.mastery_level}`}>{item.status === "mastered" ? "已掌握" : `掌握度 ${item.mastery_level}/4`}</span></article>)}<button className="cloud-review-button" type="button" onClick={() => void startSyncedReview()}>开始今日云端复习 →</button></section>}
         <section className="mistake-review-hero">
-          <div><span>SMART REVIEW</span><h2>{pendingMistakes.length ? `今天复习 ${pendingMistakes.length} 题` : "今天的错题已掌握"}</h2><p>{pendingMistakes.length ? "不只是看答案：重新答对，才算真正掌握。" : "可以再挑战一轮，看看能不能一次全对。"}</p><button type="button" onClick={() => startReview((pendingMistakes.length ? pendingMistakes : mistakeItems).map((item) => item.id))}>{pendingMistakes.length ? "开始连续复习 →" : "再巩固一遍 →"}</button></div>
+          <div><span>SMART REVIEW</span><h2>{pendingMistakes.length ? `今天复习 ${pendingMistakes.length} 题` : "今天的错题已掌握"}</h2><p>{pendingMistakes.length ? "不只是看答案：重新答对，才算真正掌握。" : "可以再挑战一轮，看看能不能一次全对。"}</p><button type="button" onClick={() => startReview(pendingMistakes.length ? pendingMistakes : mistakeItems)}>{pendingMistakes.length ? "开始连续复习 →" : "再巩固一遍 →"}</button></div>
           <div className="review-orbit" aria-hidden="true"><span>Aa</span><i>↻</i><b>{pendingMistakes.length}</b></div>
         </section>
         <div className="mistake-filter-row" role="tablist" aria-label="错题类型">{["全部", "单词", "句子", "听力"].map((filter) => <button type="button" role="tab" aria-selected={mistakeFilter === filter} className={mistakeFilter === filter ? "selected" : ""} key={filter} onClick={() => setMistakeFilter(filter)}>{filter}</button>)}</div>
-        <div className="mistake-card-list">{visibleMistakes.map((item) => { const reviewed = demo.state.reviewedMistakes.includes(item.id); return <button type="button" className={`mistake-review-card tone-${item.tone}${reviewed ? " reviewed" : ""}`} aria-label={`进入错题学习：${item.question}`} key={item.question} onClick={() => startReview([item.id])}>
+        <div className="mistake-card-list">{visibleMistakes.map((item) => { const reviewed = demo.state.reviewedMistakes.includes(item.id); return <button type="button" className={`mistake-review-card tone-${item.tone}${reviewed ? " reviewed" : ""}`} aria-label={`进入错题学习：${item.question}`} key={item.question} onClick={() => startReview([item])}>
           <span className="mistake-card-top"><span>{item.icon}</span><span><small>{item.type} · {item.reviews}</small><strong>{item.question}</strong></span></span>
           <div className="mistake-answer-compare"><div><small>上次回答</small><strong>{item.wrong}</strong></div><span>→</span><div><small>正确答案</small><strong>{item.correct}</strong></div></div>
           <p>{reviewed ? "✓ 已巩固" : `记忆提示：${item.note}`}</p>
@@ -613,9 +717,19 @@ function HomeworkPage({ onNavigate, demo, onNotice }: { onNavigate: (tab: Studen
   );
 }
 
-function GrowthPage({ onNavigate, onLogout, onSwitchAccount, demo, onNotice }: { onNavigate: (tab: StudentTab) => void; onLogout: () => void; onSwitchAccount: () => void; demo: DemoController; onNotice: (message: string) => void }) {
+type GrowthPageProps = {
+  onNavigate: (tab: StudentTab) => void; onLogout: () => void; onSwitchAccount: () => void;
+  user: AuthUser; demo: DemoController; onNotice: (message: string) => void;
+  points: PointsAccount; storeItems: StoreItem[]; growth: GrowthSummary | null;
+  onPurchase: (itemId: number) => Promise<{ ok: boolean; error?: string }>;
+  onEquip: (itemId: number) => Promise<{ ok: boolean; error?: string }>;
+};
+
+function GrowthPage({ onNavigate, onLogout, onSwitchAccount, user, demo, onNotice, points, storeItems, growth, onPurchase, onEquip }: GrowthPageProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showBookLibrary, setShowBookLibrary] = useState(false);
+  const [showStore, setShowStore] = useState(false);
+  const [storeBusy, setStoreBusy] = useState<number | null>(null);
   const activeCourseIndex = demo.state.activeCourseIndex;
   const [selectedBookIndex, setSelectedBookIndex] = useState(activeCourseIndex);
   const settings = demo.state.settings;
@@ -663,14 +777,44 @@ function GrowthPage({ onNavigate, onLogout, onSwitchAccount, demo, onNotice }: {
     );
   }
 
+  if (showStore) {
+    const actOnItem = async (item: StoreItem) => {
+      if (storeBusy !== null) return;
+      setStoreBusy(item.id);
+      const result = item.owned ? await onEquip(item.id) : await onPurchase(item.id);
+      if (result.ok) {
+        if (item.owned && item.category === "skin" && mascotSkins.some((skin) => skin.id === item.preview)) {
+          demo.patch({ mascotSkin: item.preview as MascotSkin });
+        }
+        onNotice(item.owned ? `已装备${item.name}` : `已购买${item.name}，可立即装备`);
+      } else onNotice(result.error || "操作失败，请稍后重试");
+      setStoreBusy(null);
+    };
+    return <StudentPage active="growth" onNavigate={onNavigate} label="积分商城页面">
+      <PageHeader eyebrow="LUMI STORE" title="积分商城" onBack={() => setShowStore(false)} trailing={<Pill tone="yellow">★ {points.balance}</Pill>} />
+      <section className="store-wallet"><span>★</span><div><small>可用积分</small><strong>{points.balance}</strong><p>答题、完成课程和掌握错题都能获得积分</p></div></section>
+      <div className="store-item-grid">{storeItems.map((item) => <article className={`store-item-card preview-${item.preview || "default"}`} key={item.id}>
+        <div className="store-item-preview" aria-hidden="true"><span>{item.category === "background" ? "☁" : "🐻"}</span><i /></div>
+        <small>{item.category === "skin" ? "LUMI 装扮" : "学习空间"}</small><strong>{item.name}</strong><p>{item.description || "让学习空间更有自己的风格"}</p>
+        <button type="button" disabled={storeBusy !== null || item.equipped || (!item.owned && points.balance < item.price)} onClick={() => void actOnItem(item)}>{storeBusy === item.id ? "处理中…" : item.equipped ? "已装备" : item.owned ? "立即装备" : points.balance < item.price ? `还差 ${item.price - points.balance} 分` : `★ ${item.price} 购买`}</button>
+      </article>)}</div>
+      {!storeItems.length && <Card className="store-empty">商城商品准备中，稍后再来看看吧。</Card>}
+    </StudentPage>;
+  }
+
   return (
     <StudentPage active="growth" onNavigate={onNavigate} label="我的学习页面">
       <header className="personal-hub-header"><div><span>MY SPACE</span><h1>我的学习</h1><p>书架、活动和学习记录都在这里</p></div><button className="personal-settings-button" type="button" aria-label="打开设置" onClick={() => setShowSettings(true)}>⚙</button></header>
 
       <section className="user-profile-overview" aria-label="当前用户信息">
         <div className="user-profile-avatar" aria-hidden="true">鹿</div>
-        <div className="user-profile-copy"><small>当前账号</small><h2>陈小鹿</h2><p>阳光小学 · 三年级 2 班</p><div><span>Lv.6 小小探险家</span><span>🔥 连续 {demo.state.checkInDays} 天</span></div></div>
-        <div className="user-profile-stars"><span>★</span><strong>{demo.state.stars}</strong><small>星星</small></div>
+        <div className="user-profile-copy"><small>当前账号 · {user.username}</small><h2>{user.name}</h2><p>学生学习空间</p><div><span>Lv.{Math.floor(points.balance / 100) + 1} 小小探险家</span><span>🔥 连续 {demo.state.checkInDays} 天</span></div></div>
+        <button className="user-profile-stars" type="button" onClick={() => setShowStore(true)} aria-label={`打开积分商城，余额 ${points.balance}`}><span>★</span><strong>{points.balance}</strong><small>积分商城 ›</small></button>
+      </section>
+
+      <section className="growth-badge-section">
+        <div className="personal-section-heading"><div><span>ACHIEVEMENTS</span><h2>成长徽章</h2></div><small>{growth?.badges.length ?? 0} 枚已解锁</small></div>
+        <div className="cloud-badge-grid">{growth?.badges.length ? growth.badges.map((badge) => <article key={badge.code}><span>{badge.icon}</span><div><strong>{badge.name}</strong><small>{badge.description}</small></div></article>) : <p>完成第一个云端学习活动，就会点亮成长徽章。</p>}</div>
       </section>
 
       <section className="book-switch-section">
@@ -679,9 +823,9 @@ function GrowthPage({ onNavigate, onLogout, onSwitchAccount, demo, onNotice }: {
       </section>
 
       <section className="learning-stat-section">
-        <div className="personal-section-heading"><div><span>STATISTICS</span><h2>本周学习统计</h2></div><small>8.24—8.30</small></div>
-        <div className="learning-stat-grid"><div><span>学习天数</span><strong>{Math.min(7, Math.max(4, completedLessons))}<small>天</small></strong><em>目标 5 天</em></div><div><span>学习时间</span><strong>{86 + completedLessons * 3}<small>分钟</small></strong><em>本周持续学习</em></div><div><span>完成任务</span><strong>{completedLessons + completedAssignments}<small>项</small></strong><em>课程与作业</em></div><div><span>复习正确率</span><strong>{Math.min(98, 89 + demo.state.reviewedMistakes.length * 2)}<small>%</small></strong><em>稳定提升中</em></div></div>
-        <div className="weekly-learning-bars" aria-label="本周每日学习时长">{[42, 68, 28, 82, 56, 16, 8].map((value, index) => <div key={index}><span><i style={{ height: `${value}%` }} /></span><small>{["一", "二", "三", "四", "五", "六", "日"][index]}</small></div>)}</div>
+        <div className="personal-section-heading"><div><span>STATISTICS</span><h2>学习成长统计</h2></div><small>最近 7 天</small></div>
+        <div className="learning-stat-grid"><div><span>本周活动</span><strong>{growth?.weekly_learning_events ?? 0}<small>次</small></strong><em>服务端学习记录</em></div><div><span>完成课程</span><strong>{growth?.completed_lessons ?? completedLessons}<small>节</small></strong><em>稳定推进中</em></div><div><span>完成任务</span><strong>{growth?.completed_assignments ?? completedAssignments}<small>项</small></strong><em>课程与作业</em></div><div><span>复习正确率</span><strong>{growth?.review_accuracy ?? 0}<small>%</small></strong><em>{growth?.review_total ?? 0} 次复习记录</em></div></div>
+        <div className="growth-stage-feedback"><span>✦</span><div><strong>{(growth?.weekly_learning_events ?? 0) > 0 ? "本周已经出发，继续保持！" : "完成一次学习，开启本周成长记录"}</strong><small>累计 {growth?.learning_events ?? 0} 次活动 · 掌握 {growth?.mastered_items ?? 0} 个薄弱点</small></div></div>
       </section>
 
       {showSettings && <div className="settings-dialog-layer" onClick={() => setShowSettings(false)}><section className="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title" onClick={(event) => event.stopPropagation()}>
@@ -692,21 +836,53 @@ function GrowthPage({ onNavigate, onLogout, onSwitchAccount, demo, onNotice }: {
           ["effects", "动画与庆祝效果", "答对后显示星星和动画"],
           ["slowSpeech", "慢速发音优先", "首次播放使用较慢语速"],
         ].map(([key, title, detail]) => <button type="button" className="settings-toggle-row" aria-pressed={settings[key as keyof typeof settings]} key={key} onClick={() => toggleSetting(key as keyof typeof settings)}><span><strong>{title}</strong><small>{detail}</small></span><i className={settings[key as keyof typeof settings] ? "on" : ""}><b /></i></button>)}</div>
-        <div className="settings-group"><strong>通用</strong><button type="button" className="settings-link-row" onClick={() => onNotice("演示版每日学习目标为 30 分钟")}><span><strong>学习时间管理</strong><small>每日 30 分钟</small></span><b>›</b></button><button type="button" className="settings-link-row" onClick={() => onNotice("正式版可接入家长报告与内容安全设置")}><span><strong>家长与隐私</strong><small>内容安全与使用报告</small></span><b>›</b></button><button type="button" className="settings-link-row account-switch-row" onClick={() => { setShowSettings(false); onSwitchAccount(); }}><span><strong>切换账号</strong><small>当前：陈小鹿</small></span><b>›</b></button><button type="button" className="settings-link-row" onClick={() => onNotice("Lumi 英语学习演示版 · v0.1.0")}><span><strong>关于 Lumi</strong><small>版本与服务说明</small></span><b>›</b></button></div>
+        <div className="settings-group"><strong>通用</strong><button type="button" className="settings-link-row" onClick={() => onNotice("演示版每日学习目标为 30 分钟")}><span><strong>学习时间管理</strong><small>每日 30 分钟</small></span><b>›</b></button><button type="button" className="settings-link-row" onClick={() => onNotice("正式版可接入家长报告与内容安全设置")}><span><strong>家长与隐私</strong><small>内容安全与使用报告</small></span><b>›</b></button><button type="button" className="settings-link-row account-switch-row" onClick={() => { setShowSettings(false); onSwitchAccount(); }}><span><strong>切换账号</strong><small>当前：{user.name}</small></span><b>›</b></button><button type="button" className="settings-link-row" onClick={() => onNotice("Lumi 英语学习演示版 · v0.1.0")}><span><strong>关于 Lumi</strong><small>版本与服务说明</small></span><b>›</b></button></div>
         <button className="settings-reset-demo" type="button" onClick={() => { demo.reset(); setShowSettings(false); onNotice("演示数据已重置"); }}>重置演示数据</button>
-        <button className="settings-logout" type="button" onClick={onLogout}>退出演示账号</button>
+        <button className="settings-logout" type="button" onClick={onLogout}>退出当前账号</button>
       </section></div>}
     </StudentPage>
   );
 }
 
-type StudentAppProps = SpeechRuntime & { dom?: import("expo/dom").DOMProps };
+type StudentAppProps = SpeechRuntime & {
+  publishedCourses: PublishedCourse[];
+  cloudProgress: CloudProgress[];
+  cloudWrongItems: CloudWrongItem[];
+  cloudAssignments: CloudAssignment[];
+  points: PointsAccount;
+  storeItems: StoreItem[];
+  growth: GrowthSummary | null;
+  onPurchase: (itemId: number) => Promise<{ ok: boolean; error?: string }>;
+  onEquip: (itemId: number) => Promise<{ ok: boolean; error?: string }>;
+  onLearningEvent: (event: LearningEventInput) => Promise<{ ok: boolean }>;
+  onStartCloudReview: () => Promise<{ ok: boolean; error?: string; session?: { id: number; items: CloudWrongItem[] } }>;
+  onCloudReviewAnswer: (sessionId: number, wrongItemId: number, correct: boolean) => Promise<{ ok: boolean }>;
+  onAssignmentFeedbackResponse: (assignmentId: number, response: string) => Promise<{ ok: boolean; error?: string }>;
+  authReady: boolean;
+  authenticatedUser: AuthUser | null;
+  onLogin: (username: string, password: string) => Promise<{ ok: boolean; error?: string; user?: AuthUser }>;
+  onLogout: () => Promise<void>;
+  dom?: import("expo/dom").DOMProps;
+};
 
-export default function StudentApp({ dom: _dom, ...speechRuntime }: StudentAppProps) {
+export default function StudentApp({ dom: _dom, authReady, authenticatedUser, onLogin, onLogout, publishedCourses, cloudProgress, cloudWrongItems, cloudAssignments, points, storeItems, growth, onPurchase, onEquip, onLearningEvent, onStartCloudReview, onCloudReviewAnswer, onAssignmentFeedbackResponse, ...speechRuntime }: StudentAppProps) {
   const [screen, setScreen] = useState<Screen>("login");
   const [notice, setNotice] = useState("");
   const noticeTimer = useRef<number | null>(null);
-  const demo = useDemoState();
+  const demo = useDemoState(authenticatedUser ? `user-${authenticatedUser.id}` : "guest");
+  useEffect(() => {
+    if (!authenticatedUser || !cloudProgress.length) return;
+    demo.patch((current) => {
+      const lessonProgress = { ...current.lessonProgress };
+      for (const progress of cloudProgress) {
+        const local = lessonProgress[progress.client_progress_key];
+        if (!local || progress.completed_activities !== local.completedActivities || (progress.status === "completed") !== local.completed) {
+          lessonProgress[progress.client_progress_key] = { completedActivities: progress.completed_activities, completed: progress.status === "completed" };
+        }
+      }
+      return { lessonProgress };
+    });
+  }, [authenticatedUser?.id, cloudProgress]);
   const runtime = useMemo<SpeechRuntime>(() => ({
     ...speechRuntime,
     speakText: (text, options) => {
@@ -745,6 +921,10 @@ export default function StudentApp({ dom: _dom, ...speechRuntime }: StudentAppPr
   useEffect(() => () => {
     if (noticeTimer.current != null) window.clearTimeout(noticeTimer.current);
   }, []);
+  useEffect(() => {
+    if (authenticatedUser && screen === "login") setScreen("role");
+    if (authReady && !authenticatedUser && screen !== "login") setScreen("login");
+  }, [authReady, authenticatedUser, screen]);
   const showNotice = (message: string) => {
     setNotice(message);
     if (noticeTimer.current != null) window.clearTimeout(noticeTimer.current);
@@ -752,11 +932,11 @@ export default function StudentApp({ dom: _dom, ...speechRuntime }: StudentAppPr
   };
   const navigate = (tab: StudentTab) => setScreen(tab);
   let page: React.ReactNode;
-  if (screen === "login") page = <LoginPage onNext={() => setScreen("role")} onNotice={showNotice} />;
+  if (screen === "login") page = <LoginPage authReady={authReady} onLogin={onLogin} onNotice={showNotice} />;
   else if (screen === "role") page = <RolePage onEnter={() => setScreen("home")} onBack={() => setScreen("login")} />;
   else if (screen === "ai") page = <AiPage onNavigate={navigate} runtime={runtime} />;
-  else if (screen === "homework") page = <HomeworkPage onNavigate={navigate} demo={demo} onNotice={showNotice} />;
-  else if (screen === "growth") page = <GrowthPage onNavigate={navigate} onLogout={() => setScreen("login")} onSwitchAccount={() => setScreen("role")} demo={demo} onNotice={showNotice} />;
-  else page = <AdventurePage onNavigate={navigate} demo={demo} />;
+  else if (screen === "homework") page = <HomeworkPage onNavigate={navigate} demo={demo} onNotice={showNotice} cloudAssignments={cloudAssignments} cloudWrongItems={cloudWrongItems} onStartCloudReview={onStartCloudReview} onCloudReviewAnswer={onCloudReviewAnswer} onAssignmentFeedbackResponse={onAssignmentFeedbackResponse} />;
+  else if (screen === "growth" && authenticatedUser) page = <GrowthPage onNavigate={navigate} onLogout={() => { void onLogout(); setScreen("login"); }} onSwitchAccount={() => { void onLogout(); setScreen("login"); }} user={authenticatedUser} demo={demo} onNotice={showNotice} points={points} storeItems={storeItems} growth={growth} onPurchase={onPurchase} onEquip={onEquip} />;
+  else page = <AdventurePage onNavigate={navigate} demo={demo} publishedCourses={publishedCourses} cloudAssignments={cloudAssignments} onLearningEvent={onLearningEvent} />;
   return <SpeechRuntimeProvider runtime={runtime}>{page}<DemoToast message={notice} /></SpeechRuntimeProvider>;
 }
